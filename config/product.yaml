@@ -1,0 +1,12 @@
+# Shared product URLs and repo identity (committed; not tenant secrets).
+# Skills and AGENTS.md read this file and substitute {docs.*} / {github.*}.
+# Operator-specific values stay in config/profile.yaml.
+
+docs:
+  github_account_setup: https://agents-done-right.mintlify.site/pages/github-account-setup
+
+github:
+  device_login: https://github.com/login/device
+  public_skills_repo_url: https://github.com/agentsdoneright/grokbot-agents-done-right-skills
+  public_skills_repo_owner: agentsdoneright
+  public_skills_repo_name: grokbot-agents-done-right-skills
