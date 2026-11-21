@@ -9,7 +9,8 @@ Public repo: https://github.com/agentsdoneright/grokbot-agents-done-right-skills
 > [!NOTE]
 > If you feel unsure about running the following bootstrap process, ask your agent the following to verify what will happen (do not run bootstrap yet):
 >
-> > Advise me what will happen if you follow the public skills repo bootstrap: `AGENTS.md` from `https://github.com/agentsdoneright/grokbot-agents-done-right-skills`. DO NOT RUN the bootstrap. Only advise me what the side effects will be.
+
+> Advise me what will happen if you follow the public skills repo bootstrap: `AGENTS.md` from `https://github.com/agentsdoneright/grokbot-agents-done-right-skills`. DO NOT RUN the bootstrap. Only advise me what the side effects will be.
 
 If you are still unsure or uncertain about the effects of this tutorial, the safest approach is to use a **new Google account** (Drive, Sheets, and Gmail) dedicated to the tutorial, instead of your primary work or personal account. Optionally create a **new GitHub account** as well if you plan to customize skills (Customizable / private copy) so that work stays separate from your main GitHub identity.
 
