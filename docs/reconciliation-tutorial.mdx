@@ -55,12 +55,12 @@ The skill maps common bank CSV layouts, so the agent can import statements even 
   <Step title="Locate the bank CSV">
     Look for the CSV under `root / year / extracts / month`. If it is missing, obtain it from the operator and save it into that folder before importing.
   </Step>
-  <Step title="Start from last month's sheet (or the blank template)">
+  <Step title="Start from last month's sheet (or create a blank Google Sheet)">
     Look for the previous month's reconciliation sheet. If it exists, copy it into this month's folder so reference tabs stay current: `Counterparty-Match`, `Counterparties`, `Counterparty-Category`, `Email matching`, and `Categories`.
 
     On the copy only, clear last month's transaction rows and the raw CSV area on the transactions tab. Keep the header row and all reference tabs. Never edit last month's sheet in place.
 
-    If no previous sheet exists (first month), upload the blank skill template (`skills/bank-reconciliation/Y[YYYYMM]_Reconciliation.xlsx`) into this month's folder as a native Google Sheet. Never modify the local template file. If the source is `.xlsx`, convert the copy to a native Google Sheet.
+    If no previous sheet exists (first month), create a new blank native Google Spreadsheet in this month's folder with the required tabs and header rows only (no local `.xlsx` template). Hide every tab except `Bank`.
   </Step>
 </Steps>
 
@@ -95,7 +95,7 @@ Create one reconciliation row per CSV row.
 | **Credit** | Absolute amount if money came in; otherwise blank |
 | **Debit** | Absolute amount if money went out; otherwise blank |
 
-Clear leftover template formulas below the last data row.
+Clear any leftover formulas or junk below the last data row.
 
 ## Verify and report
 

@@ -2,9 +2,10 @@
 name: Bank reconciliation
 description: >-
   Use when the user wants to reconcile a month's bank transactions (e.g. a bank
-  CSV export) in their Google Sheets reconciliation workbook: seed the first month
-  from the blank skill template, copy last month's sheet thereafter, import the
-  CSV, and fill date, counterparty, category, credit and debit columns.
+  CSV export) in their Google Sheets reconciliation workbook: create a blank
+  Google Sheet on the first month (tabs + headers only), copy last month's sheet
+  thereafter, import the CSV, and fill date, counterparty, category, credit and
+  debit columns.
 ---
 # Monthly bank reconciliation in Google Sheets
 
@@ -12,21 +13,29 @@ Do this Drive work under `{drive.root_path}`. Find the reconciliation sheet and 
 
 If you must save a CSV, PDF, or other file **locally** before uploading to Drive (or as a scratch copy), write it under `{workspace.local_path}/` (see `rules/tutorial-workspace.md`). Create that folder if needed. Do not leave tutorial temps in the repo root or under `skills/`.
 
+Never use or upload a local `.xlsx` template from this repo. There is no spreadsheet binary in the skill folder.
+
 ## 1. Prepare the month's folder and sheet
 - **Year and month folders.** The year folder is `{drive.year_folder_pattern}` under `{drive.root_path}` (`{YYYY}` is the year of the month being reconciled). If that year folder does not exist, create it, and create its `{drive.extracts_folder}` subfolder. Then create the month folder `{drive.month_folder_pattern}` inside the year folder if it does not exist (`{YYYYMM}` is the statement month).
 - **CSV.** Look first for the bank CSV in `{drive.root_path}/{drive.year_folder_pattern}/{drive.extracts_folder}/{drive.month_folder_pattern}/`. If it is not there, ask the user for it. When the user provides it, save it into that Drive folder, creating the folder if needed, before importing. If you stage the file locally first, put it under `{workspace.local_path}/` then upload to Drive.
 - **Starting sheet.** Look for the previous month's reconciliation sheet in that month's folder (`{drive.month_folder_pattern}` under its own `{drive.year_folder_pattern}`). For January, the previous month's folder is in the previous year's folder.
-  - **If a previous month's sheet exists:** copy it into this month's folder, named from `{drive.sheet_title_pattern}` (fill `{YYYYMM}` with the statement month and `{company_name}` with `{company.name}`). Use it because it has the latest mappings in `Counterparty-Match`, `Counterparties`, `Counterparty-Category`, `Email matching` and `Categories`. On the copy only, clear the previous month's transaction data and the raw CSV area on the `{drive.sheet_tab}` tab, and keep that tab's header row and the reference tabs intact. Never modify the previous month's sheet.
-  - **If no previous month's sheet exists (initial run):** upload the blank template `skills/bank-reconciliation/{drive.template_name}.xlsx` into this month's folder as a native Google Sheet named from `{drive.sheet_title_pattern}`. Never modify the local template file.
-- If the source is an .xlsx, make the copy a native Google Sheet so the Sheets tools can edit it.
+  - **If a previous month's sheet exists:** copy it into this month's folder, named from `{drive.sheet_title_pattern}` (fill `{YYYYMM}` with the statement month and `{company_name}` with `{company.name}`). Use it because it has the latest mappings in `Counterparty-Match`, `Counterparties`, `Counterparty-Category`, `Email matching` and `Categories`. On the copy only, clear the previous month's transaction data and the raw CSV area on the `{drive.sheet_tab}` tab, and keep that tab's header row and the reference tabs intact. Never modify the previous month's sheet. If the copy is still an `.xlsx`, convert it to a native Google Sheet so the Sheets tools can edit it.
+  - **If no previous month's sheet exists (initial run):** create a **new blank native Google Spreadsheet** (do not upload any local file). Title it from `{drive.sheet_title_pattern}`. Create these tabs in order with **header row only** (no sample or private data rows):
+    - `{drive.sheet_tab}` (`Bank`): `Date` | `Recipient / Payer` | `Category` | `Credit` | `Debit` | `Ref` | `Note`
+    - `Categories`: `Category`
+    - `Counterparty-Match`: `Recipient / Payer` | `Match`
+    - `Counterparties`: `Recipient / Payer`
+    - `Counterparty-Category`: `Recipient / Payer` | `Category`
+    - `Email matching`: `Recipient / Payer` | `Sender` | `Subject keywords` | `Invoice source` | `Notes`
+    Then **hide every tab except** `{drive.sheet_tab}` (`Bank`). Use the Sheets connector's sheet-property / update path if available; if hiding is impossible with the available tools, stop and ask the operator to hide those tabs once before continuing. Finally move (or ensure) the spreadsheet lives in this month's folder under `{drive.root_path}/{drive.year_folder_pattern}/{drive.month_folder_pattern}/`.
 
 ## 2. Inspect the layout before writing
 - Tabs used: the transactions tab `{drive.sheet_tab}`, `Categories` (the category list), `Counterparty-Match` (raw-to-formatted names), `Counterparties` (unique formatted names), `Counterparty-Category` (name to category), `Email matching` (how to find each counterparty's invoice emails). Tab names can change, so check them each time.
-- Read the main transactions tab (`{drive.sheet_tab}`) headers in row 1. The user edits the layout, so locate columns by header name each time. Current layout: Date | Recipient / Payer | Category | Credit | Debit | Ref | Note, then the raw CSV area to the right.
+- Read the main transactions tab (`{drive.sheet_tab}`) headers in row 1. The user edits the layout, so locate columns by header name each time. Expected layout: Date | Recipient / Payer | Category | Credit | Debit | Ref | Note, then the raw CSV area to the right.
 - Category spellings come from the `Categories` tab (the category list).
 
 ## 3. Import the CSV
-- Paste the CSV into the tab starting at the first empty column to the right of the reconciliation columns (originally column H; adjust to where the template's raw area starts). Headers go in row 1 and data starts in row 2. Write numbers as numbers and dates as real dates.
+- Paste the CSV into the tab starting at the first empty column to the right of the reconciliation columns (column H after the seven headers above; adjust if the layout changed). Headers go in row 1 and data starts in row 2. Write numbers as numbers and dates as real dates.
 
 ## 4. Fill the reconciliation columns, one row per CSV row
 - **Date**: the transaction date as a real date, number format `d-mmm` (displays 5-Nov, no leading zero).
@@ -34,7 +43,7 @@ If you must save a CSV, PDF, or other file **locally** before uploading to Drive
 - **Category**: first look up the formatted counterparty in `Counterparty-Category` and use its category. With no match, pick from the `Categories` tab. Keep them consistent with earlier months.
 - **Credit**: the absolute amount if money came in, else blank.
 - **Debit**: the absolute amount if money went out, else blank.
-- Clear leftover template formulas in rows below the last data row so nothing shows junk.
+- Clear any leftover formulas or junk in rows below the last data row.
 
 ## 5. Verify and report
 - Read back the filled range: the row count should match the CSV, dates should display as d-mmm, and SUM(Credit) and SUM(Debit) should equal the CSV's total in and total out.

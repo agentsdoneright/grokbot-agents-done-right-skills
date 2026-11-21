@@ -229,4 +229,7 @@ profile.yaml
 # Disposable local files for the reconciliation tutorial (see workspace.local_path)
 tutorial-workspace/
 
+# Never commit local reconciliation spreadsheet templates (may contain private data)
+skills/bank-reconciliation/*.xlsx
+
 .cursor/

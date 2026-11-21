@@ -22,11 +22,10 @@ drive:
   # {company_name} inside sheet_title_pattern comes from company.name.
   # CSV folder: {root_path}/{year_folder_pattern}/{extracts_folder}/{month_folder_pattern}/
   # Month folder: {root_path}/{year_folder_pattern}/{month_folder_pattern}/
-  # Blank template file: skills/bank-reconciliation/{template_name}.xlsx
+  # First month: skill creates a blank Google Sheet (no local xlsx template).
   year_folder_pattern: "{YYYY}"
   month_folder_pattern: "Y{YYYYMM}"
   extracts_folder: Extracts
-  template_name: "Y[YYYYMM]_Reconciliation"
   sheet_title_pattern: "Y{YYYYMM}_{company_name}_Reconciliation"
   sheet_tab: Bank
   expenses_folder: Expenses
