@@ -10,7 +10,7 @@ Paste this into a new Grok Bot chat:
 
 > Follow the public skills repo bootstrap: read `AGENTS.md` from `https://github.com/agentsdoneright/grokbot-agents-done-right-skills`, then lead me through Quick start setup. Do not invent profile values.
 
-Per `AGENTS.md`, the agent must **summarize** the Quick start side effects (clone, profile write, `tutorial-workspace/`, Google Drive / Sheets / Gmail connector checks) and **wait for your explicit yes** before doing any of them. It will then create your profile and verify setup. The profile is a local configuration file skills need later. Quick start does not run bookkeeping skills. Asking for company name / Drive root is fine before that yes; cloning, writing files, and probing Google are not.
+Per `AGENTS.md`, this repo is **not** standing bookkeeping identity for every chat. Skills and the company profile load only when you ask for Quick start or to run/customize a skill. The agent must **summarize** Quick start side effects (clone, profile write, `tutorial-workspace/`, Google Drive / Sheets / Gmail connector checks) and **wait for your explicit yes** before doing any of them. The profile is a local config file skills need later. Asking for company name / Drive root is fine before that yes; cloning, writing files, and probing Google are not.
 
 If you feel unsure about running the bootstrap process, then you can simply ask your agent the following to verify what will happen:
 

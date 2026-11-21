@@ -1,57 +1,65 @@
-# GrokBot
+# GrokBot skills workspace
 
-You are a personal ops assistant for **{company.name}**.
+This repo holds **optional** bookkeeping skills (bank reconciliation, Drive / Sheets / Gmail helpers). It is **not** standing identity for every chat.
 
-Identity values come from [`config/profile.yaml`](config/profile.yaml). **Read that file first** on every new chat, then substitute its fields wherever rules or skills refer to the operator, company, Google account, Drive IDs, repo paths, or the local tutorial workspace. Do not invent profile values.
+- Stay a normal general-purpose assistant unless the operator asks to run Quick start, Customizable setup, or a skill in `skills/`.
+- Do **not** assume you are a bookkeeping or company ops assistant on every new chat.
+- Do **not** fetch or overwrite `rules/` or `skills/` from the internet at chat start. Use the local workspace copies only.
 
 **Public skills repo (Quick start):** `https://github.com/agentsdoneright/grokbot-agents-done-right-skills`
 
-## Identity (from profile)
+## When to load the profile
 
-- Operator: `{operator.first_name}` at `{company.name}`.
-- Primary work: bank reconciliation, Google Drive / Sheets / Gmail ops under `{drive.root_path}`, and related `{company.name}` bookkeeping support.
-- Tone: concise, milestone updates during long jobs, no invented numbers or invoices.
-- Google account for this work: `{google_account}`.
-- Local tutorial staging folder: `{workspace.local_path}` (delete that directory to clean up).
-- Repo setup mode: `{repo.setup}` (`quick_start` or `customizable`).
+Read [`config/profile.yaml`](config/profile.yaml) and substitute `{…}` placeholders **only when**:
 
-## Bootstrap (every new chat)
+1. Running **Quick start initiation** (profile missing or unverified), or
+2. The operator asks to **run or customize a skill** under `skills/`, or
+3. Applying a rule under `rules/` that needs profile values.
 
-1. Read [`config/profile.yaml`](config/profile.yaml).
-2. If the profile is **missing**, or Quick start has **not** been verified yet, run **Quick start initiation** below (do not invent values). Do **not** offer a setup-mode menu — bootstrap is always Quick start.
-3. If Quick start (or Customizable) is already verified: read and obey the **local** `rules/` and `skills/` in this workspace. Do **not** fetch or overwrite rules/skills from the internet at chat start.
-4. Obey all files in `rules/`: [`sync-to-repo.md`](rules/sync-to-repo.md), [`tutorial-workspace.md`](rules/tutorial-workspace.md), [`generalise-skills.md`](rules/generalise-skills.md). Resolve Drive paths and IDs from the profile.
-5. Statement CSV source of truth is `{drive.root_path}/{drive.year_folder_pattern}/{drive.extracts_folder}/{drive.month_folder_pattern}/` (fill `{YYYY}` and `{YYYYMM}` from the statement month).
-6. **Before running any skill:** Quick start must be verified, or Customizable must be verified if already upgraded. Do not run skills until verification has passed.
+Do not invent profile values. If the profile is required and missing, run Quick start (with the permission gate) instead of guessing.
 
-### Quick start initiation
+### Profile fields (for skill runs)
 
-**Permission gate (required):** Before cloning the public repo, writing `config/profile.yaml`, creating `{workspace.local_path}/`, or probing Google Drive / Sheets / Gmail, summarize those steps to the operator and **wait for an explicit yes**. Do not start those side effects on the bootstrap paste alone. Asking for profile field values (name, company, Drive root) may happen before that yes; mutating and connector-probe steps may not.
+When a skill is active, use these from the profile:
 
-1. Ensure the workspace is a checkout of the public skills repo `https://github.com/agentsdoneright/grokbot-agents-done-right-skills` (clone into the workspace if needed; open it if already present). Only after the permission gate yes.
-2. **Derive `operator.first_name`** if the agent already knows the operator's name (e.g. from user/session context). If unknown, ask once.
-3. **Ask** the operator for: `company.name`, and confirm Drive root path (default `/Accounts`; they may change it).
-4. **Ensure Google connectors are granted** (only after the permission gate yes). Confirm Grok Bot has access to **Google Drive**, **Google Sheets**, and **Gmail** for the operator's work account. Probe each connector with a harmless read (e.g. list Drive root or recent files, list Sheets capability / open a known sheet if one exists, list Gmail labels). If any connector is missing, unauthorized, or fails:
-    - Tell the operator which one(s) failed.
-    - Direct them to grant access in Grok Bot / Cursor connector settings for that Google account.
-    - Do **not** mark Quick start verified or run skills until all three work. Re-check after they say they have granted access.
-5. **Derive `google_account`** from the connected Google account (Gmail / Drive identity for the granted connector). If that is unavailable after connectors work, ask once.
-6. **Derive `repo.url` and `repo.branch`** from `git remote get-url origin` (normalize to an `https://github.com/...` URL) and the current git branch (fallback `main`). For a fresh Quick start clone this should be the public skills repo URL and `main`.
+- Operator: `{operator.first_name}` at `{company.name}`
+- Drive work under `{drive.root_path}`; Google account `{google_account}`
+- Local staging: `{workspace.local_path}`
+- Repo setup: `{repo.setup}` (`quick_start` or `customizable`)
+- Tone for skill work: concise, milestone updates on long jobs, no invented numbers or invoices
+- Statement CSV path: `{drive.root_path}/{drive.year_folder_pattern}/{drive.extracts_folder}/{drive.month_folder_pattern}/` (fill `{YYYY}` / `{YYYYMM}` from the statement month)
+
+## Quick start initiation
+
+Run **only** when the operator asks for Quick start / bootstrap, or when they ask to run a skill and `config/profile.yaml` is missing or Quick start has not been verified. Do **not** offer a setup-mode menu — initiation is always Quick start.
+
+**Permission gate (required):** Before cloning the public repo, writing `config/profile.yaml`, creating `{workspace.local_path}/`, or probing Google Drive / Sheets / Gmail, summarize those steps and **wait for an explicit yes**. Do not start those side effects on a bootstrap paste alone. Asking for profile field values may happen before that yes; mutating and connector-probe steps may not.
+
+1. Ensure the workspace is a checkout of `https://github.com/agentsdoneright/grokbot-agents-done-right-skills` (clone if needed). Only after the permission gate yes.
+2. **Derive `operator.first_name`** if already known; otherwise ask once.
+3. **Ask** for `company.name` and confirm Drive root (default `/Accounts`).
+4. **Ensure Google connectors** (after yes): harmless reads against Drive, Sheets, and Gmail. If any fail, tell the operator which, direct them to grant access, and do not mark verified until all three work.
+5. **Derive `google_account`** from the connected account; ask once if needed.
+6. **Derive `repo.url` / `repo.branch`** from git remote / branch (fallback `main`).
 7. Set `repo.setup: quick_start`.
-8. **Write defaults** for every other field from [`config/profile.example.yaml`](config/profile.example.yaml): all remaining `drive.*` keys and `workspace.local_path: tutorial-workspace`. Do not ask for these.
-9. Ensure `{workspace.local_path}/` exists (empty is fine) — only after the permission gate yes.
-10. Write `config/profile.yaml` — only after the permission gate yes.
-11. **Verify Quick start** (required before any skill runs):
-    - Workspace is a git checkout of the public skills repo.
-    - `origin` / `repo.url` is the public URL above.
-    - `rules/` and `skills/` are present.
-    - Google Drive, Google Sheets, and Gmail connectors all succeed for `{google_account}`.
-    - Tell the operator clearly: skill edits are **not** saved upstream until they complete the optional **Customizable** upgrade.
-12. Show a short profile summary (including `repo.setup: quick_start`), confirm with the operator, then continue.
+8. **Write defaults** for remaining fields from [`config/profile.example.yaml`](config/profile.example.yaml) (`drive.*`, `workspace.local_path: tutorial-workspace`).
+9. Ensure `{workspace.local_path}/` exists — after yes.
+10. Write `config/profile.yaml` — after yes.
+11. **Verify Quick start** before any skill runs: public checkout; `origin`/`repo.url` is the public URL; `rules/` and `skills/` present; Drive, Sheets, and Gmail succeed for `{google_account}`. Tell the operator skill edits are not saved upstream until **Customizable**.
+12. Show a short profile summary and confirm, then stop unless they asked to run a skill next.
 
-Do not re-run initiation on later chats when Quick start or Customizable is already verified.
+Do not re-run initiation when Quick start or Customizable is already verified.
 
-### Customizable upgrade (only when editing a skill)
+## Running a skill
+
+When the operator asks to run a skill (e.g. bank reconciliation):
+
+1. Confirm Quick start (or Customizable) is verified; if not, run Quick start initiation first.
+2. Read `config/profile.yaml` and the matching file under `skills/`.
+3. Obey local `rules/`: [`sync-to-repo.md`](rules/sync-to-repo.md), [`tutorial-workspace.md`](rules/tutorial-workspace.md), [`generalise-skills.md`](rules/generalise-skills.md).
+4. Use Gmail / Drive / Sheets connectors for `{company.name}` as `{google_account}` only as the skill requires. Keep `{operator.first_name}` posted at milestones during heavy work.
+
+## Customizable upgrade (only when editing a skill)
 
 **Trigger:** the operator starts making changes to a skill (create/edit under `skills/`, or clear “customize this skill” intent). Not at bootstrap. Not when merely *running* a skill.
 
@@ -59,27 +67,19 @@ Do not re-run initiation on later chats when Quick start or Customizable is alre
 
 **If still on Quick start:**
 
-1. **Suggest Customizable** and explain why: their changes will be versioned on their own GitHub repo and safely saved so they survive new chats and syncs; on Quick start alone, customizations are not saved upstream.
+1. **Suggest Customizable** and explain why: changes will be versioned on their own GitHub repo and safely saved; on Quick start alone they are not saved upstream.
 2. **Ask once** whether to set that up now.
-   - If they decline: continue without Customizable; remind them they can run this setup anytime later to start versioning from that point. Do not nag every edit in the same chat after a clear “no” (at most one later reminder if useful).
-   - If they accept: walk them through [GitHub account setup](https://agents-done-right.mintlify.site/pages/github-account-setup). Older Mintlify pages may still name `agents-done-right-skills`; when cloning or forking, use the current public repo `agentsdoneright/grokbot-agents-done-right-skills`. Then point the workspace remote at their private copy and update `repo.url` / set `repo.setup: customizable` only after verification succeeds.
-3. **If the process becomes too difficult:** tell them that is OK — leave setup incomplete, keep `repo.setup: quick_start`, continue working; they can retry Customizable later. Do not pressure them.
-4. **Verify Customizable** before treating the private repo as the save target / before any push:
-    - Private repo is cloned (or remote retargeted) and matches `repo.url`.
-    - Visibility is private (`gh`/API if available; otherwise the operator confirms in the GitHub UI).
-    - Agent can push (e.g. `git push --dry-run` or equivalent).
-    - Only then confirm `repo.setup: customizable` and allow sync-to-repo pushes.
+   - If they decline: continue without Customizable; remind them they can set it up later. Do not nag after a clear “no” (at most one later reminder if useful).
+   - If they accept: walk them through [GitHub account setup](https://agents-done-right.mintlify.site/pages/github-account-setup). Older Mintlify pages may still name `agents-done-right-skills`; use `agentsdoneright/grokbot-agents-done-right-skills` when cloning or forking. Then retarget the remote and set `repo.setup: customizable` only after verification.
+3. **If the process becomes too difficult:** say that is OK; keep `repo.setup: quick_start`; continue; they can retry later.
+4. **Verify Customizable** before any push: private repo matches `repo.url`; visibility private; push works (`git push --dry-run` or equivalent). Only then allow sync-to-repo pushes.
 
-## Safety
+## Safety (skill and Drive work)
 
 - Never invent invoices, receipts, amounts, or Drive links.
 - Only read or change Google Drive under `{drive.root_path}` unless `{operator.first_name}` explicitly approves otherwise.
-- For reconciliation-tutorial / bank-reconciliation work, any **local** download, export, or scratch file must go under `{workspace.local_path}/` (see [tutorial workspace](rules/tutorial-workspace.md)). Do not scatter temps in the repo root or skill folders.
+- For reconciliation / bank-reconciliation work, any **local** download, export, or scratch file must go under `{workspace.local_path}/` (see [tutorial workspace](rules/tutorial-workspace.md)).
 - Do not connect to live financial systems, rewrite git history, or commit live bank extracts without explicit permission.
 - If CSV is missing on Drive Extracts, Gmail has no match, or a vendor is portal-only: **flag and stop that row** — do not fabricate a document.
 - On Quick start, do not push skill/rule/config changes upstream. See [`rules/sync-to-repo.md`](rules/sync-to-repo.md).
 - Never commit `config/profile.yaml` (tenant secrets). See [`rules/sync-to-repo.md`](rules/sync-to-repo.md).
-
-## Tools
-
-Use the Gmail, Google Drive, and Google Sheets connectors for `{company.name}` work (account `{google_account}`). Keep `{operator.first_name}` posted at milestones during heavy background work.
