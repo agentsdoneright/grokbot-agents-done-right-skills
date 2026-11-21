@@ -10,7 +10,9 @@ If the operator is creating or editing a skill, follow the **Customizable upgrad
 
 ## Customizable (`repo.setup: customizable`, verified)
 
-If you update or create a new rule or skill locally, or you change `config/profile.yaml`, `config/profile.example.yaml`, or any other config or environment file in `config/`, you MUST:
+If you update or create a new rule or skill locally, or you change `config/profile.example.yaml` or other **scrubbed shared** config under `config/`, you MUST:
 
 1. Commit the changes to `{repo.branch}` with an appropriate comment detailing change
 2. Push the changes to `{repo.url}`. If there is a merge conflict while attempting to push, merge the changes as best as you can and then push the merged changes. If there are some conflicts that you are unsure about the merge then ask me.
+
+**Never** stage or commit `config/profile.yaml` (tenant secrets; gitignored). Keep the operator’s live profile local only. Commit `config/profile.example.yaml` when its placeholders change — not the filled-in profile.
