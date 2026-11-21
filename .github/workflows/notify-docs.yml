@@ -1,0 +1,17 @@
+name: Notify docs repository
+
+on:
+  push:
+    branches: [main]
+    paths: ["docs/**"]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger docs aggregate workflow
+        env:
+          GH_TOKEN: ${{ secrets.DOCS_DISPATCH_TOKEN }}
+        run: |
+          gh api repos/agentsdoneright/agents-done-right-docs/dispatches \
+            -f event_type=docs-updated

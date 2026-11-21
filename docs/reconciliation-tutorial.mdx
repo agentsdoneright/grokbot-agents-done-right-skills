@@ -1,0 +1,138 @@
+---
+title: "Reconciliation tutorial"
+description: "Reconcile a month of bank transactions with invoices"
+---
+This tutorial walks through a monthly bank reconciliation using a Grok Bot agent.
+
+<Info>
+ The agent will:
+
+1. Prepare the month's Google Drive folder and Google Sheet import the bank CSV data
+2. Fill the reconciliation columns and categorising each transaction
+3. Verify totals
+4. Match any invoices that you have either received via an email or that you have manually uploaded with the bank transactions.
+5. Save links to the invoices in your Google Drive
+</Info>
+
+## Prerequisites
+
+<Callout color="#FFC107">
+  Before you start, complete **Quick start** with Grok Bot: paste the bootstrap prompt from the skills repo README so the agent reads `AGENTS.md` from `https://github.com/agentsdoneright/grokbot-agents-done-right-skills`, clones it, creates your profile, and verifies setup.
+
+  Prerequisites after Quick start:
+
+  - Workspace checkout of the public skills repo `agentsdoneright/grokbot-agents-done-right-skills`
+  - Synced Grok Bot with the skills it needs
+  - Grok Bot access to Google Drive, Sheets, and Gmail verified during Quick start (grant connectors if the agent reports any missing)
+
+  Optional later: if you customize a skill and want changes versioned on your own GitHub, the agent will suggest the **Customizable** upgrade and can walk you through [GitHub account setup](https://agents-done-right.mintlify.site/pages/github-account-setup).
+</Callout>
+
+## Export your monthly bank statement
+
+All banks should have an option to export bank transactions. 
+
+- Export last month's bank statement as a CSV and save the file to your computer.
+
+The skill maps common bank CSV layouts, so the agent can import statements even when column names vary by bank.
+
+<Info>
+  A **CSV** (Comma-Separated Values) file is a plain-text spreadsheet: each row is a transaction, and columns such as date, amount, and description are separated by commas. Banks use CSV so you can open the statement in Sheets or Excel and so the agent can import the data into your reconciliation workbook.
+</Info>
+
+<Tip>
+  Automating monthly bank pulls is possible later, but only with tightly restricted access. For this tutorial, export a CSV by hand — simpler and safer.
+</Tip>
+
+## Run the Reconciliation Skill
+
+## Prepare the month's folder and sheet
+
+<Steps>
+  <Step title="Create year and month folders">
+    Under your Drive root, ensure the year folder exists for the statement year, including an extracts subfolder. Then create the month folder for the statement month (`YYYYMM`) if it is missing.
+  </Step>
+  <Step title="Locate the bank CSV">
+    Look for the CSV under `root / year / extracts / month`. If it is missing, obtain it from the operator and save it into that folder before importing.
+  </Step>
+  <Step title="Start from last month's sheet (or the blank template)">
+    Look for the previous month's reconciliation sheet. If it exists, copy it into this month's folder so reference tabs stay current: `Counterparty-Match`, `Counterparties`, `Counterparty-Category`, `Email matching`, and `Categories`.
+
+    On the copy only, clear last month's transaction rows and the raw CSV area on the transactions tab. Keep the header row and all reference tabs. Never edit last month's sheet in place.
+
+    If no previous sheet exists (first month), upload the blank skill template (`skills/bank-reconciliation/Y[YYYYMM]_Reconciliation.xlsx`) into this month's folder as a native Google Sheet. Never modify the local template file. If the source is `.xlsx`, convert the copy to a native Google Sheet.
+  </Step>
+</Steps>
+
+## Inspect the layout
+
+Before writing, confirm tab names and column headers. Tabs usually include:
+
+- Transactions tab (main reconciliation grid)
+- `Categories` — allowed category spellings
+- `Counterparty-Match` — formatted name ↔ raw bank name
+- `Counterparties` — unique formatted names
+- `Counterparty-Category` — formatted name ↔ category
+- `Email matching` — Gmail search rules per counterparty
+
+On the transactions tab, locate columns by header name. Typical layout:
+
+`Date | Recipient / Payer | Category | Credit | Debit | Ref | Note` then the raw CSV area to the right.
+
+## Import the CSV
+
+Paste the CSV into the first empty column to the right of the reconciliation columns (often starting at column H). Put headers in row 1 and data from row 2. Write numbers as numbers and dates as real dates.
+
+## Fill the reconciliation columns
+
+Create one reconciliation row per CSV row.
+
+| Column | How to fill it |
+| --- | --- |
+| **Date** | Transaction date as a real date, display format `d-mmm` (for example `5-Nov`) |
+| **Recipient / Payer** | Prefer Merchant, else Payee Name, else Payer Name, else Description. Loose-match against `Counterparty-Match`. If no match, write a clean, properly cased name |
+| **Category** | Look up the formatted name in `Counterparty-Category`. Otherwise pick from `Categories` and stay consistent with earlier months |
+| **Credit** | Absolute amount if money came in; otherwise blank |
+| **Debit** | Absolute amount if money went out; otherwise blank |
+
+Clear leftover template formulas below the last data row.
+
+## Verify and report
+
+- Row count should match the CSV
+- Dates should display as `d-mmm`
+- `SUM(Credit)` and `SUM(Debit)` should match the CSV totals in and out
+
+Report the sheet link, totals, category counts, and any guesses (new counterparties or unsure categories).
+
+## After review
+
+When the operator renames counterparties or changes categories:
+
+1. Update `Counterparty-Match` (formatted name ↔ raw Match string) without duplicates
+2. Add new names to `Counterparties`
+3. Update `Counterparty-Category` with the agreed category
+
+## Match invoices from email
+
+Run this when the operator asks, or as a final optional step for debit rows.
+
+<Steps>
+  <Step title="Search with Email matching rules">
+    For each debit row, check `Email matching` first. If the recipient is listed, search Gmail with that rule, narrowed by date and amount.
+  </Step>
+  <Step title="Fall back to a general search">
+    Otherwise search by counterparty name, raw merchant text, a window of about two weeks before to a few days after the bank date, and the amount (include original FX amounts from the raw CSV when relevant).
+  </Step>
+  <Step title="Attach the invoice">
+    Prefer a PDF attachment. Upload to an expenses subfolder inside the spreadsheet's folder as `YYYY-MM-DD_Counterparty_Amount.pdf`. Put the Drive link in **Ref**. Add a **Note** only when something needs attention (FX/VAT mismatch, multi-charge invoice, uncertain match, and similar).
+
+    Immediately save or update the working Gmail rule in `Email matching`. Skip bank-fee rows unless an invoice clearly exists. Never send, reply to, or change emails.
+  </Step>
+</Steps>
+
+Report the expenses folder link, matches found, notes written, and rows still missing an invoice.
+
+## Hand back
+
+When the operator finishes manual edits (renames, categories, uploaded invoices), sync the transactions tab back into the reference tabs so next month starts with the latest mappings.

@@ -1,0 +1,37 @@
+# Tenant profile for GrokBot.
+# Agents create config/profile.yaml on first run (see AGENTS.md). Do not invent values.
+# Keep this example scrubbed: no real names, companies, accounts, or paths.
+
+operator:
+  first_name: <first-name>
+
+company:
+  name: <company-name>
+
+google_account: <you@example.com>
+
+repo:
+  url: https://github.com/<owner>/<repo>
+  branch: main
+  # quick_start = public clone (default bootstrap). customizable = private copy; required to push skill edits.
+  setup: quick_start
+
+drive:
+  root_path: /Accounts
+  # {YYYY} is the calendar year. {YYYYMM} is the statement month.
+  # {company_name} inside sheet_title_pattern comes from company.name.
+  # CSV folder: {root_path}/{year_folder_pattern}/{extracts_folder}/{month_folder_pattern}/
+  # Month folder: {root_path}/{year_folder_pattern}/{month_folder_pattern}/
+  # Blank template file: skills/bank-reconciliation/{template_name}.xlsx
+  year_folder_pattern: "{YYYY}"
+  month_folder_pattern: "Y{YYYYMM}"
+  extracts_folder: Extracts
+  template_name: "Y[YYYYMM]_Reconciliation"
+  sheet_title_pattern: "Y{YYYYMM}_{company_name}_Reconciliation"
+  sheet_tab: Bank
+  expenses_folder: Expenses
+
+workspace:
+  # Repo-relative folder for disposable local files from the reconciliation tutorial.
+  # Easy cleanup: delete this directory.
+  local_path: tutorial-workspace

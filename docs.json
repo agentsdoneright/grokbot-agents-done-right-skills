@@ -1,0 +1,18 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "Agents done right skills",
+  "colors": {
+    "primary": "#16A34A"
+  },
+  "navigation": {
+    "groups": [ 
+      {
+        "group": "Skills",
+        "pages": [
+          "docs/reconciliation-tutorial"
+        ]
+      }
+    ]
+  }
+}
