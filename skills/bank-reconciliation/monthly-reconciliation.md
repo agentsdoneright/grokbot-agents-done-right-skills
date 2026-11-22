@@ -1,8 +1,8 @@
 ---
 name: Bank reconciliation
-version: 1.4.1
+version: 1.5.0
 description: >-
-  Version 1.4.1. Use when the user wants to reconcile a month's bank transactions
+  Version 1.5.0. Use when the user wants to reconcile a month's bank transactions
   (e.g. a bank CSV export) in their Google Sheets reconciliation workbook: on the
   first month upload the skill's scrubbed `.xlsx` template and convert it to a
   Google Sheet, copy last month's sheet thereafter, import the CSV, fill date,
@@ -13,8 +13,9 @@ description: >-
   tab with live formulas for Missing Expense Invoices, Missing Revenue
   Invoices, and Expenses by Category (required SUMIF Totals against Bank
   Transactions Debits by Category + Type so the pie chart updates when
-  categories change); remove empty missing-invoice title/table blocks. Also use
-  for test mode / sample data / try with test data — run against
+  categories change); remove empty missing-invoice title/table blocks; highlight
+  Bank Transactions rows that match those missing-invoice lists in light red.
+  Also use for test mode / sample data / try with test data — run against
   skills/bank-reconciliation/test-data fixtures instead of a live bank CSV
   download and Gmail.
 ---
@@ -50,7 +51,7 @@ In test mode the Sheets / Drive path is unchanged (month folders, template or co
 3. Copy `skills/bank-reconciliation/test-data/bank-statement.csv` into `{drive.root_path}/{drive.accounts_folder}/{drive.year_folder_pattern}/{drive.extracts_folder}/{drive.month_folder_pattern}/` (create folders if needed). Then continue sections 1–6 as usual (CSV is already on Drive) — fill the transactions tab, seed reference tabs including Categories Type (section 5), then verify before invoice matching.
 4. For expense invoice matching (section 8): check Unfiled expense invoices first (usually empty in the default fixture run). Then open each `skills/bank-reconciliation/test-data/emails/*.eml` (not under `sent/`). Match each Debit row using `From`, subject, amount, and date (confirmation fields: Date, Counterparty, Debit). Prefer the PDF attachment; extract under `{workspace.local_path}/`, upload to `{drive.expenses_folder}`, set Invoice / VAT / Ref, set **Source = `Email`**, update Counterparties contact fields and `Email matching` as in section 8. Skip bank-fee rows unless an invoice clearly exists. Fixture pack includes unmatched debits with no EML — leave those unmatched (Source blank).
 5. For revenue invoice matching (section 9): check the month `{drive.revenue_folder}` and Unfiled revenue invoices first (usually empty). Then open each `skills/bank-reconciliation/test-data/emails/sent/*.eml`. Match Credit rows (Date, Counterparty, Credit); upload to `{drive.revenue_folder}`; set Invoice / VAT / Ref; set **Source = `Email`**.
-6. Fill the Summary tab (section 10): Missing Expense / Revenue blocks (remove a block entirely if it has no rows), formula-driven Expenses by Category (SUMIF-style over Bank Debits + Categories Type), and the Expenses by Category pie chart.
+6. Fill the Summary tab (section 10): Missing Expense / Revenue blocks (remove a block entirely if it has no rows), light-red highlight on matching Bank Transactions rows, formula-driven Expenses by Category (SUMIF-style over Bank Debits + Categories Type), and the Expenses by Category pie chart.
 7. After the run, read `skills/bank-reconciliation/test-data/expected-results.md` and report pass/fail against that checklist (including that Gmail was not used, and the Summary tables and pie chart).
 
 ## 1. Prepare the month's folder and sheet
@@ -201,6 +202,16 @@ Then:
 - Same rules for **Missing Revenue Invoices** (Amount = Credit): keep/fill with formulas when candidates exist; **delete** title and whole table when there are none.
 - On a later Summary refresh, if a previously deleted block is needed again: recreate the title and headers (Date, Counterparty, Amount, Note) in a clear area of Summary **without covering Expenses by Category**, then fill with live formulas. Do not invent decorative formatting.
 
+#### Highlight missing-invoice rows on Bank Transactions
+
+After the Summary missing-invoice blocks are filled (or removed), sync row highlighting on the **transactions tab** so it matches those lists exactly:
+
+- **Same membership as Summary:** highlight a bank row if and only if it is a **missing expense candidate** or **missing revenue candidate** (same rules as above). Bank-fee rows excluded from Missing Expense Invoices must **not** be highlighted for missing invoices. Rows that appear on Summary Missing Expense or Missing Revenue tables must be highlighted; rows that do not must not stay highlighted for this reason.
+- **Colour:** light red fill on the **full reconciliation data columns** for that row (Date through Source/Notes — the ten reconciliation columns, not the raw CSV import columns to the right). Use a pale red such as `#FFCDD2` (or the Sheets theme light-red equivalent). Do not invent other colours.
+- Prefer **conditional formatting** on the transactions tab driven by blank Invoice plus Debit/Credit (and excluding bank fees), so the highlight stays aligned when Invoice is filled later. If the connector cannot set conditional formatting, apply/clear the light-red fill on the matching rows for this run, then on a later Summary refresh clear fill from rows that are no longer missing and apply it to any newly missing rows.
+- Clear light-red missing-invoice highlighting from rows that now have an Invoice (or that are bank fees). Do not strip unrelated formatting the operator added.
+- **Verify:** the set of highlighted bank rows (Date, Counterparty, Debit or Credit) must match the rows shown in the Summary Missing Expense and Missing Revenue tables (when those blocks exist). If a Summary block was deleted because it is empty, no bank rows should remain highlighted for that missing type.
+
 #### Expenses by Category (formula-linked to Bank)
 
 Build this table so changing a bank row’s **Category** or **Debit** updates Totals, Percentages, and the pie chart without rewriting Summary by hand:
@@ -235,7 +246,7 @@ Create or update **one** embedded pie chart on the Summary tab titled **Expenses
 
 ### Report (Summary)
 
-Include: the locations you used (title cells, ranges, or named ranges); whether each missing-invoice block was **kept**, **removed**, or **recreated**; that Expenses by Category Totals are `SUMIF`-style formulas against the transactions tab (**confirmed** on re-read, or **corrected** from static numbers); the expense-category totals and integer percentages; the missing expense and revenue rows (if any); any Type mismatches or blank Types; and whether the pie chart was created or updated.
+Include: the locations you used (title cells, ranges, or named ranges); whether each missing-invoice block was **kept**, **removed**, or **recreated**; that Bank Transactions light-red highlights match those Summary missing rows; that Expenses by Category Totals are `SUMIF`-style formulas against the transactions tab (**confirmed** on re-read, or **corrected** from static numbers); the expense-category totals and integer percentages; the missing expense and revenue rows (if any); any Type mismatches or blank Types; and whether the pie chart was created or updated.
 
 ## 11. Final step: hand back to the user
-End every run by telling the user: they may update Category names, Category Type, or Counterparty names directly on the spreadsheet; when they are finished, they should let you know so you can verify everything and correctly relink the reference tabs (`Counterparty-Match`, `Counterparties`, `Counterparty-Category`, `Categories`, and `Email matching` if names changed) and refresh the Summary formulas and pie chart if needed — see sections 7 and 10.
+End every run by telling the user: they may update Category names, Category Type, or Counterparty names directly on the spreadsheet; when they are finished, they should let you know so you can verify everything and correctly relink the reference tabs (`Counterparty-Match`, `Counterparties`, `Counterparty-Category`, `Categories`, and `Email matching` if names changed) and refresh the Summary formulas, missing-invoice highlights, and pie chart if needed — see sections 7 and 10.
