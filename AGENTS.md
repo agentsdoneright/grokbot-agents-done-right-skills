@@ -2,10 +2,22 @@
 
 This repo holds **optional** bookkeeping skills (bank reconciliation, Drive / Sheets / Gmail helpers). It is **not** standing identity for every chat.
 
+## Rules (global — every agent, every chat)
+
+**All agents must follow every file under [`rules/`](rules/).** These are standing requirements for this workspace, not optional and not limited to skill runs. Read and obey them whenever this `AGENTS.md` applies:
+
+- [`rules/action-recording/action-recording.md`](rules/action-recording/action-recording.md) — record sanitized action metadata unless `{logging.destination}` is `off` (`disk` = local JSONL; `disk_and_sheet` = local + Drive Logs Sheet from `rules/action-recording/Action_Log.xlsx`)
+- [`rules/sync-to-repo.md`](rules/sync-to-repo.md) — when and how to save skill/rule/config changes
+- [`rules/tutorial-workspace.md`](rules/tutorial-workspace.md) — local staging under `{workspace.local_path}/` and Drive Accounts/Logs layout
+- [`rules/generalise-skills.md`](rules/generalise-skills.md) — keep tenant values in profile/product config; version skills and rules
+
+If a new file appears under `rules/` (including rule subfolders), follow it too. Do **not** skip `action-recording` or any other rule because the operator did not ask for a skill.
+
+## Standing behavior
+
 - Stay a normal general-purpose assistant unless the operator asks to run Quick start, Customizable setup, or a skill in `skills/`.
 - Do **not** assume you are a bookkeeping or company ops assistant on every new chat.
 - Do **not** fetch or overwrite `rules/` or `skills/` from the internet at chat start. Use the local workspace copies only.
-- Obey [`rules/action-recording.md`](rules/action-recording.md) for guided work in this workspace (Quick start, skills, rules, Customizable) unless `{logging.destination}` is `off`: record sanitized action metadata locally when `disk` or `disk_and_sheet`, and to a Drive Logs Sheet when `disk_and_sheet`.
 
 Read [`config/product.yaml`](config/product.yaml) for shared URLs (`{docs.*}`, `{github.*}`). **Public skills repo (Quick start):** `{github.public_skills_repo_url}`.
 
@@ -25,7 +37,7 @@ When a skill is active, use these from the profile:
 
 - Operator: `{operator.first_name}` at `{company.name}`
 - Drive parent root `{drive.root_path}`; bookkeeping under `{drive.root_path}/{drive.accounts_folder}`; logs under `{drive.root_path}/{drive.logs_folder}`; Google account `{google_account}`
-- Logging: `{logging.destination}` (`off`, `disk`, or `disk_and_sheet`) — see [`rules/action-recording.md`](rules/action-recording.md)
+- Logging: `{logging.destination}` (`off`, `disk`, or `disk_and_sheet`) — see [`rules/action-recording/action-recording.md`](rules/action-recording/action-recording.md)
 - Local staging: `{workspace.local_path}`
 - Repo setup: `{repo.setup}` (`quick_start` or `customizable`)
 - Tone for skill work: concise, milestone updates on long jobs, no invented numbers or invoices
@@ -58,7 +70,7 @@ When the operator asks to run a skill (e.g. bank reconciliation):
 
 1. Confirm Quick start (or Customizable) is verified; if not, run Quick start initiation first.
 2. Read `config/profile.yaml`, `config/product.yaml` when the skill needs `{docs.*}` / `{github.*}`, and the matching file under `skills/`.
-3. Obey local `rules/`: [`action-recording.md`](rules/action-recording.md), [`sync-to-repo.md`](rules/sync-to-repo.md), [`tutorial-workspace.md`](rules/tutorial-workspace.md), [`generalise-skills.md`](rules/generalise-skills.md).
+3. Keep obeying all of [`rules/`](rules/) (see **Rules (global)** above); load profile values the skill needs.
 4. Use Gmail / Drive / Sheets connectors for `{company.name}` as `{google_account}` only as the skill requires. Keep `{operator.first_name}` posted at milestones during heavy work.
 
 ## Customizable upgrade (only when editing a skill)

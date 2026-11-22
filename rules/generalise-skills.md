@@ -38,7 +38,7 @@ Keep `version` and the `Version X.Y.Z.` prefix of `description` in sync.
 
 ### Rules
 
-Every file under `rules/` should declare a semver in YAML frontmatter so [`action-recording.md`](action-recording.md) can cite `guidance.version`:
+Every rule markdown under `rules/` (including subfolders such as `rules/action-recording/`) should declare a semver in YAML frontmatter so [`action-recording/action-recording.md`](action-recording/action-recording.md) can cite `guidance.version`:
 
 ```yaml
 ---
