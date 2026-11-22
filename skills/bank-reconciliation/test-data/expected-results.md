@@ -6,6 +6,7 @@ Use this checklist after a **test mode** run (statement month **November 2024** 
 
 - [ ] Statement month is November 2024 (`2024` / `Y202411`), not “last month”
 - [ ] Fixture CSV was copied to Drive Extracts for that month (not a live bank export)
+- [ ] First-month sheet came from the skill `.xlsx` template (uploaded + converted), not a blank spreadsheet built from scratch
 - [ ] Gmail was **not** searched or modified
 - [ ] Invoice addressee checks used **Demo Company Ltd** (not flagged solely vs `{company.name}`)
 
@@ -22,6 +23,16 @@ Fixture CSV has **6** rows. Totals from signed `Amount` (negative = out):
 - [ ] `SUM(Credit)` = **2500.00**
 - [ ] `SUM(Debit)` = **289.49**
 - [ ] Dates display as `d-mmm` (e.g. `5-Nov`)
+- [ ] Every Bank row has a non-empty **Category** (exact spellings may vary)
+
+## Reference tabs (seeded same run)
+
+After filling Bank, the agent must seed these tabs in the **same run**. Do **not** require fixed category names — assert structure and consistency with Bank / the fixture merchants:
+
+- [ ] `Categories` has data rows (not header-only); every Category used on Bank appears there
+- [ ] `Counterparties` lists each distinct Bank `Recipient / Payer` (6 names; casing may vary, e.g. Acme Cloud)
+- [ ] `Counterparty-Match` has a row per those names; `Match` loosely matches the fixture merchants: `ACME CLOUD *SUB`, `NORTHWIND SAAS`, `CLIENT PAYMENT ACME`, `BRIGHTLINE OPS`, `BANK SERVICE FEE`, `HARBOR TOOLS`
+- [ ] `Counterparty-Category` maps each Counterparties name to the Category used on that Bank row
 
 ## Matched invoices (from `test-data/emails/`)
 
@@ -55,4 +66,4 @@ Four Debits should get a PDF in `{drive.expenses_folder}` and a **Ref** Drive li
 
 ## Report
 
-- [ ] Operator report includes sheet link, credit/debit totals, expenses folder link, four matches, fee as unmatched, and confirmation that Gmail was not used
+- [ ] Operator report includes sheet link, credit/debit totals, that reference tabs were seeded, expenses folder link, four matches, fee as unmatched, and confirmation that Gmail was not used

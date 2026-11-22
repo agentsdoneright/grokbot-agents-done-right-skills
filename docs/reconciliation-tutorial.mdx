@@ -8,10 +8,11 @@ This tutorial walks through a monthly bank reconciliation using a Grok Bot agent
  The agent will:
 
 1. Prepare the month's Google Drive folder and Google Sheet import the bank CSV data
-2. Fill the reconciliation columns and categorising each transaction
-3. Verify totals
-4. Match any invoices that you have either received via an email or that you have manually uploaded with the bank transactions.
-5. Save links to the invoices in your Google Drive
+2. Fill the reconciliation columns and categorise each transaction
+3. Seed Categories and Counterparty reference tabs from those Bank rows
+4. Verify totals
+5. Match any invoices that you have either received via an email or that you have manually uploaded with the bank transactions.
+6. Save links to the invoices in your Google Drive
 </Info>
 
 ## Prerequisites
@@ -32,7 +33,7 @@ This tutorial walks through a monthly bank reconciliation using a Grok Bot agent
 
 After Quick start, you can exercise the skill **without** exporting a live bank CSV or searching your Gmail inbox. Ask the agent to run bank reconciliation in **test mode** (or “try with sample / test data”).
 
-Test mode still creates a Google Sheet under your Drive root for **November 2024**, imports a fixture CSV, matches four sample invoice `.eml` files (with PDF attachments) from `skills/bank-reconciliation/test-data/`, and uploads expense PDFs with Ref links. It does **not** read Gmail. Compare the agent’s report to `skills/bank-reconciliation/test-data/expected-results.md`.
+Test mode still creates a Google Sheet under your Drive root for **November 2024** (from the skill `.xlsx` template on a first month, or a copy of the prior month), imports a fixture CSV, seeds Categories / Counterparty reference tabs from the filled Bank rows, matches four sample invoice `.eml` files (with PDF attachments) from `skills/bank-reconciliation/test-data/`, and uploads expense PDFs with Ref links. It does **not** read Gmail. Compare the agent’s report to `skills/bank-reconciliation/test-data/expected-results.md`.
 
 When you are ready for a real month, continue with the live CSV export steps below.
 
@@ -63,12 +64,12 @@ The skill maps common bank CSV layouts, so the agent can import statements even 
   <Step title="Locate the bank CSV">
     Look for the CSV under `root / year / extracts / month`. If it is missing, obtain it from the operator and save it into that folder before importing.
   </Step>
-  <Step title="Start from last month's sheet (or create a blank Google Sheet)">
+  <Step title="Start from last month's sheet (or upload the skill template)">
     Look for the previous month's reconciliation sheet. If it exists, copy it into this month's folder so reference tabs stay current: `Counterparty-Match`, `Counterparties`, `Counterparty-Category`, `Email matching`, and `Categories`.
 
     On the copy only, clear last month's transaction rows and the raw CSV area on the transactions tab. Keep the header row and all reference tabs. Never edit last month's sheet in place.
 
-    If no previous sheet exists (first month), create a new blank native Google Spreadsheet in this month's folder with the required tabs and header rows only (no local `.xlsx` template). Hide every tab except `Bank`.
+    If no previous sheet exists (first month), upload a copy of the scrubbed template `skills/bank-reconciliation/Y[date]_[company]_Reconciliation.xlsx` into this month's folder, rename it from the sheet title pattern, and convert it to a native Google Sheet. Keep the template's tab visibility. Do not create a blank spreadsheet from scratch or edit the repo template in place.
   </Step>
 </Steps>
 
@@ -89,7 +90,7 @@ On the transactions tab, locate columns by header name. Typical layout:
 
 ## Import the CSV
 
-Paste the CSV into the first empty column to the right of the reconciliation columns (often starting at column H). Put headers in row 1 and data from row 2. Write numbers as numbers and dates as real dates.
+Paste the CSV into the first empty column to the right of the reconciliation columns (often starting at column H). If the template already has raw CSV headers there, keep them and write data from row 2; otherwise put headers in row 1 and data from row 2. Write numbers as numbers and dates as real dates.
 
 ## Fill the reconciliation columns
 
@@ -99,27 +100,40 @@ Create one reconciliation row per CSV row.
 | --- | --- |
 | **Date** | Transaction date as a real date, display format `d-mmm` (for example `5-Nov`) |
 | **Recipient / Payer** | Prefer Merchant, else Payee Name, else Payer Name, else Description. Loose-match against `Counterparty-Match`. If no match, write a clean, properly cased name |
-| **Category** | Look up the formatted name in `Counterparty-Category`. Otherwise pick from `Categories` and stay consistent with earlier months |
+| **Category** | Look up the formatted name in `Counterparty-Category`. Otherwise pick from `Categories`. If those tabs have no data rows yet (first month), invent a short consistent category — do not leave Category blank |
 | **Credit** | Absolute amount if money came in; otherwise blank |
 | **Debit** | Absolute amount if money went out; otherwise blank |
 
 Clear any leftover formulas or junk below the last data row.
+
+## Seed reference tabs
+
+In the same run, after filling Bank, seed (or extend) the reference tabs from those rows and the raw bank string for each counterparty:
+
+- `Categories` — unique Category values from Bank
+- `Counterparty-Match` — formatted `Recipient / Payer` ↔ raw `Match` string
+- `Counterparties` — unique formatted names
+- `Counterparty-Category` — formatted name ↔ Category used on Bank
+
+Skip keys that already exist (later months). Do not unhide the tabs unless the operator asks.
 
 ## Verify and report
 
 - Row count should match the CSV
 - Dates should display as `d-mmm`
 - `SUM(Credit)` and `SUM(Debit)` should match the CSV totals in and out
+- The four reference tabs above should have data rows consistent with Bank (not header-only after a first fill)
 
-Report the sheet link, totals, category counts, and any guesses (new counterparties or unsure categories).
+Report the sheet link, totals, category counts, that reference tabs were seeded or updated, and any guesses (new counterparties or unsure categories).
 
 ## After review
 
-When the operator renames counterparties or changes categories:
+When the operator says they have finished editing Category or Counterparty names:
 
-1. Update `Counterparty-Match` (formatted name ↔ raw Match string) without duplicates
-2. Add new names to `Counterparties`
-3. Update `Counterparty-Category` with the agreed category
+1. Sync `Counterparty-Match` (formatted name ↔ raw Match string) without duplicates
+2. Sync unique names into `Counterparties`
+3. Sync `Counterparty-Category` and unique spellings into `Categories`
+4. If a counterparty was renamed, update `Email matching` so invoice rules still line up
 
 ## Match invoices from email
 
@@ -143,4 +157,4 @@ Report the expenses folder link, matches found, notes written, and rows still mi
 
 ## Hand back
 
-When the operator finishes manual edits (renames, categories, uploaded invoices), sync the transactions tab back into the reference tabs so next month starts with the latest mappings.
+Tell the operator they may update Category names or Counterparty names directly on the spreadsheet. When they are finished, they should let the agent know so it can verify everything and correctly relink the reference tabs (`Counterparty-Match`, `Counterparties`, `Counterparty-Category`, `Categories`, and `Email matching` if names changed).

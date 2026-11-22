@@ -2,12 +2,13 @@
 name: Bank reconciliation
 description: >-
   Use when the user wants to reconcile a month's bank transactions (e.g. a bank
-  CSV export) in their Google Sheets reconciliation workbook: create a blank
-  Google Sheet on the first month (tabs + headers only), copy last month's sheet
-  thereafter, import the CSV, and fill date, counterparty, category, credit and
-  debit columns. Also use for test mode / sample data / try with test data —
-  run against skills/bank-reconciliation/test-data fixtures instead of a live
-  bank CSV download and Gmail.
+  CSV export) in their Google Sheets reconciliation workbook: on the first month
+  upload the skill's scrubbed `.xlsx` template and convert it to a Google Sheet,
+  copy last month's sheet thereafter, import the CSV, fill date, counterparty,
+  category, credit and debit columns, and seed Categories / Counterparty
+  reference tabs from those rows. Also use for test mode / sample data / try
+  with test data — run against skills/bank-reconciliation/test-data fixtures
+  instead of a live bank CSV download and Gmail.
 ---
 # Monthly bank reconciliation in Google Sheets
 
@@ -15,13 +16,13 @@ Do this Drive work under `{drive.root_path}`. Find the reconciliation sheet and 
 
 If you must save a CSV, PDF, or other file **locally** before uploading to Drive (or as a scratch copy), write it under `{workspace.local_path}/` (see `rules/tutorial-workspace.md`). Create that folder if needed. Do not leave tutorial temps in the repo root or under `skills/`.
 
-Never use or upload a local `.xlsx` template from this repo. There is no spreadsheet binary in the skill folder.
+**First-month workbook template (committed, scrubbed):** `skills/bank-reconciliation/Y[date]_[company]_Reconciliation.xlsx`. Upload a copy of that file for the initial month only; never edit the repo file in place, and never leave a filled private copy under `skills/`.
 
 ## Test mode
 
 Run **test mode** when the operator asks to reconcile with **test mode**, **sample data**, or **try with test data** (or equivalent).
 
-In test mode the Sheets / Drive path is unchanged (month folders, blank or copied sheet, import, fill columns, expenses upload, Ref links). Only the **CSV source** and **invoice search** change:
+In test mode the Sheets / Drive path is unchanged (month folders, template or copied sheet, import, fill columns, seed reference tabs, expenses upload, Ref links). Only the **CSV source** and **invoice search** change:
 
 | Live | Test mode |
 | --- | --- |
@@ -38,8 +39,8 @@ In test mode the Sheets / Drive path is unchanged (month folders, blank or copie
 
 1. Set the statement month to `202411` / year `2024`.
 2. Ensure year, extracts, and month folders exist under `{drive.root_path}` as in section 1.
-3. Copy `skills/bank-reconciliation/test-data/bank-statement.csv` into `{drive.root_path}/{drive.year_folder_pattern}/{drive.extracts_folder}/{drive.month_folder_pattern}/` (create folders if needed). Then continue sections 1–6 as usual (CSV is already on Drive).
-4. For invoice matching (section 7), instead of Gmail: open each `skills/bank-reconciliation/test-data/emails/*.eml`. Match each Debit row using `From`, subject, amount, and date (same confirmation fields as live: Date, Recipient / Payer, Debit). Prefer the PDF attachment in the multipart message; extract it under `{workspace.local_path}/`, then upload to `{drive.expenses_folder}` with the usual `YYYY-MM-DD_Counterparty_Amount.pdf` naming, set Ref, update `Email matching`, and skip bank-fee rows unless an invoice clearly exists. The fixture pack includes one bank-fee debit with no EML — leave it unmatched.
+3. Copy `skills/bank-reconciliation/test-data/bank-statement.csv` into `{drive.root_path}/{drive.year_folder_pattern}/{drive.extracts_folder}/{drive.month_folder_pattern}/` (create folders if needed). Then continue sections 1–6 as usual (CSV is already on Drive) — fill Bank, seed reference tabs (section 5), then verify before invoice matching.
+4. For invoice matching (section 8), instead of Gmail: open each `skills/bank-reconciliation/test-data/emails/*.eml`. Match each Debit row using `From`, subject, amount, and date (same confirmation fields as live: Date, Recipient / Payer, Debit). Prefer the PDF attachment in the multipart message; extract it under `{workspace.local_path}/`, then upload to `{drive.expenses_folder}` with the usual `YYYY-MM-DD_Counterparty_Amount.pdf` naming, set Ref, update `Email matching`, and skip bank-fee rows unless an invoice clearly exists. The fixture pack includes one bank-fee debit with no EML — leave it unmatched.
 5. After the run, read `skills/bank-reconciliation/test-data/expected-results.md` and report pass/fail against that checklist (including that Gmail was not used).
 
 ## 1. Prepare the month's folder and sheet
@@ -47,14 +48,9 @@ In test mode the Sheets / Drive path is unchanged (month folders, blank or copie
 - **CSV.** Look first for the bank CSV in `{drive.root_path}/{drive.year_folder_pattern}/{drive.extracts_folder}/{drive.month_folder_pattern}/`. If it is not there, ask the user for it. When the user provides it, save it into that Drive folder, creating the folder if needed, before importing. If you stage the file locally first, put it under `{workspace.local_path}/` then upload to Drive. In **test mode**, use the fixture copy step in **Test mode** instead of asking for a live export.
 - **Starting sheet.** Look for the previous month's reconciliation sheet in that month's folder (`{drive.month_folder_pattern}` under its own `{drive.year_folder_pattern}`). For January, the previous month's folder is in the previous year's folder.
   - **If a previous month's sheet exists:** copy it into this month's folder, named from `{drive.sheet_title_pattern}` (fill `{YYYYMM}` with the statement month and `{company_name}` with `{company.name}`). Use it because it has the latest mappings in `Counterparty-Match`, `Counterparties`, `Counterparty-Category`, `Email matching` and `Categories`. On the copy only, clear the previous month's transaction data and the raw CSV area on the `{drive.sheet_tab}` tab, and keep that tab's header row and the reference tabs intact. Never modify the previous month's sheet. If the copy is still an `.xlsx`, convert it to a native Google Sheet so the Sheets tools can edit it.
-  - **If no previous month's sheet exists (initial run):** create a **new blank native Google Spreadsheet** (do not upload any local file). Title it from `{drive.sheet_title_pattern}`. Create these tabs in order with **header row only** (no sample or private data rows):
-    - `{drive.sheet_tab}` (`Bank`): `Date` | `Recipient / Payer` | `Category` | `Credit` | `Debit` | `Ref` | `Note`
-    - `Categories`: `Category`
-    - `Counterparty-Match`: `Recipient / Payer` | `Match`
-    - `Counterparties`: `Recipient / Payer`
-    - `Counterparty-Category`: `Recipient / Payer` | `Category`
-    - `Email matching`: `Recipient / Payer` | `Sender` | `Subject keywords` | `Invoice source` | `Notes`
-    Then **hide every tab except** `{drive.sheet_tab}` (`Bank`). Use the Sheets connector's sheet-property / update path if available; if hiding is impossible with the available tools, stop and ask the operator to hide those tabs once before continuing. Finally move (or ensure) the spreadsheet lives in this month's folder under `{drive.root_path}/{drive.year_folder_pattern}/{drive.month_folder_pattern}/`.
+  - **If no previous month's sheet exists (initial run):** upload a **copy** of the scrubbed template `skills/bank-reconciliation/Y[date]_[company]_Reconciliation.xlsx` into this month's folder under `{drive.root_path}/{drive.year_folder_pattern}/{drive.month_folder_pattern}/`. Rename the Drive file to `{drive.sheet_title_pattern}` (fill `{YYYYMM}` with the statement month and `{company_name}` with `{company.name}`). Convert that `.xlsx` to a **native Google Sheet** so the Sheets tools can edit it. Do **not** create a blank spreadsheet from scratch, and do **not** modify the repo template file.
+    - The template already has the required tabs and header rows (no sample/private data): `{drive.sheet_tab}` (`Bank`), `Counterparties`, `Categories`, `Counterparty-Match`, `Counterparty-Category`, `Email matching`. Keep the template's tab visibility (Bank / Counterparties / Categories visible; the other three hidden) unless the operator asks otherwise.
+    - On `Bank`, the raw CSV header row is already present in columns H–K (`Date` | `Merchant` | `Amount` | `Description`). When importing (section 3), write CSV **data** under those headers starting at row 2; do not duplicate the H–K header row unless the layout differs.
 
 ## 2. Inspect the layout before writing
 - Tabs used: the transactions tab `{drive.sheet_tab}`, `Categories` (the category list), `Counterparty-Match` (raw-to-formatted names), `Counterparties` (unique formatted names), `Counterparty-Category` (name to category), `Email matching` (how to find each counterparty's invoice emails). Tab names can change, so check them each time.
@@ -62,25 +58,40 @@ In test mode the Sheets / Drive path is unchanged (month folders, blank or copie
 - Category spellings come from the `Categories` tab (the category list).
 
 ## 3. Import the CSV
-- Paste the CSV into the tab starting at the first empty column to the right of the reconciliation columns (column H after the seven headers above; adjust if the layout changed). Headers go in row 1 and data starts in row 2. Write numbers as numbers and dates as real dates.
+- Paste the CSV into the tab starting at the first empty column to the right of the reconciliation columns (column H after the seven headers above; adjust if the layout changed). If row 1 already has raw CSV headers there (as in the skill template), keep them and write data from row 2. Otherwise put headers in row 1 and data from row 2. Write numbers as numbers and dates as real dates.
 
 ## 4. Fill the reconciliation columns, one row per CSV row
 - **Date**: the transaction date as a real date, number format `d-mmm` (displays 5-Nov, no leading zero).
 - **Recipient / Payer**: take the raw name from Merchant, else Payee Name, else Payer Name, else Description. Look it up in `Counterparty-Match` (A = formatted `Recipient / Payer`, B = `Match` raw bank name) with a loose match (contains or key words, since raw strings change monthly) and write the formatted name. If there's no match, write your best clean, properly cased name for the entity.
-- **Category**: first look up the formatted counterparty in `Counterparty-Category` and use its category. With no match, pick from the `Categories` tab. Keep them consistent with earlier months.
+- **Category**: first look up the formatted counterparty in `Counterparty-Category` and use its category. With no match, pick from the `Categories` tab. If `Categories` and `Counterparty-Category` have no data rows yet (typical first month), invent a short consistent category for the Bank row — do not leave Category blank. Keep spellings consistent across rows and with earlier months when those tabs already have data.
 - **Credit**: the absolute amount if money came in, else blank.
 - **Debit**: the absolute amount if money went out, else blank.
 - Clear any leftover formulas or junk in rows below the last data row.
 
-## 5. Verify and report
+## 5. Seed reference tabs from the filled Bank rows
+In the **same run**, after section 4 and before the verify report, seed (or extend) the reference tabs from the filled `{drive.sheet_tab}` rows and the raw bank string used for each row (Merchant / Payee Name / Payer Name / Description):
+
+- **`Categories`**: unique Category values from Bank; no duplicates; no blank categories.
+- **`Counterparty-Match`**: one row per unique formatted `Recipient / Payer`, with `Match` = the raw bank string for that counterparty; no duplicates.
+- **`Counterparties`**: unique formatted `Recipient / Payer` values in column A.
+- **`Counterparty-Category`**: one row per unique formatted name with the Category used on Bank for that name.
+
+Skip writing a row when the same key already exists (month-2 copies already have mappings; only add genuinely new counterparties or categories). Do **not** unhide the reference tabs unless the operator asks.
+
+## 6. Verify and report
 - Read back the filled range: the row count should match the CSV, dates should display as d-mmm, and SUM(Credit) and SUM(Debit) should equal the CSV's total in and total out.
-- Report the file link, the totals, the category counts, and any guesses (new counterparties not in `Counterparty-Match`, unsure categories).
+- Confirm the four reference tabs from section 5 have data rows consistent with Bank (not header-only after a first fill).
+- Report the file link, the totals, the category counts, that the reference tabs were seeded or updated for new counterparties, and any guesses (new counterparties, unsure categories).
 
-## 6. After the user reviews
-- If the user renames counterparties, add or update their mappings (formatted name to raw Match string) in the `Counterparty-Match` tab, without duplicates, so the next month picks them up, and add any new name to the `Counterparties` tab (a unique list of formatted names in column A).
-- Likewise add any new counterparty and its agreed category to `Counterparty-Category`.
+## 7. After the user reviews
+When the operator says they have finished editing Category or Counterparty names (or other manual sheet changes), re-read `{drive.sheet_tab}` against the reference tabs and **update mappings so everything stays linked**:
 
-## 7. Match invoices from email
+- Sync `Counterparty-Match` (formatted name ↔ raw Match string) without duplicates.
+- Sync unique formatted names into `Counterparties`.
+- Sync `Counterparty-Category` and unique spellings into `Categories`.
+- If a counterparty was renamed, update the matching `Recipient / Payer` in `Email matching` so invoice rules still line up.
+
+## 8. Match invoices from email
 Run when the user asks to match invoices (or as the last step of a reconciliation if they want it). **In test mode, follow the EML steps in Test mode instead of searching Gmail** — do not use `{google_account}` Gmail for matching.
 
 For every `{drive.sheet_tab}` row with a Debit (live mode only for steps 1–2):
@@ -97,5 +108,5 @@ For every `{drive.sheet_tab}` row with a Debit (live mode only for steps 1–2):
 6. Before reporting, re-read `Email matching` and confirm every match found has its rule saved there.
 7. **Report:** the `{drive.expenses_folder}` folder link, the matches found, any notes written, and a clear list of rows still missing an invoice (Date, Recipient / Payer, Debit), so the user can upload those files manually. When they do, upload each one to `{drive.expenses_folder}` with the same naming, link it in Ref, and add a note if needed. In **test mode**, also report pass/fail against `skills/bank-reconciliation/test-data/expected-results.md`.
 
-## 8. Final step: hand back to the user
-End every run by telling the user: once they've finished making their own manual changes to the spreadsheet (renamed counterparties, changed categories, uploaded invoices, etc.), they should let you know, so you can check the `{drive.sheet_tab}` tab against the reference tabs (`Counterparty-Match`, `Counterparties`, `Counterparty-Category`, `Email matching`, `Categories`) and update them to match (see section 6).
+## 9. Final step: hand back to the user
+End every run by telling the user: they may update Category names or Counterparty names directly on the spreadsheet; when they are finished, they should let you know so you can verify everything and correctly relink the reference tabs (`Counterparty-Match`, `Counterparties`, `Counterparty-Category`, `Categories`, and `Email matching` if names changed) — see section 7.

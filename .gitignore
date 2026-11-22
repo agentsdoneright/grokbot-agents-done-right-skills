@@ -229,7 +229,8 @@ profile.yaml
 # Disposable local files for the reconciliation tutorial (see workspace.local_path)
 tutorial-workspace/
 
-# Never commit local reconciliation spreadsheet templates (may contain private data)
+# Ignore local reconciliation .xlsx copies (may contain private data), but keep the scrubbed skill template
 skills/bank-reconciliation/*.xlsx
+!skills/bank-reconciliation/Y\[date\]_\[company\]_Reconciliation.xlsx
 
 .cursor/
