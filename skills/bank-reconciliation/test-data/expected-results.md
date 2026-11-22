@@ -54,7 +54,9 @@ Four Debits should get a PDF in `{drive.expenses_folder}` and a **Ref** Drive li
 | 2024-11-12 | Brightline Ops | 75.50 | `accounts@brightline-ops.example` | `2024-11-12_Brightline Ops_75.50.pdf` |
 | 2024-11-19 | Harbor Tools | 32.99 | `billing@harbor-tools.example` | `2024-11-19_Harbor Tools_32.99.pdf` |
 
-- [ ] All four rows have non-empty **Ref** links to Drive PDFs
+- [ ] All four rows have non-empty **Ref** hyperlinks to Drive PDFs
+- [ ] Each **Ref** cell’s visible label is the saved expenses **filename** (not the raw URL)
+- [ ] **Ref** column/cells use **Clip** text overflow (not Wrap)
 - [ ] PDFs came from EML attachments (not Gmail)
 - [ ] Agent matched despite differing layouts / tax field names (VAT vs GST vs sales tax vs Tax)
 - [ ] Each matched counterparty has an `Email matching` rule saved (sender / subject / attachment)

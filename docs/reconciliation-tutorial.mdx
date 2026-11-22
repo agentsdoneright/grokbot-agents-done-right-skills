@@ -147,7 +147,7 @@ Run this when the operator asks, or as a final optional step for debit rows.
     Otherwise search by counterparty name, raw merchant text, a window of about two weeks before to a few days after the bank date, and the amount (include original FX amounts from the raw CSV when relevant).
   </Step>
   <Step title="Attach the invoice">
-    Prefer a PDF attachment. Upload to an expenses subfolder inside the spreadsheet's folder as `YYYY-MM-DD_Counterparty_Amount.pdf`. Put the Drive link in **Ref**. Add a **Note** only when something needs attention (FX/VAT mismatch, multi-charge invoice, uncertain match, and similar).
+    Prefer a PDF attachment. Upload to an expenses subfolder inside the spreadsheet's folder as `YYYY-MM-DD_Counterparty_Amount.pdf`. Put a Drive hyperlink in **Ref** whose **visible label is that filename** (not the raw URL), and format **Ref** with **Clip** overflow (not Wrap). Add a **Note** only when something needs attention (FX/VAT mismatch, multi-charge invoice, uncertain match, and similar).
 
     Immediately save or update the working Gmail rule in `Email matching`. Skip bank-fee rows unless an invoice clearly exists. Never send, reply to, or change emails.
   </Step>
