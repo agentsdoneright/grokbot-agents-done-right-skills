@@ -1,0 +1,43 @@
+From: Northwind SaaS <invoices@northwind-saas.example>
+To: Demo Company Ltd <ap@demo-company.example>
+Subject: Your Northwind SaaS invoice NW-8891
+Date: Thu, 07 Nov 2024 09:05:00 +0000
+Message-ID: <nw-8891@mail.northwind-saas.example>
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="===============3093747250037979779=="
+
+--===============3093747250037979779==
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+Hello,
+
+Please find attached invoice NW-8891 from Northwind SaaS.
+Amount: USD 120.00
+Bill to: Demo Company Ltd
+Related bank charge date (approx): 2024-11-08
+
+Thank you,
+Northwind SaaS Billing
+
+--===============3093747250037979779==
+Content-Type: application/pdf
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment; filename="invoice-NW-8891.pdf"
+MIME-Version: 1.0
+
+JVBERi0xLjQKMSAwIG9iajw8IC9UeXBlIC9DYXRhbG9nIC9QYWdlcyAyIDAgUiA+PmVuZG9iagoy
+IDAgb2JqPDwgL1R5cGUgL1BhZ2VzIC9LaWRzIFszIDAgUl0gL0NvdW50IDEgPj5lbmRvYmoKMyAw
+IG9iajw8IC9UeXBlIC9QYWdlIC9QYXJlbnQgMiAwIFIgL01lZGlhQm94IFswIDAgNjEyIDc5Ml0g
+L0NvbnRlbnRzIDQgMCBSIC9SZXNvdXJjZXMgPDwgL0ZvbnQgPDwgL0YxIDUgMCBSID4+ID4+ID4+
+ZW5kb2JqCjQgMCBvYmo8PCAvTGVuZ3RoIDE5OSA+PnN0cmVhbQpCVAovRjEgMTIgVGYKNTAgNzUw
+IFRkCihJTlZPSUNFIE5XLTg4OTEpIFRqCjAgLTE4IFRkCihWZW5kb3I6IE5vcnRod2luZCBTYWFT
+KSBUagowIC0xOCBUZAooQmlsbCB0bzogRGVtbyBDb21wYW55IEx0ZCkgVGoKMCAtMTggVGQKKEFt
+b3VudCBkdWU6IFVTRCAxMjAuMDApIFRqCjAgLTE4IFRkCihJbnZvaWNlIGRhdGU6IDIwMjQtMTEt
+MDcpIFRqCkVUCmVuZHN0cmVhbQplbmRvYmoKNSAwIG9iajw8IC9UeXBlIC9Gb250IC9TdWJ0eXBl
+IC9UeXBlMSAvQmFzZUZvbnQgL0hlbHZldGljYSA+PmVuZG9iagp4cmVmCjAgNgowMDAwMDAwMDAw
+IDY1NTM1IGYgCjAwMDAwMDAwMDkgMDAwMDAgbiAKMDAwMDAwMDA1NiAwMDAwMCBuIAowMDAwMDAw
+MTExIDAwMDAwIG4gCjAwMDAwMDAyMzUgMDAwMDAgbiAKMDAwMDAwMDQ4MyAwMDAwMCBuIAp0cmFp
+bGVyPDwgL1NpemUgNiAvUm9vdCAxIDAgUiA+PgpzdGFydHhyZWYKNTUxCiUlRU9GCg==
+
+--===============3093747250037979779==--

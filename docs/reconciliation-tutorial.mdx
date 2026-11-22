@@ -28,6 +28,14 @@ This tutorial walks through a monthly bank reconciliation using a Grok Bot agent
   Optional later: if you customize a skill and want changes versioned on your own GitHub, the agent will suggest the **Customizable** upgrade and run the `private-repo-copy` skill (automatic via `gh` if you grant permissions, or manual via the GitHub account setup URL in `config/product.yaml`).
 </Callout>
 
+## Try with test data
+
+After Quick start, you can exercise the skill **without** exporting a live bank CSV or searching your Gmail inbox. Ask the agent to run bank reconciliation in **test mode** (or “try with sample / test data”).
+
+Test mode still creates a Google Sheet under your Drive root for **November 2024**, imports a fixture CSV, matches four sample invoice `.eml` files (with PDF attachments) from `skills/bank-reconciliation/test-data/`, and uploads expense PDFs with Ref links. It does **not** read Gmail. Compare the agent’s report to `skills/bank-reconciliation/test-data/expected-results.md`.
+
+When you are ready for a real month, continue with the live CSV export steps below.
+
 ## Export your monthly bank statement
 
 All banks should have an option to export bank transactions. 

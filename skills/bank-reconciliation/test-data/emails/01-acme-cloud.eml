@@ -1,0 +1,43 @@
+From: Acme Cloud Billing <billing@acme-cloud.example>
+To: Demo Company Ltd <ap@demo-company.example>
+Subject: Invoice INV-AC-1042 from Acme Cloud
+Date: Sun, 03 Nov 2024 14:22:00 +0000
+Message-ID: <inv-ac-1042@mail.acme-cloud.example>
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="===============7853715932039891535=="
+
+--===============7853715932039891535==
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+Hello,
+
+Please find attached invoice INV-AC-1042 from Acme Cloud.
+Amount: USD 49.00
+Bill to: Demo Company Ltd
+Related bank charge date (approx): 2024-11-05
+
+Thank you,
+Acme Cloud Billing
+
+--===============7853715932039891535==
+Content-Type: application/pdf
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment; filename="invoice-INV-AC-1042.pdf"
+MIME-Version: 1.0
+
+JVBERi0xLjQKMSAwIG9iajw8IC9UeXBlIC9DYXRhbG9nIC9QYWdlcyAyIDAgUiA+PmVuZG9iagoy
+IDAgb2JqPDwgL1R5cGUgL1BhZ2VzIC9LaWRzIFszIDAgUl0gL0NvdW50IDEgPj5lbmRvYmoKMyAw
+IG9iajw8IC9UeXBlIC9QYWdlIC9QYXJlbnQgMiAwIFIgL01lZGlhQm94IFswIDAgNjEyIDc5Ml0g
+L0NvbnRlbnRzIDQgMCBSIC9SZXNvdXJjZXMgPDwgL0ZvbnQgPDwgL0YxIDUgMCBSID4+ID4+ID4+
+ZW5kb2JqCjQgMCBvYmo8PCAvTGVuZ3RoIDE5OCA+PnN0cmVhbQpCVAovRjEgMTIgVGYKNTAgNzUw
+IFRkCihJTlZPSUNFIElOVi1BQy0xMDQyKSBUagowIC0xOCBUZAooVmVuZG9yOiBBY21lIENsb3Vk
+KSBUagowIC0xOCBUZAooQmlsbCB0bzogRGVtbyBDb21wYW55IEx0ZCkgVGoKMCAtMTggVGQKKEFt
+b3VudCBkdWU6IFVTRCA0OS4wMCkgVGoKMCAtMTggVGQKKEludm9pY2UgZGF0ZTogMjAyNC0xMS0w
+MykgVGoKRVQKZW5kc3RyZWFtCmVuZG9iago1IDAgb2JqPDwgL1R5cGUgL0ZvbnQgL1N1YnR5cGUg
+L1R5cGUxIC9CYXNlRm9udCAvSGVsdmV0aWNhID4+ZW5kb2JqCnhyZWYKMCA2CjAwMDAwMDAwMDAg
+NjU1MzUgZiAKMDAwMDAwMDAwOSAwMDAwMCBuIAowMDAwMDAwMDU2IDAwMDAwIG4gCjAwMDAwMDAx
+MTEgMDAwMDAgbiAKMDAwMDAwMDIzNSAwMDAwMCBuIAowMDAwMDAwNDgyIDAwMDAwIG4gCnRyYWls
+ZXI8PCAvU2l6ZSA2IC9Sb290IDEgMCBSID4+CnN0YXJ0eHJlZgo1NTAKJSVFT0YK
+
+--===============7853715932039891535==--

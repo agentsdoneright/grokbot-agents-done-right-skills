@@ -1,0 +1,43 @@
+From: Harbor Tools Billing <billing@harbor-tools.example>
+To: Demo Company Ltd <ap@demo-company.example>
+Subject: Harbor Tools receipt HT-5510
+Date: Mon, 18 Nov 2024 11:12:00 +0000
+Message-ID: <ht-5510@mail.harbor-tools.example>
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="===============0534863005127127019=="
+
+--===============0534863005127127019==
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+Hello,
+
+Please find attached invoice HT-5510 from Harbor Tools.
+Amount: USD 32.99
+Bill to: Demo Company Ltd
+Related bank charge date (approx): 2024-11-19
+
+Thank you,
+Harbor Tools Billing
+
+--===============0534863005127127019==
+Content-Type: application/pdf
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment; filename="invoice-HT-5510.pdf"
+MIME-Version: 1.0
+
+JVBERi0xLjQKMSAwIG9iajw8IC9UeXBlIC9DYXRhbG9nIC9QYWdlcyAyIDAgUiA+PmVuZG9iagoy
+IDAgb2JqPDwgL1R5cGUgL1BhZ2VzIC9LaWRzIFszIDAgUl0gL0NvdW50IDEgPj5lbmRvYmoKMyAw
+IG9iajw8IC9UeXBlIC9QYWdlIC9QYXJlbnQgMiAwIFIgL01lZGlhQm94IFswIDAgNjEyIDc5Ml0g
+L0NvbnRlbnRzIDQgMCBSIC9SZXNvdXJjZXMgPDwgL0ZvbnQgPDwgL0YxIDUgMCBSID4+ID4+ID4+
+ZW5kb2JqCjQgMCBvYmo8PCAvTGVuZ3RoIDE5NiA+PnN0cmVhbQpCVAovRjEgMTIgVGYKNTAgNzUw
+IFRkCihJTlZPSUNFIEhULTU1MTApIFRqCjAgLTE4IFRkCihWZW5kb3I6IEhhcmJvciBUb29scykg
+VGoKMCAtMTggVGQKKEJpbGwgdG86IERlbW8gQ29tcGFueSBMdGQpIFRqCjAgLTE4IFRkCihBbW91
+bnQgZHVlOiBVU0QgMzIuOTkpIFRqCjAgLTE4IFRkCihJbnZvaWNlIGRhdGU6IDIwMjQtMTEtMTgp
+IFRqCkVUCmVuZHN0cmVhbQplbmRvYmoKNSAwIG9iajw8IC9UeXBlIC9Gb250IC9TdWJ0eXBlIC9U
+eXBlMSAvQmFzZUZvbnQgL0hlbHZldGljYSA+PmVuZG9iagp4cmVmCjAgNgowMDAwMDAwMDAwIDY1
+NTM1IGYgCjAwMDAwMDAwMDkgMDAwMDAgbiAKMDAwMDAwMDA1NiAwMDAwMCBuIAowMDAwMDAwMTEx
+IDAwMDAwIG4gCjAwMDAwMDAyMzUgMDAwMDAgbiAKMDAwMDAwMDQ4MCAwMDAwMCBuIAp0cmFpbGVy
+PDwgL1NpemUgNiAvUm9vdCAxIDAgUiA+PgpzdGFydHhyZWYKNTQ4CiUlRU9GCg==
+
+--===============0534863005127127019==--
