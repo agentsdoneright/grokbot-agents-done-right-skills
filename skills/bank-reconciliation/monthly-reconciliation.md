@@ -59,6 +59,7 @@ In test mode the Sheets / Drive path is unchanged (month folders, template or co
 
 ## 3. Import the CSV
 - Paste the CSV into the tab starting at the first empty column to the right of the reconciliation columns (column H after the seven headers above; adjust if the layout changed). If row 1 already has raw CSV headers there (as in the skill template), keep them and write data from row 2. Otherwise put headers in row 1 and data from row 2. Write numbers as numbers and dates as real dates.
+- After the import is written, **hide every imported raw CSV column** (typically H onward through the last CSV column used). Keep the seven reconciliation columns visible. You may still read the hidden columns when filling Recipient / Payer, amounts, or matching invoices — do not unhide them unless the operator asks.
 
 ## 4. Fill the reconciliation columns, one row per CSV row
 - **Date**: the transaction date as a real date, number format `d-mmm` (displays 5-Nov, no leading zero).

@@ -24,6 +24,7 @@ Fixture CSV has **6** rows. Totals from signed `Amount` (negative = out):
 - [ ] `SUM(Debit)` = **289.49**
 - [ ] Dates display as `d-mmm` (e.g. `5-Nov`)
 - [ ] Every Bank row has a non-empty **Category** (exact spellings may vary)
+- [ ] Imported raw CSV columns (typically H onward) are **hidden**; reconciliation columns A–G stay visible
 
 ## Reference tabs (seeded same run)
 
