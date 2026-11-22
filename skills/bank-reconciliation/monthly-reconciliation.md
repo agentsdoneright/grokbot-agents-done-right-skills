@@ -1,15 +1,17 @@
 ---
 name: Bank reconciliation
-version: 1.0.0
+version: 1.1.0
 description: >-
-  Version 1.0.0. Use when the user wants to reconcile a month's bank transactions
+  Version 1.1.0. Use when the user wants to reconcile a month's bank transactions
   (e.g. a bank CSV export) in their Google Sheets reconciliation workbook: on the
   first month upload the skill's scrubbed `.xlsx` template and convert it to a
   Google Sheet, copy last month's sheet thereafter, import the CSV, fill date,
   counterparty, category, credit and debit columns, and seed Categories /
-  Counterparty reference tabs from those rows. Also use for test mode / sample
-  data / try with test data — run against skills/bank-reconciliation/test-data
-  fixtures instead of a live bank CSV download and Gmail.
+  Counterparty reference tabs from those rows. Match invoices from Unfiled Drive
+  folders first (Source=Drive), then email (Source=Email), then Manual chat
+  uploads (Source=Manual). Also use for test mode / sample data / try with test
+  data — run against skills/bank-reconciliation/test-data fixtures instead of a
+  live bank CSV download and Gmail.
 ---
 # Monthly bank reconciliation in Google Sheets
 
@@ -23,7 +25,7 @@ If you must save a CSV, PDF, or other file **locally** before uploading to Drive
 
 Run **test mode** when the operator asks to reconcile with **test mode**, **sample data**, or **try with test data** (or equivalent).
 
-In test mode the Sheets / Drive path is unchanged (month folders, template or copied sheet, import, fill columns, seed reference tabs, Expenses / Revenue uploads, Invoice links). Only the **CSV source** and **invoice search** change:
+In test mode the Sheets / Drive path is unchanged (month folders, template or copied sheet, import, fill columns, seed reference tabs, Expenses / Revenue uploads, Invoice links, Unfiled folders may be created but stay empty unless fixtures are added). Only the **CSV source** and **invoice search** change:
 
 | Live | Test mode |
 | --- | --- |
@@ -41,8 +43,8 @@ In test mode the Sheets / Drive path is unchanged (month folders, template or co
 1. Set the statement month to `202411` / year `2024`.
 2. Ensure year, extracts, and month folders exist under `{drive.root_path}` as in section 1.
 3. Copy `skills/bank-reconciliation/test-data/bank-statement.csv` into `{drive.root_path}/{drive.year_folder_pattern}/{drive.extracts_folder}/{drive.month_folder_pattern}/` (create folders if needed). Then continue sections 1–6 as usual (CSV is already on Drive) — fill Bank, seed reference tabs (section 5), then verify before invoice matching.
-4. For expense invoice matching (section 8): open each `skills/bank-reconciliation/test-data/emails/*.eml` (not under `sent/`). Match each Debit row using `From`, subject, amount, and date (confirmation fields: Date, Counterparty, Debit). Prefer the PDF attachment; extract under `{workspace.local_path}/`, upload to `{drive.expenses_folder}`, set Invoice / VAT / Ref, update Counterparties contact fields and `Email matching` as in section 8. Skip bank-fee rows unless an invoice clearly exists. Fixture pack includes unmatched debits with no EML — leave those unmatched.
-5. For revenue invoice matching (section 9): open each `skills/bank-reconciliation/test-data/emails/sent/*.eml`. Match Credit rows (Date, Counterparty, Credit); upload to `{drive.revenue_folder}`; set Invoice / VAT / Ref. Also check the Drive Revenue folder for an existing file before relying only on the EML.
+4. For expense invoice matching (section 8): check Unfiled expense invoices first (usually empty in the default fixture run). Then open each `skills/bank-reconciliation/test-data/emails/*.eml` (not under `sent/`). Match each Debit row using `From`, subject, amount, and date (confirmation fields: Date, Counterparty, Debit). Prefer the PDF attachment; extract under `{workspace.local_path}/`, upload to `{drive.expenses_folder}`, set Invoice / VAT / Ref, set **Source = `Email`**, update Counterparties contact fields and `Email matching` as in section 8. Skip bank-fee rows unless an invoice clearly exists. Fixture pack includes unmatched debits with no EML — leave those unmatched (Source blank).
+5. For revenue invoice matching (section 9): check the month `{drive.revenue_folder}` and Unfiled revenue invoices first (usually empty). Then open each `skills/bank-reconciliation/test-data/emails/sent/*.eml`. Match Credit rows (Date, Counterparty, Credit); upload to `{drive.revenue_folder}`; set Invoice / VAT / Ref; set **Source = `Email`**.
 6. After the run, read `skills/bank-reconciliation/test-data/expected-results.md` and report pass/fail against that checklist (including that Gmail was not used).
 
 ## 1. Prepare the month's folder and sheet
@@ -70,7 +72,7 @@ In test mode the Sheets / Drive path is unchanged (month folders, template or co
 - **Credit**: the absolute amount if money came in, else blank.
 - **Debit**: the absolute amount if money went out, else blank.
 - **VAT**, **Ref**, **Invoice**, **Notes**: leave blank during this fill pass; fill them when matching invoices (sections 8–9). Do not invent VAT or Ref.
-- **Source**: leave as-is / blank unless the operator already uses it; do not require filling it.
+- **Source**: leave blank during this fill pass. Set only when matching invoices (sections 8–9) or when the operator uploads an invoice in chat (`Manual`). Allowed values: `Email`, `Manual`, `Drive`.
 - Clear any leftover formulas or junk in rows below the last data row.
 
 ## 5. Seed reference tabs from the filled Bank rows
@@ -99,40 +101,59 @@ When the operator says they have finished editing Category or Counterparty names
 ## 8. Match expense invoices (Debit rows)
 Run when the user asks to match invoices (or as the last step of a reconciliation if they want it). **In test mode, follow the EML steps in Test mode instead of searching Gmail** — do not use `{google_account}` Gmail for matching.
 
-For every `{drive.sheet_tab}` row with a Debit (live mode only for steps 1–2):
-1. **Check `Email matching` first.** Read the tab's headers and rows. If the row's Counterparty is listed, search Gmail on `{google_account}` with that rule (sender, subject keywords, attachment hints, etc.), narrowed by the row's Date and Debit amount.
-2. **Otherwise do a general search** on `{google_account}`: the counterparty name and raw merchant text, a date window of about two weeks before to a few days after the bank date, and the amount (also the original currency amount from the raw CSV columns for FX charges, e.g. USD or GBP). Use Date, Counterparty and Debit as the key fields to confirm the match.
-3. **When a match is found:**
+**Source column** (set when a match is attached this run):
+- `Drive` — invoice found in Unfiled expense invoices and moved into the month `{drive.expenses_folder}`
+- `Email` — invoice found via Gmail / test EML
+- `Manual` — operator uploaded the invoice into the agent chat
+
+Search order per Debit row: **Unfiled → email → Manual (later, after the unmatched report)**.
+
+Unfiled expense path: `{drive.root_path}/{drive.unfiled_folder}/{drive.unfiled_expense_invoices}`. Ensure that folder exists (create `{drive.unfiled_folder}` and the expense invoices subfolder if missing). Ensure a `{drive.expenses_folder}` subfolder exists inside the spreadsheet's folder (create once, then reuse).
+
+For every `{drive.sheet_tab}` row with a Debit:
+
+1. **Check Unfiled first.** Search `{drive.root_path}/{drive.unfiled_folder}/{drive.unfiled_expense_invoices}` for a PDF that matches Date / Counterparty / Debit.
+   - **When an Unfiled match is found:** **move** (do not copy) the file into the month `{drive.expenses_folder}`. Rename to `YYYY-MM-DD_Counterparty_Amount.pdf` if needed; do not leave duplicates. Set **Invoice** as a filename-labeled hyperlink with **Clip** overflow (same rules as below). Fill **VAT** / **Ref** from the invoice when present. Write **Notes** only when something needs attention. Set **Source = `Drive`**. Update `Counterparties` contact fields from the invoice when present (same rules as email matches). Do **not** add or update `Email matching` solely because of a Drive match.
+2. **Else check `Email matching`.** (Live mode only for Gmail.) Read the tab's headers and rows. If the row's Counterparty is listed, search Gmail on `{google_account}` with that rule (sender, subject keywords, attachment hints, etc.), narrowed by the row's Date and Debit amount. In **test mode**, use the EML fixtures instead of Gmail.
+3. **Otherwise do a general search** on `{google_account}` (live mode): the counterparty name and raw merchant text, a date window of about two weeks before to a few days after the bank date, and the amount (also the original currency amount from the raw CSV columns for FX charges, e.g. USD or GBP). Use Date, Counterparty and Debit as the key fields to confirm the match. In **test mode**, match against expense EMLs as in Test mode.
+4. **When an email match is found:**
    - Get the invoice: prefer a PDF attachment. If it's only in the body or behind a link, save the email as a PDF or download the linked PDF under `{workspace.local_path}/`, and say so in Notes.
-   - Upload it to Google Drive in a subfolder named `{drive.expenses_folder}` inside the spreadsheet's folder (create it once, then reuse it). Name it `YYYY-MM-DD_Counterparty_Amount.pdf` and don't upload duplicates.
+   - Upload it to `{drive.expenses_folder}` inside the spreadsheet's folder. Name it `YYYY-MM-DD_Counterparty_Amount.pdf` and don't upload duplicates.
    - Put a link to the Drive file in the row's **Invoice** column: the **visible link text must be the saved filename** (e.g. `2024-11-05_Acme Cloud_49.00.pdf`), not the raw URL. Use a Sheets hyperlink whose label is that filename (for example `=HYPERLINK("https://…", "YYYY-MM-DD_Counterparty_Amount.pdf")`, or the connector equivalent). Format the **Invoice** column (or those cells) with **Clip** text overflow — do not Wrap — so long labels stay readable in a narrow column.
    - Fill **VAT** with the tax amount extracted from the invoice when present; leave blank if the invoice has no tax line.
    - Fill **Ref** with the invoice reference / invoice number when present; leave blank if none.
+   - Set **Source = `Email`**.
    - Write Notes only when something needs the user's attention, such as an amount mismatch (FX or VAT), an invoice that covers several charges, a date far off, a receipt instead of an invoice, an invoice addressed to someone other than `{company.name}` (in **test mode**, use **Demo Company Ltd** as the expected addressee), or an uncertain match.
    - **Update `Counterparties` contact fields** for this Counterparty from the invoice (Email, Phone, Registration, Address). If multiple emails appear, prefer the one that matches finance / billing / accounts. If the counterparty row already exists and any of those values **changed**, overwrite them on the current month's sheet and **inform the operator** what was updated (old → new). Never invent contact fields.
    - Right away, as part of the same match (not batched for the end), if the counterparty wasn't already in `Email matching`, or the rule needed changing to find it, add or update its row with the rule that worked (sender address or domain, subject pattern, whether the invoice is an attachment or a link, and any quirks), following the tab's columns and without duplicates.
-4. Skip bank-fee rows (service fees etc) unless an invoice clearly exists.
-5. Never send, reply to, or change any emails.
-6. Before reporting, re-read `Email matching` and confirm every expense match found has its rule saved there.
-7. **Report (expenses):** the `{drive.expenses_folder}` folder link, the matches found, any Notes written, Counterparties contact updates told to the operator, and a clear list of Debit rows still missing an invoice (Date, Counterparty, Debit), so the user can upload those files manually. When they do, upload each one to `{drive.expenses_folder}` with the same naming, put a filename-labeled hyperlink in Invoice (Clip overflow), fill VAT / Ref when known, and add a note if needed.
+5. Skip bank-fee rows (service fees etc) unless an invoice clearly exists.
+6. Never send, reply to, or change any emails.
+7. Before reporting, re-read `Email matching` and confirm every **email** expense match has its rule saved there (Drive matches do not require an Email matching row).
+8. **Report (expenses):** the `{drive.expenses_folder}` folder link, the matches found (include **Source** counts: Drive / Email / Manual), any Notes written, Counterparties contact updates told to the operator, and a clear list of Debit rows still missing an invoice (Date, Counterparty, Debit), so the user can upload those files manually. When they do, upload each one to `{drive.expenses_folder}` with the same naming, put a filename-labeled hyperlink in Invoice (Clip overflow), fill VAT / Ref when known, set **Source = `Manual`**, and add a note if needed.
 
 ## 9. Match revenue invoices (Credit rows)
 Match outbound invoices the company sent (clients paying for work). Run with section 8 when invoice matching is requested.
 
+**Source** values are the same as expenses (`Drive` / `Email` / `Manual`). Search order per Credit row: **month Revenue folder (already filed) → Unfiled → email → Manual**.
+
+Unfiled revenue path: `{drive.root_path}/{drive.unfiled_folder}/{drive.unfiled_revenue_invoices}`. Ensure that folder exists (create if missing).
+
 For every `{drive.sheet_tab}` row with a Credit:
 
 1. Ensure a Drive subfolder named `{drive.revenue_folder}` exists inside the spreadsheet's folder (create once, then reuse).
-2. **Check `{drive.revenue_folder}` first** for an existing PDF that matches Date / Counterparty / Credit (same `YYYY-MM-DD_Counterparty_Amount.pdf` naming when possible).
-3. **Otherwise search Gmail Sent** on `{google_account}` for outbound invoices to that client (counterparty name, amount, date window of about two weeks before to a few days after the bank date). In **test mode**, use `skills/bank-reconciliation/test-data/emails/sent/*.eml` instead of Gmail Sent.
-4. **When a match is found:**
+2. **Check `{drive.revenue_folder}` first** for an existing PDF that matches Date / Counterparty / Credit (same `YYYY-MM-DD_Counterparty_Amount.pdf` naming when possible). If linking that already-filed file this run and **Source** is empty, leave **Source** blank (it was not matched from Unfiled this run).
+3. **Else check Unfiled.** Search `{drive.root_path}/{drive.unfiled_folder}/{drive.unfiled_revenue_invoices}` for a matching PDF. On match: **move** (do not copy) into the month `{drive.revenue_folder}`, rename to `YYYY-MM-DD_Counterparty_Amount.pdf` if needed, set Invoice / VAT / Ref / Notes as for expenses, and set **Source = `Drive`**.
+4. **Otherwise search Gmail Sent** on `{google_account}` for outbound invoices to that client (counterparty name, amount, date window of about two weeks before to a few days after the bank date). In **test mode**, use `skills/bank-reconciliation/test-data/emails/sent/*.eml` instead of Gmail Sent.
+5. **When an email match is found:**
    - Prefer a PDF attachment; stage under `{workspace.local_path}/` if extracting from email.
    - Upload to `{drive.revenue_folder}` as `YYYY-MM-DD_Counterparty_Amount.pdf` (no duplicates).
    - Set **Invoice** as a filename-labeled hyperlink with Clip overflow (same rules as expenses).
    - Fill **VAT** and **Ref** from the outbound invoice when present.
+   - Set **Source = `Email`**.
    - Update `Counterparties` Email / Phone / Registration / Address from the client's details on the invoice when present; if values changed, overwrite and **inform the operator**. Prefer finance / billing emails when several are listed. Never invent values.
    - Seed / keep the Counterparty on `Counterparties`, `Counterparty-Match`, and `Counterparty-Category` like any other bank row (section 5) — the Counterparty is the **paying client**, not `{company.name}`.
-5. Never send, reply to, or change any emails.
-6. **Report (revenue):** the `{drive.revenue_folder}` folder link, credit matches found, Counterparties updates, and Credit rows still missing an invoice (Date, Counterparty, Credit).
+6. Never send, reply to, or change any emails.
+7. **Report (revenue):** the `{drive.revenue_folder}` folder link, credit matches found (include **Source** counts), Counterparties updates, and Credit rows still missing an invoice (Date, Counterparty, Credit). When the operator uploads a missing invoice in chat, upload to `{drive.revenue_folder}` with the same naming, set Invoice / VAT / Ref as known, and set **Source = `Manual`**.
 
 In **test mode**, after expenses and revenue matching, also report pass/fail against `skills/bank-reconciliation/test-data/expected-results.md`.
 

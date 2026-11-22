@@ -30,6 +30,10 @@ drive:
   sheet_tab: Bank
   expenses_folder: Expenses
   revenue_folder: Revenue
+  # Unfiled drop folders under root_path (agent moves matches into the month Expenses / Revenue folders).
+  unfiled_folder: Unfiled
+  unfiled_expense_invoices: Expense Invoices
+  unfiled_revenue_invoices: Revenue Invoices
 
 workspace:
   # Repo-relative folder for disposable local files from the reconciliation tutorial.

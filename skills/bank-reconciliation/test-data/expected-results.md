@@ -59,6 +59,7 @@ Four Debits should get a PDF in `{drive.expenses_folder}` and an **Invoice** Dri
 - [ ] All four rows have non-empty **Invoice** hyperlinks to Drive PDFs under `{drive.expenses_folder}`
 - [ ] Each **Invoice** cell’s visible label is the saved expenses **filename** (not the raw URL)
 - [ ] **Invoice** column/cells use **Clip** text overflow (not Wrap)
+- [ ] **Source** = `Email` on all four matched expense rows (EML fixtures; Unfiled left empty in the default run)
 - [ ] **Ref** filled with invoice numbers where the fixture provides them
 - [ ] **VAT** filled with tax amounts where the fixture provides them (leave blank only if the invoice has no tax line)
 - [ ] PDFs came from expense EML attachments (not Gmail)
@@ -68,7 +69,7 @@ Four Debits should get a PDF in `{drive.expenses_folder}` and an **Invoice** Dri
 
 ## Matched revenue invoices (from `test-data/emails/sent/*.eml`)
 
-Two Credits should get a PDF in `{drive.revenue_folder}` and an **Invoice** Drive link. Outbound fixtures are from **Demo Company Ltd**:
+Two Credits should get a PDF in `{drive.revenue_folder}` and an **Invoice** Drive link. Outbound fixtures are from **Demo Company Ltd** and use the **same** tax-invoice layout and field labels (unlike the varied expense fixtures): left navy accent, `TAX INVOICE`, `BILL TO`, line-item table, `VAT`, `Amount due`.
 
 | Bank date | Counterparty (approx) | Credit | Ref | VAT | Sent EML | Revenue filename |
 | --- | --- | ---: | --- | ---: | --- | --- |
@@ -76,6 +77,7 @@ Two Credits should get a PDF in `{drive.revenue_folder}` and an **Invoice** Driv
 | 2024-11-22 | Pixelforge Studio | 950.00 | DC-2402 | 64.17 | `02-pixelforge-dc-2402.eml` | `2024-11-22_Pixelforge Studio_950.00.pdf` |
 
 - [ ] Both revenue rows have **Invoice** hyperlinks to PDFs under `{drive.revenue_folder}` (not Expenses)
+- [ ] **Source** = `Email` on both matched revenue rows
 - [ ] **Ref** / **VAT** filled from the outbound invoices
 - [ ] PDFs came from `emails/sent/` EML attachments (not Gmail Sent)
 - [ ] Paying clients appear on `Counterparties` (seeded); contact fields updated from invoice Bill To when available (`ap@riverstone-consulting.example`, `finance@pixelforge.example`, phones, registration, addresses)
@@ -83,12 +85,12 @@ Two Credits should get a PDF in `{drive.revenue_folder}` and an **Invoice** Driv
 
 ## Unmatched / skipped
 
-- [ ] **Credit** row (Client Payment / Acme / 2500.00): no revenue fixture; **Invoice** blank; listed among unmatched credits
-- [ ] **Bank service fee** Debit (12.00): skipped / still missing invoice
-- [ ] **Staples** Debit (64.20): no EML; still missing invoice
-- [ ] **City Rides** Debit (18.75): no EML; still missing invoice
+- [ ] **Credit** row (Client Payment / Acme / 2500.00): no revenue fixture; **Invoice** blank; **Source** blank; listed among unmatched credits
+- [ ] **Bank service fee** Debit (12.00): skipped / still missing invoice; **Source** blank
+- [ ] **Staples** Debit (64.20): no EML; still missing invoice; **Source** blank
+- [ ] **City Rides** Debit (18.75): no EML; still missing invoice; **Source** blank
 - [ ] Unmatched Debits listed in the report (Date, Counterparty, Debit) for fee + Staples + City Rides
 
 ## Report
 
-- [ ] Operator report includes sheet link, credit/debit totals, that reference tabs were seeded, `{drive.expenses_folder}` and `{drive.revenue_folder}` folder links, four expense matches, two revenue matches, unmatched debits/credits as above, any Counterparties contact updates, and confirmation that Gmail was not used
+- [ ] Operator report includes sheet link, credit/debit totals, that reference tabs were seeded, `{drive.expenses_folder}` and `{drive.revenue_folder}` folder links, four expense matches, two revenue matches (Source=`Email` for those matches), unmatched debits/credits as above, any Counterparties contact updates, and confirmation that Gmail was not used
