@@ -1,8 +1,8 @@
 ---
 name: Bank reconciliation
-version: 1.4.0
+version: 1.4.1
 description: >-
-  Version 1.4.0. Use when the user wants to reconcile a month's bank transactions
+  Version 1.4.1. Use when the user wants to reconcile a month's bank transactions
   (e.g. a bank CSV export) in their Google Sheets reconciliation workbook: on the
   first month upload the skill's scrubbed `.xlsx` template and convert it to a
   Google Sheet, copy last month's sheet thereafter, import the CSV, fill date,
@@ -11,11 +11,12 @@ description: >-
   Match invoices from Unfiled Drive folders first (Source=Drive), then email
   (Source=Email), then Manual chat uploads (Source=Manual). Fill the Summary
   tab with live formulas for Missing Expense Invoices, Missing Revenue
-  Invoices, and Expenses by Category (SUMIF-style totals over Bank Debits by
-  Category + Type so the pie chart updates when categories change); remove empty
-  missing-invoice title/table blocks. Also use for test mode / sample data /
-  try with test data — run against skills/bank-reconciliation/test-data fixtures
-  instead of a live bank CSV download and Gmail.
+  Invoices, and Expenses by Category (required SUMIF Totals against Bank
+  Transactions Debits by Category + Type so the pie chart updates when
+  categories change); remove empty missing-invoice title/table blocks. Also use
+  for test mode / sample data / try with test data — run against
+  skills/bank-reconciliation/test-data fixtures instead of a live bank CSV
+  download and Gmail.
 ---
 # Monthly bank reconciliation in Google Sheets
 
@@ -206,9 +207,17 @@ Build this table so changing a bank row’s **Category** or **Debit** updates To
 
 - Include **only** categories whose **Type** on the `Categories` tab is an expense type. Match Type case-insensitively: `Expense`, `expense`, and `Debit` count as expense; `Revenue`, `revenue`, and `Credit` count as revenue. Include bank-fee categories when they are typed as expense — they are real expenses.
 - **Category** labels: expense-typed categories from `Categories` (preferably via formulas so new Categories rows can appear when the range allows).
-- **Total** per category: a formula that **sums Debit** on the transactions tab where that row’s **Category** equals the label (e.g. `SUMIF` / `SUMIFS` / `QUERY` over the Debit and Category columns). **No static pasted totals.**
-- **Percentage**: formula = that Total / the sum of expense Totals in this table; format `0%`.
+- **Total (required live formula):** every Total cell **must** be a spreadsheet formula that references the resolved transactions tab (template name **`Bank Transactions`**). **Pasting computed numbers is a failure of this step** — replace any static Total with a formula before finishing.
+  - After locating Category and Debit by header on the transactions tab, use this canonical pattern (adapt column letters and the Criteria cell to the Summary layout; use the real tab name from section 2 if it is not `Bank Transactions`):
+
+```text
+=SUMIF('Bank Transactions'!$C$3:$C,$F3,'Bank Transactions'!$E$3:$E)
+```
+
+  - Meaning: sum **Debit** where **Category** equals this row’s Category label. Open-ended ranges (or spare rows past the last bank row) so new transactions are included without editing the formula. `SUMIFS` / `QUERY` that do the same cross-sheet Debit sum are acceptable; a plain number is not.
+- **Percentage:** must also be a formula over those Total cells (e.g. `=G3/SUM($G$3:$G$20)`), format `0%`.
 - Sort larger totals first unless the template already specifies an order. If a debit Category has a blank Type, or a Type that is neither expense nor revenue, omit it from this table and tell the operator. If a category typed revenue has debit amounts (or the reverse), follow Type for this table and flag the mismatch in the report.
+- **Verify before reporting:** re-read every Expenses by Category **Total** cell. Confirm each value is a formula (starts with `=` and references the transactions tab). If any Total is a plain number, replace it with the SUMIF pattern above, then re-check.
 
 Do not invent amounts. If a formula cannot resolve (tab or column missing), stop and tell the operator what was missing.
 
@@ -226,7 +235,7 @@ Create or update **one** embedded pie chart on the Summary tab titled **Expenses
 
 ### Report (Summary)
 
-Include: the locations you used (title cells, ranges, or named ranges); whether each missing-invoice block was **kept**, **removed**, or **recreated**; that Expenses by Category Totals are formula-driven over Bank Debits; the expense-category totals and integer percentages; the missing expense and revenue rows (if any); any Type mismatches or blank Types; and whether the pie chart was created or updated.
+Include: the locations you used (title cells, ranges, or named ranges); whether each missing-invoice block was **kept**, **removed**, or **recreated**; that Expenses by Category Totals are `SUMIF`-style formulas against the transactions tab (**confirmed** on re-read, or **corrected** from static numbers); the expense-category totals and integer percentages; the missing expense and revenue rows (if any); any Type mismatches or blank Types; and whether the pie chart was created or updated.
 
 ## 11. Final step: hand back to the user
 End every run by telling the user: they may update Category names, Category Type, or Counterparty names directly on the spreadsheet; when they are finished, they should let you know so you can verify everything and correctly relink the reference tabs (`Counterparty-Match`, `Counterparties`, `Counterparty-Category`, `Categories`, and `Email matching` if names changed) and refresh the Summary formulas and pie chart if needed — see sections 7 and 10.

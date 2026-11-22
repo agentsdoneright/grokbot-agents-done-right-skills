@@ -97,7 +97,8 @@ Two Credits should get a PDF in `{drive.revenue_folder}` and an **Invoice** Driv
 - [ ] **Missing Expense Invoices** block is present (default fixture has unmatched Staples + City Rides; bank fee excluded from this table) with formula-driven rows — not static pasted values
 - [ ] **Missing Revenue Invoices** block is present (unmatched Client Payment / Acme credit) with formula-driven rows
 - [ ] If a missing block would have **zero** rows, its title and entire table are **removed** (not left empty) — N/A for the default fixture above, but required on any run where all expenses or all revenues are matched
-- [ ] **Expenses by Category** Totals are **formulas** (e.g. `SUMIF` / `SUMIFS` / `QUERY`) summing Debit on the transactions tab by Category for categories whose Type is expense — not static numbers
+- [ ] **Expenses by Category** Totals are live **`SUMIF` / `SUMIFS` / equivalent** formulas that **reference the transactions tab** (e.g. `'Bank Transactions'!…`) and sum Debit by Category for expense-typed categories — **not** static pasted numbers
+- [ ] Agent re-read Totals and confirmed they are formulas (or corrected any plain numbers before finishing)
 - [ ] Percentage column uses formulas over those Totals, format `0%`
 - [ ] One **Expenses by Category** pie chart is bound to Category + Total (created or updated in place; no duplicate charts)
 
