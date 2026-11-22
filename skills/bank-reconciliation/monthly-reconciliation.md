@@ -1,8 +1,8 @@
 ---
 name: Bank reconciliation
-version: 1.1.1
+version: 1.2.0
 description: >-
-  Version 1.1.1. Use when the user wants to reconcile a month's bank transactions
+  Version 1.2.0. Use when the user wants to reconcile a month's bank transactions
   (e.g. a bank CSV export) in their Google Sheets reconciliation workbook: on the
   first month upload the skill's scrubbed `.xlsx` template and convert it to a
   Google Sheet, copy last month's sheet thereafter, import the CSV, fill date,
@@ -15,7 +15,7 @@ description: >-
 ---
 # Monthly bank reconciliation in Google Sheets
 
-Do this Drive work under `{drive.root_path}`. Find the reconciliation sheet and the bank CSV on Drive as described below. Use the Google Drive and Google Sheets connectors (load the google-drive and google-sheets skills first).
+Do this Drive work under `{drive.root_path}/{drive.accounts_folder}`. Find the reconciliation sheet and the bank CSV on Drive as described below. Use the Google Drive and Google Sheets connectors (load the google-drive and google-sheets skills first).
 
 If you must save a CSV, PDF, or other file **locally** before uploading to Drive (or as a scratch copy), write it under `{workspace.local_path}/` (see `rules/tutorial-workspace.md`). Create that folder if needed. Do not leave tutorial temps in the repo root or under `skills/`.
 
@@ -41,18 +41,18 @@ In test mode the Sheets / Drive path is unchanged (month folders, template or co
 **Test-mode steps:**
 
 1. Set the statement month to `202411` / year `2024`.
-2. Ensure year, extracts, and month folders exist under `{drive.root_path}` as in section 1.
-3. Copy `skills/bank-reconciliation/test-data/bank-statement.csv` into `{drive.root_path}/{drive.year_folder_pattern}/{drive.extracts_folder}/{drive.month_folder_pattern}/` (create folders if needed). Then continue sections 1–6 as usual (CSV is already on Drive) — fill Bank, seed reference tabs (section 5), then verify before invoice matching.
+2. Ensure year, extracts, and month folders exist under `{drive.root_path}/{drive.accounts_folder}` as in section 1.
+3. Copy `skills/bank-reconciliation/test-data/bank-statement.csv` into `{drive.root_path}/{drive.accounts_folder}/{drive.year_folder_pattern}/{drive.extracts_folder}/{drive.month_folder_pattern}/` (create folders if needed). Then continue sections 1–6 as usual (CSV is already on Drive) — fill Bank, seed reference tabs (section 5), then verify before invoice matching.
 4. For expense invoice matching (section 8): check Unfiled expense invoices first (usually empty in the default fixture run). Then open each `skills/bank-reconciliation/test-data/emails/*.eml` (not under `sent/`). Match each Debit row using `From`, subject, amount, and date (confirmation fields: Date, Counterparty, Debit). Prefer the PDF attachment; extract under `{workspace.local_path}/`, upload to `{drive.expenses_folder}`, set Invoice / VAT / Ref, set **Source = `Email`**, update Counterparties contact fields and `Email matching` as in section 8. Skip bank-fee rows unless an invoice clearly exists. Fixture pack includes unmatched debits with no EML — leave those unmatched (Source blank).
 5. For revenue invoice matching (section 9): check the month `{drive.revenue_folder}` and Unfiled revenue invoices first (usually empty). Then open each `skills/bank-reconciliation/test-data/emails/sent/*.eml`. Match Credit rows (Date, Counterparty, Credit); upload to `{drive.revenue_folder}`; set Invoice / VAT / Ref; set **Source = `Email`**.
 6. After the run, read `skills/bank-reconciliation/test-data/expected-results.md` and report pass/fail against that checklist (including that Gmail was not used).
 
 ## 1. Prepare the month's folder and sheet
-- **Year and month folders.** The year folder is `{drive.year_folder_pattern}` under `{drive.root_path}` (`{YYYY}` is the year of the month being reconciled). If that year folder does not exist, create it, and create its `{drive.extracts_folder}` subfolder. Then create the month folder `{drive.month_folder_pattern}` inside the year folder if it does not exist (`{YYYYMM}` is the statement month).
-- **CSV.** Look first for the bank CSV in `{drive.root_path}/{drive.year_folder_pattern}/{drive.extracts_folder}/{drive.month_folder_pattern}/`. If it is not there, ask the user for it. When the user provides it, save it into that Drive folder, creating the folder if needed, before importing. If you stage the file locally first, put it under `{workspace.local_path}/` then upload to Drive. In **test mode**, use the fixture copy step in **Test mode** instead of asking for a live export.
+- **Year and month folders.** The year folder is `{drive.year_folder_pattern}` under `{drive.root_path}/{drive.accounts_folder}` (`{YYYY}` is the year of the month being reconciled). If that year folder does not exist, create it, and create its `{drive.extracts_folder}` subfolder. Then create the month folder `{drive.month_folder_pattern}` inside the year folder if it does not exist (`{YYYYMM}` is the statement month).
+- **CSV.** Look first for the bank CSV in `{drive.root_path}/{drive.accounts_folder}/{drive.year_folder_pattern}/{drive.extracts_folder}/{drive.month_folder_pattern}/`. If it is not there, ask the user for it. When the user provides it, save it into that Drive folder, creating the folder if needed, before importing. If you stage the file locally first, put it under `{workspace.local_path}/` then upload to Drive. In **test mode**, use the fixture copy step in **Test mode** instead of asking for a live export.
 - **Starting sheet.** Look for the previous month's reconciliation sheet in that month's folder (`{drive.month_folder_pattern}` under its own `{drive.year_folder_pattern}`). For January, the previous month's folder is in the previous year's folder.
   - **If a previous month's sheet exists:** copy it into this month's folder, named from `{drive.sheet_title_pattern}` (fill `{YYYYMM}` with the statement month and `{company_name}` with `{company.name}`). Use it because it has the latest mappings in `Counterparty-Match`, `Counterparties`, `Counterparty-Category`, `Email matching` and `Categories`. On the copy only, clear the previous month's transaction data and the raw CSV area on the `{drive.sheet_tab}` tab, and keep that tab's header row and the reference tabs intact. Never modify the previous month's sheet. If the copy is still an `.xlsx`, convert it to a native Google Sheet so the Sheets tools can edit it.
-  - **If no previous month's sheet exists (initial run):** upload a **copy** of the scrubbed template `skills/bank-reconciliation/Y[date]_[company]_Reconciliation.xlsx` into this month's folder under `{drive.root_path}/{drive.year_folder_pattern}/{drive.month_folder_pattern}/`. Rename the Drive file to `{drive.sheet_title_pattern}` (fill `{YYYYMM}` with the statement month and `{company_name}` with `{company.name}`). Convert that `.xlsx` to a **native Google Sheet** so the Sheets tools can edit it. Do **not** modify the repo template file.
+  - **If no previous month's sheet exists (initial run):** upload a **copy** of the scrubbed template `skills/bank-reconciliation/Y[date]_[company]_Reconciliation.xlsx` into this month's folder under `{drive.root_path}/{drive.accounts_folder}/{drive.year_folder_pattern}/{drive.month_folder_pattern}/`. Rename the Drive file to `{drive.sheet_title_pattern}` (fill `{YYYYMM}` with the statement month and `{company_name}` with `{company.name}`). Convert that `.xlsx` to a **native Google Sheet** so the Sheets tools can edit it. Do **not** modify the repo template file.
     - The template already has the required tabs, header rows, and layout (no sample/private data): `{drive.sheet_tab}` (`Bank`), `Counterparties`, `Categories`, `Counterparty-Match`, `Counterparty-Category`, `Email matching`. Do not change the template's formatting.
     - On `Bank`, the raw CSV header row is already present in columns K–N (`Date` | `Merchant` | `Amount` | `Description`). When importing (section 3), write CSV **data** under those headers starting at row 2; do not duplicate the K–N header row unless the layout differs.
 
@@ -107,11 +107,11 @@ Run when the user asks to match invoices (or as the last step of a reconciliatio
 
 Search order per Debit row: **Unfiled → email → Manual (later, after the unmatched report)**.
 
-Unfiled expense path: `{drive.root_path}/{drive.unfiled_folder}/{drive.unfiled_expense_invoices}`. Ensure that folder exists (create `{drive.unfiled_folder}` and the expense invoices subfolder if missing). Ensure a `{drive.expenses_folder}` subfolder exists inside the spreadsheet's folder (create once, then reuse).
+Unfiled expense path: `{drive.root_path}/{drive.accounts_folder}/{drive.unfiled_folder}/{drive.unfiled_expense_invoices}`. Ensure that folder exists (create `{drive.unfiled_folder}` and the expense invoices subfolder if missing). Ensure a `{drive.expenses_folder}` subfolder exists inside the spreadsheet's folder (create once, then reuse).
 
 For every `{drive.sheet_tab}` row with a Debit:
 
-1. **Check Unfiled first.** Search `{drive.root_path}/{drive.unfiled_folder}/{drive.unfiled_expense_invoices}` for a PDF that matches Date / Counterparty / Debit.
+1. **Check Unfiled first.** Search `{drive.root_path}/{drive.accounts_folder}/{drive.unfiled_folder}/{drive.unfiled_expense_invoices}` for a PDF that matches Date / Counterparty / Debit.
    - **When an Unfiled match is found:** **move** (do not copy) the file into the month `{drive.expenses_folder}`. Rename to `YYYYMMDD_Counterparty_Ref.pdf` if needed (`Ref` = invoice reference number, e.g. `20261115_Acme_INV78.pdf`); do not leave duplicates. Set **Invoice** as a filename-labeled hyperlink with **Clip** overflow (same rules as below). Fill **VAT** / **Ref** from the invoice when present. Write **Notes** only when something needs attention. Set **Source = `Drive`**. Update `Counterparties` contact fields from the invoice when present (same rules as email matches). Do **not** add or update `Email matching` solely because of a Drive match.
 2. **Else check `Email matching`.** (Live mode only for Gmail.) Read the tab's headers and rows. If the row's Counterparty is listed, search Gmail on `{google_account}` with that rule (sender, subject keywords, attachment hints, etc.), narrowed by the row's Date and Debit amount. In **test mode**, use the EML fixtures instead of Gmail.
 3. **Otherwise do a general search** on `{google_account}` (live mode): the counterparty name and raw merchant text, a date window of about two weeks before to a few days after the bank date, and the amount (also the original currency amount from the raw CSV columns for FX charges, e.g. USD or GBP). Use Date, Counterparty and Debit as the key fields to confirm the match. In **test mode**, match against expense EMLs as in Test mode.
@@ -135,13 +135,13 @@ Match outbound invoices the company sent (clients paying for work). Run with sec
 
 **Source** values are the same as expenses (`Drive` / `Email` / `Manual`). Search order per Credit row: **month Revenue folder (already filed) → Unfiled → email → Manual**.
 
-Unfiled revenue path: `{drive.root_path}/{drive.unfiled_folder}/{drive.unfiled_revenue_invoices}`. Ensure that folder exists (create if missing).
+Unfiled revenue path: `{drive.root_path}/{drive.accounts_folder}/{drive.unfiled_folder}/{drive.unfiled_revenue_invoices}`. Ensure that folder exists (create if missing).
 
 For every `{drive.sheet_tab}` row with a Credit:
 
 1. Ensure a Drive subfolder named `{drive.revenue_folder}` exists inside the spreadsheet's folder (create once, then reuse).
 2. **Check `{drive.revenue_folder}` first** for an existing PDF that matches Date / Counterparty / Credit (same `YYYYMMDD_Counterparty_Ref.pdf` naming when possible). If linking that already-filed file this run and **Source** is empty, leave **Source** blank (it was not matched from Unfiled this run).
-3. **Else check Unfiled.** Search `{drive.root_path}/{drive.unfiled_folder}/{drive.unfiled_revenue_invoices}` for a matching PDF. On match: **move** (do not copy) into the month `{drive.revenue_folder}`, rename to `YYYYMMDD_Counterparty_Ref.pdf` if needed (`Ref` = invoice reference number), set Invoice / VAT / Ref / Notes as for expenses, and set **Source = `Drive`**.
+3. **Else check Unfiled.** Search `{drive.root_path}/{drive.accounts_folder}/{drive.unfiled_folder}/{drive.unfiled_revenue_invoices}` for a matching PDF. On match: **move** (do not copy) into the month `{drive.revenue_folder}`, rename to `YYYYMMDD_Counterparty_Ref.pdf` if needed (`Ref` = invoice reference number), set Invoice / VAT / Ref / Notes as for expenses, and set **Source = `Drive`**.
 4. **Otherwise search Gmail Sent** on `{google_account}` for outbound invoices to that client (counterparty name, amount, date window of about two weeks before to a few days after the bank date). In **test mode**, use `skills/bank-reconciliation/test-data/emails/sent/*.eml` instead of Gmail Sent.
 5. **When an email match is found:**
    - Prefer a PDF attachment; stage under `{workspace.local_path}/` if extracting from email.

@@ -17,11 +17,16 @@ repo:
   setup: quick_start
 
 drive:
-  root_path: /Accounts
-  # {YYYY} is the calendar year. {YYYYMM} is the statement month.
+  # Parent Drive folder. Quick start suggests /agents-done-right; operator may change.
+  root_path: /agents-done-right
+  # Bookkeeping tree: {root_path}/{accounts_folder}/…
+  accounts_folder: Accounts
+  # Action logs (Sheets): {root_path}/{logs_folder}/…
+  logs_folder: Logs
+  # {YYYY} is the calendar year. {YYYYMM} is the statement month (or log month).
   # {company_name} inside sheet_title_pattern comes from company.name.
-  # CSV folder: {root_path}/{year_folder_pattern}/{extracts_folder}/{month_folder_pattern}/
-  # Month folder: {root_path}/{year_folder_pattern}/{month_folder_pattern}/
+  # Accounts CSV: {root_path}/{accounts_folder}/{year_folder_pattern}/{extracts_folder}/{month_folder_pattern}/
+  # Accounts month: {root_path}/{accounts_folder}/{year_folder_pattern}/{month_folder_pattern}/
   # First month: skill uploads skills/bank-reconciliation/Y[date]_[company]_Reconciliation.xlsx and converts it to a Google Sheet.
   year_folder_pattern: "{YYYY}"
   month_folder_pattern: "Y{YYYYMM}"
@@ -30,10 +35,14 @@ drive:
   sheet_tab: Bank
   expenses_folder: Expenses
   revenue_folder: Revenue
-  # Unfiled drop folders under root_path (agent moves matches into the month Expenses / Revenue folders).
+  # Unfiled drop folders under Accounts root (agent moves matches into the month Expenses / Revenue folders).
   unfiled_folder: Unfiled
   unfiled_expense_invoices: Expense Invoices
   unfiled_revenue_invoices: Revenue Invoices
+
+logging:
+  # disk = local JSONL only. disk_and_sheet = also append to a daily Google Sheet under Logs.
+  destination: disk_and_sheet
 
 workspace:
   # Repo-relative folder for disposable local files from the reconciliation tutorial.

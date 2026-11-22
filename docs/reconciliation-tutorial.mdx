@@ -33,7 +33,7 @@ This tutorial walks through a monthly bank reconciliation using a Grok Bot agent
 
 After Quick start, you can exercise the skill **without** exporting a live bank CSV or searching your Gmail inbox. Ask the agent to run bank reconciliation in **test mode** (or “try with sample / test data”).
 
-Test mode still creates a Google Sheet under your Drive root for **November 2024** (from the skill `.xlsx` template on a first month, or a copy of the prior month), imports a fixture CSV, seeds Categories / Counterparty reference tabs from the filled Bank rows, matches sample expense `.eml` files and outbound revenue `.eml` files (with PDF attachments) from `skills/bank-reconciliation/test-data/`, and uploads PDFs to Expenses and Revenue with Invoice links. It does **not** read Gmail. Compare the agent’s report to `skills/bank-reconciliation/test-data/expected-results.md`.
+Test mode still creates a Google Sheet under your Drive Accounts root (`{drive.root_path}/{drive.accounts_folder}`) for **November 2024** (from the skill `.xlsx` template on a first month, or a copy of the prior month), imports a fixture CSV, seeds Categories / Counterparty reference tabs from the filled Bank rows, matches sample expense `.eml` files and outbound revenue `.eml` files (with PDF attachments) from `skills/bank-reconciliation/test-data/`, and uploads PDFs to Expenses and Revenue with Invoice links. It does **not** read Gmail. Compare the agent’s report to `skills/bank-reconciliation/test-data/expected-results.md`.
 
 When you are ready for a real month, continue with the live CSV export steps below.
 
@@ -59,10 +59,10 @@ The skill maps common bank CSV layouts, so the agent can import statements even 
 
 <Steps>
   <Step title="Create year and month folders">
-    Under your Drive root, ensure the year folder exists for the statement year, including an extracts subfolder. Then create the month folder for the statement month (`YYYYMM`) if it is missing.
+    Under your Drive Accounts root (`{drive.root_path}/{drive.accounts_folder}`), ensure the year folder exists for the statement year, including an extracts subfolder. Then create the month folder for the statement month (`YYYYMM`) if it is missing.
   </Step>
   <Step title="Locate the bank CSV">
-    Look for the CSV under `root / year / extracts / month`. If it is missing, obtain it from the operator and save it into that folder before importing.
+    Look for the CSV under `root / Accounts / year / extracts / month`. If it is missing, obtain it from the operator and save it into that folder before importing.
   </Step>
   <Step title="Start from last month's sheet (or upload the skill template)">
     Look for the previous month's reconciliation sheet. If it exists, copy it into this month's folder so reference tabs stay current: `Counterparty-Match`, `Counterparties`, `Counterparty-Category`, `Email matching`, and `Categories`.
@@ -155,7 +155,7 @@ Run this when the operator asks, or as a final optional step for debit rows.
 
 Search order: **Unfiled → email → Manual** (Manual only after the unmatched report, when the operator uploads).
 
-Unfiled expense invoices live at `Drive root / Unfiled / Expense Invoices` (profile: `{drive.root_path}/{drive.unfiled_folder}/{drive.unfiled_expense_invoices}`).
+Unfiled expense invoices live at `Drive root / Accounts / Unfiled / Expense Invoices` (profile: `{drive.root_path}/{drive.accounts_folder}/{drive.unfiled_folder}/{drive.unfiled_expense_invoices}`).
 
 <Steps>
   <Step title="Check Unfiled expense invoices">
@@ -182,7 +182,7 @@ Report the expenses folder link, matches found (with Source counts), notes writt
 
 For credit rows (money in from clients), match invoices the company sent.
 
-Unfiled revenue invoices live at `Drive root / Unfiled / Revenue Invoices` (profile: `{drive.root_path}/{drive.unfiled_folder}/{drive.unfiled_revenue_invoices}`).
+Unfiled revenue invoices live at `Drive root / Accounts / Unfiled / Revenue Invoices` (profile: `{drive.root_path}/{drive.accounts_folder}/{drive.unfiled_folder}/{drive.unfiled_revenue_invoices}`).
 
 <Steps>
   <Step title="Check the Revenue folder">

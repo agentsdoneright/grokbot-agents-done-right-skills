@@ -1,3 +1,6 @@
+---
+version: 1.0.0
+---
 # Save rules, skills, and shared config
 
 Read `repo.setup` from `config/profile.yaml` first.
