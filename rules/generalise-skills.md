@@ -11,3 +11,22 @@ If a skill needs a **shared product** URL or constant, add it to `config/product
 When a skill needs a **local** path for disposable tutorial or reconciliation files, use `{workspace.local_path}` (see `rules/tutorial-workspace.md`). Do not hard-code folder names like `tmp/` or `downloads/` in the skill.
 
 When `profile.yaml` / `product.yaml` are the wrong place for a value, you may add another file under `config/`. Reference that file the same way: point the skill at the config file and its keys, and do not paste the operator's own values into the skill.
+
+## Versioning
+
+Every public skill under `skills/` must declare a semver in frontmatter and in its discovery text:
+
+```yaml
+---
+name: Example skill
+version: 1.0.0
+description: >-
+  Version 1.0.0. Use when...
+---
+```
+
+Keep `version` and the `Version X.Y.Z.` prefix of `description` in sync.
+
+- **Skill bump:** When a skill’s instructions or behavior change in a meaningful way, bump that skill’s semver (patch / minor / major as appropriate).
+- **Significant push / release:** When shipping those changes upstream, update [`CHANGELOG.md`](../CHANGELOG.md) with what changed per skill, and bump the project `version` in [`config/product.yaml`](../config/product.yaml) for the bundle release. Skill versions in the changelog entry must match the skill frontmatter for that release.
+- Do not invent changelog entries for unchanged skills. Unversioned local tooling under `.cursor/skills/` is out of scope.

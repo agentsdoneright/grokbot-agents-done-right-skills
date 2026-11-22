@@ -2,6 +2,8 @@
 # Skills and AGENTS.md read this file and substitute {docs.*} / {github.*}.
 # Operator-specific values stay in config/profile.yaml.
 
+version: 1.0.0
+
 docs:
   github_account_setup: https://agents-done-right.mintlify.site/pages/github-account-setup
 

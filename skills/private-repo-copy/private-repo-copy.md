@@ -1,10 +1,12 @@
 ---
 name: Private repo copy
+version: 1.0.0
 description: >-
-  Use when the operator wants Customizable mode: a private, standalone (not a
-  fork) GitHub copy of the public skills repo under the same name, so skill
-  edits are versioned and pushed there. Offers automatic setup via gh (repo +
-  workflow scopes) or a manual docs path. See Customizable upgrade in AGENTS.md.
+  Version 1.0.0. Use when the operator wants Customizable mode: a private,
+  standalone (not a fork) GitHub copy of the public skills repo under the same
+  name, so skill edits are versioned and pushed there. Offers automatic setup via
+  gh (repo + workflow scopes) or a manual docs path. See Customizable upgrade in
+  AGENTS.md.
 ---
 # Private copy of {github.public_skills_repo_name}
 

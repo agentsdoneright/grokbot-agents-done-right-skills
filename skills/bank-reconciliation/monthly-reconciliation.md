@@ -1,14 +1,15 @@
 ---
 name: Bank reconciliation
+version: 1.0.0
 description: >-
-  Use when the user wants to reconcile a month's bank transactions (e.g. a bank
-  CSV export) in their Google Sheets reconciliation workbook: on the first month
-  upload the skill's scrubbed `.xlsx` template and convert it to a Google Sheet,
-  copy last month's sheet thereafter, import the CSV, fill date, counterparty,
-  category, credit and debit columns, and seed Categories / Counterparty
-  reference tabs from those rows. Also use for test mode / sample data / try
-  with test data — run against skills/bank-reconciliation/test-data fixtures
-  instead of a live bank CSV download and Gmail.
+  Version 1.0.0. Use when the user wants to reconcile a month's bank transactions
+  (e.g. a bank CSV export) in their Google Sheets reconciliation workbook: on the
+  first month upload the skill's scrubbed `.xlsx` template and convert it to a
+  Google Sheet, copy last month's sheet thereafter, import the CSV, fill date,
+  counterparty, category, credit and debit columns, and seed Categories /
+  Counterparty reference tabs from those rows. Also use for test mode / sample
+  data / try with test data — run against skills/bank-reconciliation/test-data
+  fixtures instead of a live bank CSV download and Gmail.
 ---
 # Monthly bank reconciliation in Google Sheets
 

@@ -2,6 +2,8 @@
 
 Skills and rules for running Grok Bot with Google Drive / Sheets / Gmail bookkeeping workflows.
 
+**Project version:** `1.0.0` (see `config/product.yaml` and `CHANGELOG.md`).
+
 Public repo: https://github.com/agentsdoneright/grokbot-agents-done-right-skills
 
 ## Start here
