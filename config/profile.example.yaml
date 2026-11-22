@@ -29,6 +29,7 @@ drive:
   sheet_title_pattern: "Y{YYYYMM}_{company_name}_Reconciliation"
   sheet_tab: Bank
   expenses_folder: Expenses
+  revenue_folder: Revenue
 
 workspace:
   # Repo-relative folder for disposable local files from the reconciliation tutorial.
