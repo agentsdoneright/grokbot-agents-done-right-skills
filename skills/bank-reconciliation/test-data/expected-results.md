@@ -25,6 +25,15 @@ Fixture CSV has **6** rows. Totals from signed `Amount` (negative = out):
 
 ## Matched invoices (from `test-data/emails/`)
 
+The four PDFs use **different layouts and field labels** on purpose (so matching is not template-identical):
+
+| Vendor | Layout sketch | Customer label | Tax label | Total label |
+| --- | --- | --- | --- | --- |
+| Acme Cloud | US SaaS header band | Bill to | Sales tax | Amount due |
+| Northwind SaaS | UK centred letterhead | Invoice to | VAT | Total incl. VAT |
+| Brightline Ops | Left sidebar tax invoice | Sold to | GST | Balance payable |
+| Harbor Tools | Monospace receipt | Sold / Ship to | Tax | Grand total |
+
 Four Debits should get a PDF in `{drive.expenses_folder}` and a **Ref** Drive link. Suggested formatted names (clean casing OK if close):
 
 | Bank date | Recipient / Payer (approx) | Debit | EML `From` | Expenses filename |
@@ -36,6 +45,7 @@ Four Debits should get a PDF in `{drive.expenses_folder}` and a **Ref** Drive li
 
 - [ ] All four rows have non-empty **Ref** links to Drive PDFs
 - [ ] PDFs came from EML attachments (not Gmail)
+- [ ] Agent matched despite differing layouts / tax field names (VAT vs GST vs sales tax vs Tax)
 - [ ] Each matched counterparty has an `Email matching` rule saved (sender / subject / attachment)
 
 ## Unmatched / skipped
