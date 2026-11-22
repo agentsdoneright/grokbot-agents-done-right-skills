@@ -1,17 +1,21 @@
 ---
 name: Bank reconciliation
-version: 1.2.0
+version: 1.4.0
 description: >-
-  Version 1.2.0. Use when the user wants to reconcile a month's bank transactions
+  Version 1.4.0. Use when the user wants to reconcile a month's bank transactions
   (e.g. a bank CSV export) in their Google Sheets reconciliation workbook: on the
   first month upload the skill's scrubbed `.xlsx` template and convert it to a
   Google Sheet, copy last month's sheet thereafter, import the CSV, fill date,
   counterparty, category, credit and debit columns, and seed Categories /
-  Counterparty reference tabs from those rows. Match invoices from Unfiled Drive
-  folders first (Source=Drive), then email (Source=Email), then Manual chat
-  uploads (Source=Manual). Also use for test mode / sample data / try with test
-  data — run against skills/bank-reconciliation/test-data fixtures instead of a
-  live bank CSV download and Gmail.
+  Counterparty reference tabs from those rows (including Categories Type).
+  Match invoices from Unfiled Drive folders first (Source=Drive), then email
+  (Source=Email), then Manual chat uploads (Source=Manual). Fill the Summary
+  tab with live formulas for Missing Expense Invoices, Missing Revenue
+  Invoices, and Expenses by Category (SUMIF-style totals over Bank Debits by
+  Category + Type so the pie chart updates when categories change); remove empty
+  missing-invoice title/table blocks. Also use for test mode / sample data /
+  try with test data — run against skills/bank-reconciliation/test-data fixtures
+  instead of a live bank CSV download and Gmail.
 ---
 # Monthly bank reconciliation in Google Sheets
 
@@ -42,10 +46,11 @@ In test mode the Sheets / Drive path is unchanged (month folders, template or co
 
 1. Set the statement month to `202411` / year `2024`.
 2. Ensure year, extracts, and month folders exist under `{drive.root_path}/{drive.accounts_folder}` as in section 1.
-3. Copy `skills/bank-reconciliation/test-data/bank-statement.csv` into `{drive.root_path}/{drive.accounts_folder}/{drive.year_folder_pattern}/{drive.extracts_folder}/{drive.month_folder_pattern}/` (create folders if needed). Then continue sections 1–6 as usual (CSV is already on Drive) — fill Bank, seed reference tabs (section 5), then verify before invoice matching.
+3. Copy `skills/bank-reconciliation/test-data/bank-statement.csv` into `{drive.root_path}/{drive.accounts_folder}/{drive.year_folder_pattern}/{drive.extracts_folder}/{drive.month_folder_pattern}/` (create folders if needed). Then continue sections 1–6 as usual (CSV is already on Drive) — fill the transactions tab, seed reference tabs including Categories Type (section 5), then verify before invoice matching.
 4. For expense invoice matching (section 8): check Unfiled expense invoices first (usually empty in the default fixture run). Then open each `skills/bank-reconciliation/test-data/emails/*.eml` (not under `sent/`). Match each Debit row using `From`, subject, amount, and date (confirmation fields: Date, Counterparty, Debit). Prefer the PDF attachment; extract under `{workspace.local_path}/`, upload to `{drive.expenses_folder}`, set Invoice / VAT / Ref, set **Source = `Email`**, update Counterparties contact fields and `Email matching` as in section 8. Skip bank-fee rows unless an invoice clearly exists. Fixture pack includes unmatched debits with no EML — leave those unmatched (Source blank).
 5. For revenue invoice matching (section 9): check the month `{drive.revenue_folder}` and Unfiled revenue invoices first (usually empty). Then open each `skills/bank-reconciliation/test-data/emails/sent/*.eml`. Match Credit rows (Date, Counterparty, Credit); upload to `{drive.revenue_folder}`; set Invoice / VAT / Ref; set **Source = `Email`**.
-6. After the run, read `skills/bank-reconciliation/test-data/expected-results.md` and report pass/fail against that checklist (including that Gmail was not used).
+6. Fill the Summary tab (section 10): Missing Expense / Revenue blocks (remove a block entirely if it has no rows), formula-driven Expenses by Category (SUMIF-style over Bank Debits + Categories Type), and the Expenses by Category pie chart.
+7. After the run, read `skills/bank-reconciliation/test-data/expected-results.md` and report pass/fail against that checklist (including that Gmail was not used, and the Summary tables and pie chart).
 
 ## 1. Prepare the month's folder and sheet
 - **Year and month folders.** The year folder is `{drive.year_folder_pattern}` under `{drive.root_path}/{drive.accounts_folder}` (`{YYYY}` is the year of the month being reconciled). If that year folder does not exist, create it, and create its `{drive.extracts_folder}` subfolder. Then create the month folder `{drive.month_folder_pattern}` inside the year folder if it does not exist (`{YYYYMM}` is the statement month).
@@ -53,16 +58,19 @@ In test mode the Sheets / Drive path is unchanged (month folders, template or co
 - **Starting sheet.** Look for the previous month's reconciliation sheet in that month's folder (`{drive.month_folder_pattern}` under its own `{drive.year_folder_pattern}`). For January, the previous month's folder is in the previous year's folder.
   - **If a previous month's sheet exists:** copy it into this month's folder, named from `{drive.sheet_title_pattern}` (fill `{YYYYMM}` with the statement month and `{company_name}` with `{company.name}`). Use it because it has the latest mappings in `Counterparty-Match`, `Counterparties`, `Counterparty-Category`, `Email matching` and `Categories`. On the copy only, clear the previous month's transaction data and the raw CSV area on the `{drive.sheet_tab}` tab, and keep that tab's header row and the reference tabs intact. Never modify the previous month's sheet. If the copy is still an `.xlsx`, convert it to a native Google Sheet so the Sheets tools can edit it.
   - **If no previous month's sheet exists (initial run):** upload a **copy** of the scrubbed template `skills/bank-reconciliation/Y[date]_[company]_Reconciliation.xlsx` into this month's folder under `{drive.root_path}/{drive.accounts_folder}/{drive.year_folder_pattern}/{drive.month_folder_pattern}/`. Rename the Drive file to `{drive.sheet_title_pattern}` (fill `{YYYYMM}` with the statement month and `{company_name}` with `{company.name}`). Convert that `.xlsx` to a **native Google Sheet** so the Sheets tools can edit it. Do **not** modify the repo template file.
-    - The template already has the required tabs, header rows, and layout (no sample/private data): `{drive.sheet_tab}` (`Bank`), `Counterparties`, `Categories`, `Counterparty-Match`, `Counterparty-Category`, `Email matching`. Do not change the template's formatting.
-    - On `Bank`, the raw CSV header row is already present in columns K–N (`Date` | `Merchant` | `Amount` | `Description`). When importing (section 3), write CSV **data** under those headers starting at row 2; do not duplicate the K–N header row unless the layout differs.
+    - The template already has the required tabs, header rows, and layout (no sample/private data): the transactions tab named `{drive.sheet_tab}` (template / profile default: `Bank Transactions`), `Counterparties`, `Categories` (including a **Type** column), `Counterparty-Match`, `Counterparty-Category`, `Email matching`, and `Summary` (headers and table formatting for Missing Expense Invoices, Missing Revenue Invoices, and Expenses by Category). Do not change the template's formatting, and do not edit the repo `.xlsx` in place. The operator may update that template separately.
+    - If a copy of an older template is missing the `Summary` tab or the Categories `Type` column, add a minimal unstyled tab or column with the expected headers from section 10 so later steps can run. Do not invent decorative formatting.
+    - On the transactions tab, the raw CSV header row is already present to the right of the reconciliation columns (typically K–N: `Date` | `Merchant` | `Amount` | `Description`). When importing (section 3), write CSV **data** under those headers on the first empty row beneath them; do not duplicate that header row unless the layout differs.
 
 ## 2. Inspect the layout before writing
-- Tabs used: the transactions tab `{drive.sheet_tab}`, `Categories` (the category list), `Counterparty-Match` (raw-to-formatted names), `Counterparties` (unique formatted names plus contact fields), `Counterparty-Category` (name to category), `Email matching` (how to find each counterparty's invoice emails). Tab names can change, so check them each time.
-- Read the main transactions tab (`{drive.sheet_tab}`) headers in row 1. The user edits the layout, so locate columns by header name each time. Expected layout: Date | Counterparty | Category | Credit | Debit | VAT | Ref | Invoice | Notes | Source, then the raw CSV area to the right (typically K onward). If an older sheet still has `Recipient / Payer`, treat that column as Counterparty (rename the header when practical). Do **not** rename `Ref` to `Invoice` — `Ref` is the invoice reference number; `Invoice` holds the Drive file link.
+- Tabs used: the transactions tab, `Categories` (the category list, including **Type**), `Counterparty-Match` (raw-to-formatted names), `Counterparties` (unique formatted names plus contact fields), `Counterparty-Category` (name to category), `Email matching` (how to find each counterparty's invoice emails), and `Summary`. Tab names can change, so check them each time.
+- **Transactions tab.** Start from `{drive.sheet_tab}` in the profile (current template name: **`Bank Transactions`**). If that exact tab name is not present, find the tab that holds the reconciliation columns (Date, Counterparty, Category, Credit, Debit, Invoice, and the other headers below). Older sheets may still be named `Bank`. Use the tab you find for the rest of the run; do not rename it unless the operator asks. In later sections, “the transactions tab” means this resolved tab, even when the text still mentions `{drive.sheet_tab}`.
+- Read the transactions tab and **locate the header row by column names**, not by assuming it is row 1 (a title row may sit above it). The user edits the layout, so locate columns by header name each time. Expected headers: Date | Counterparty | Category | Credit | Debit | VAT | Ref | Invoice | Notes | Source, then the raw CSV area to the right (typically K onward). Notes and Source may be swapped; still key off the header text. If an older sheet still has `Recipient / Payer`, treat that column as Counterparty (rename the header when practical). Do **not** rename `Ref` to `Invoice` — `Ref` is the invoice reference number; `Invoice` holds the Drive file link.
+- Also read `Categories` (note the Type column if present) and `Summary` (section 10) so you know the current layout before writing.
 - Category spellings come from the `Categories` tab (the category list).
 
 ## 3. Import the CSV
-- Paste the CSV into the tab starting at the first empty column to the right of the reconciliation columns (column K after the ten headers above; adjust if the layout changed). If row 1 already has raw CSV headers there (as in the skill template), keep them and write data from row 2. Otherwise put headers in row 1 and data from row 2. Write numbers as numbers and dates as real dates. You may still read the raw CSV columns (typically K onward) when filling Counterparty, amounts, or matching invoices.
+- Paste the CSV into the tab starting at the first empty column to the right of the reconciliation columns (column K after the ten headers above; adjust if the layout changed). If the header row already has raw CSV headers there (as in the skill template), keep them and write data on the first empty row beneath. Otherwise put headers in the header row and data on the next row. Write numbers as numbers and dates as real dates. You may still read the raw CSV columns (typically K onward) when filling Counterparty, amounts, or matching invoices.
 
 ## 4. Fill the reconciliation columns, one row per CSV row
 - **Date**: the transaction date as a real date, number format `d-mmm` (displays 5-Nov, no leading zero).
@@ -77,7 +85,7 @@ In test mode the Sheets / Drive path is unchanged (month folders, template or co
 ## 5. Seed reference tabs from the filled Bank rows
 In the **same run**, after section 4 and before the verify report, seed (or extend) the reference tabs from the filled `{drive.sheet_tab}` rows and the raw bank string used for each row (Merchant / Payee Name / Payer Name / Description):
 
-- **`Categories`**: unique Category values from Bank; no duplicates; no blank categories.
+- **`Categories`**: unique Category values from the transactions tab; no duplicates; no blank categories. Also seed **Type** when the column exists (add a `Type` header if the template is older and the column is missing): use `Expense` for a category that appears only on Debit rows, and `Revenue` for a category that appears only on Credit rows. If a category appears on both, leave Type blank and flag it for the operator rather than guessing. Do **not** overwrite a Type the operator (or a previous month) already set. Allowed Type values are `Expense` and `Revenue` (match them case-insensitively later; `Debit` / `Credit` also count as expense / revenue if the operator used those words).
 - **`Counterparty-Match`**: one row per unique formatted `Counterparty`, with `Match` = the raw bank string for that counterparty; no duplicates.
 - **`Counterparties`**: unique formatted `Counterparty` values in column A (include credit counterparties / clients). Leave Email / Phone / Registration / Address blank until an invoice match supplies them (section 8–9).
 - **`Counterparty-Category`**: one row per unique formatted name with the Category used on Bank for that name.
@@ -94,7 +102,7 @@ When the operator says they have finished editing Category or Counterparty names
 
 - Sync `Counterparty-Match` (formatted name ↔ raw Match string) without duplicates.
 - Sync unique formatted names into `Counterparties` (preserve existing Email / Phone / Registration / Address when only the name key is syncing).
-- Sync `Counterparty-Category` and unique spellings into `Categories`.
+- Sync `Counterparty-Category` and unique spellings into `Categories`. Preserve existing Type values; seed Type only for newly added categories (same rules as section 5).
 - If a counterparty was renamed, update the matching `Counterparty` in `Email matching` so invoice rules still line up.
 
 ## 8. Match expense invoices (Debit rows)
@@ -154,7 +162,71 @@ For every `{drive.sheet_tab}` row with a Credit:
 6. Never send, reply to, or change any emails.
 7. **Report (revenue):** the `{drive.revenue_folder}` folder link, credit matches found (include **Source** counts), Counterparties updates, and Credit rows still missing an invoice (Date, Counterparty, Credit). When the operator uploads a missing invoice in chat, upload to `{drive.revenue_folder}` with the same naming, set Invoice / VAT / Ref as known, and set **Source = `Manual`**.
 
-In **test mode**, after expenses and revenue matching, also report pass/fail against `skills/bank-reconciliation/test-data/expected-results.md`.
+Then fill the Summary tab (section 10). In **test mode**, after Summary, also report pass/fail against `skills/bank-reconciliation/test-data/expected-results.md`.
 
-## 10. Final step: hand back to the user
-End every run by telling the user: they may update Category names or Counterparty names directly on the spreadsheet; when they are finished, they should let you know so you can verify everything and correctly relink the reference tabs (`Counterparty-Match`, `Counterparties`, `Counterparty-Category`, `Categories`, and `Email matching` if names changed) — see section 7.
+## 10. Fill the Summary tab
+
+Run this after invoice matching (sections 8–9) so the Invoice column is up to date. If the operator later asks only to refresh Summary, re-read the current transactions tab and Categories Type values and update the formulas and chart; do not rebuild Expenses by Category table formatting.
+
+### Read the template layout first
+
+The workbook template is expected to provide a **Summary** tab with table headers and formatting already in place. **Do not restyle or redesign those tables.** At the start of this step, read the Summary tab (and any named ranges) and locate the areas by **header text** and named ranges, **not by fixed cell coordinates** — operators often move these blocks.
+
+Look for these titles and headers (case-insensitive; close wording is fine):
+
+- **Missing Expense Invoices** — columns such as Date, Counterparty (or Description), Amount, and Note (or reason).
+- **Missing Revenue Invoices** — the same kind of columns.
+- **Expenses by Category** — columns such as Category, Total, and Percentage.
+
+If a named range exists for one of these (a name containing `MissingExpense`, `MissingRevenue`, or `ExpensesByCategory`, or similar), use it as the start of that table. If the Summary tab is missing, add a minimal tab named `Summary` with those three header blocks only — no decorative formatting (the operator maintains formats in the `.xlsx` template). If a needed block is missing and there are rows to show (or for Expenses by Category), add just its title and column headers in empty space, without disturbing existing Summary content.
+
+### Fill with live formulas
+
+Write **formulas** (FILTER, QUERY, SUMIF, SUMIFS, ARRAYFORMULA, or equivalent) that read the transactions tab and `Categories`, so values stay current when Bank Category / Debit / Credit / Invoice or Type data changes. Do **not** paste static snapshot totals or missing-invoice rows. Keep the template's number and date formats on those cells. For **Percentage**, use number format `0%` (integer percent display; leave the underlying share unchanged).
+
+Use the transactions tab resolved in section 2 (often named **`Bank Transactions`**). Find Date, Counterparty, Category, Credit, Debit, and Invoice by header name. Transaction data starts on the first row below that header row.
+
+#### Missing invoice blocks (keep, remove, or recreate)
+
+Evaluate which rows would appear before writing:
+
+- **Missing expense candidates:** Debit > 0 and Invoice blank, **excluding bank-fee rows**. Treat a row as a bank fee when Category or Counterparty matches `bank fee` or `service fee` (case-insensitive). Bank fees do not require an invoice (see section 8).
+- **Missing revenue candidates:** Credit > 0 and Invoice blank.
+
+Then:
+
+- If there is **at least one** missing expense candidate: keep or recreate the **Missing Expense Invoices** title and table; fill with live `FILTER`/`QUERY` (or equivalent) formulas for Date, Counterparty, Amount (Debit), and Note (for example `No invoice found`). You may mention excluded bank-fee rows in the report; do not list them as missing invoices.
+- If there are **no** missing expense candidates: **delete** the **Missing Expense Invoices** title and its **entire** table (headers and any data or formula rows). Do **not** leave an empty titled table.
+- Same rules for **Missing Revenue Invoices** (Amount = Credit): keep/fill with formulas when candidates exist; **delete** title and whole table when there are none.
+- On a later Summary refresh, if a previously deleted block is needed again: recreate the title and headers (Date, Counterparty, Amount, Note) in a clear area of Summary **without covering Expenses by Category**, then fill with live formulas. Do not invent decorative formatting.
+
+#### Expenses by Category (formula-linked to Bank)
+
+Build this table so changing a bank row’s **Category** or **Debit** updates Totals, Percentages, and the pie chart without rewriting Summary by hand:
+
+- Include **only** categories whose **Type** on the `Categories` tab is an expense type. Match Type case-insensitively: `Expense`, `expense`, and `Debit` count as expense; `Revenue`, `revenue`, and `Credit` count as revenue. Include bank-fee categories when they are typed as expense — they are real expenses.
+- **Category** labels: expense-typed categories from `Categories` (preferably via formulas so new Categories rows can appear when the range allows).
+- **Total** per category: a formula that **sums Debit** on the transactions tab where that row’s **Category** equals the label (e.g. `SUMIF` / `SUMIFS` / `QUERY` over the Debit and Category columns). **No static pasted totals.**
+- **Percentage**: formula = that Total / the sum of expense Totals in this table; format `0%`.
+- Sort larger totals first unless the template already specifies an order. If a debit Category has a blank Type, or a Type that is neither expense nor revenue, omit it from this table and tell the operator. If a category typed revenue has debit amounts (or the reverse), follow Type for this table and flag the mismatch in the report.
+
+Do not invent amounts. If a formula cannot resolve (tab or column missing), stop and tell the operator what was missing.
+
+### Pie chart (Expenses by Category)
+
+Create or update **one** embedded pie chart on the Summary tab titled **Expenses by Category**:
+
+- Bind the chart to the Expenses by Category **Category** and **Total** columns (not Percentage). Include the header row in the chart range (`headerCount` 1, or equivalent).
+- Give the data range **spare rows** below the current last category (about 5–10 extra rows, or a modest window under the table) so newly seeded expense categories appear without a manual range edit. Empty trailing rows should not become extra slices (Sheets typically ignores blanks).
+- Because Totals are live formulas over Bank Debits by Category, a category change on the transactions tab updates the pie without inserting a new chart.
+- **Do not add a second chart on reruns.** If a chart with that title (or an existing pie already bound to this table) is present, update its data range in place instead of inserting another.
+- When creating a new chart, place it in empty space on Summary; do not cover the table headers.
+
+**Connector limits** (do not fail the step because of these): the Google Sheets connector has no hide-columns tool, and no setting for pie slice label format (for example forcing integer percents on the slices). The Percentage column (`0%`) is the reliable integer display. The pie may show slice percentages by default; that is enough.
+
+### Report (Summary)
+
+Include: the locations you used (title cells, ranges, or named ranges); whether each missing-invoice block was **kept**, **removed**, or **recreated**; that Expenses by Category Totals are formula-driven over Bank Debits; the expense-category totals and integer percentages; the missing expense and revenue rows (if any); any Type mismatches or blank Types; and whether the pie chart was created or updated.
+
+## 11. Final step: hand back to the user
+End every run by telling the user: they may update Category names, Category Type, or Counterparty names directly on the spreadsheet; when they are finished, they should let you know so you can verify everything and correctly relink the reference tabs (`Counterparty-Match`, `Counterparties`, `Counterparty-Category`, `Categories`, and `Email matching` if names changed) and refresh the Summary formulas and pie chart if needed — see sections 7 and 10.

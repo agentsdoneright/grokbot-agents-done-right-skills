@@ -32,7 +32,7 @@ drive:
   month_folder_pattern: "Y{YYYYMM}"
   extracts_folder: Extracts
   sheet_title_pattern: "Y{YYYYMM}_{company_name}_Reconciliation"
-  sheet_tab: Bank
+  sheet_tab: Bank Transactions
   expenses_folder: Expenses
   revenue_folder: Revenue
   # Unfiled drop folders under Accounts root (agent moves matches into the month Expenses / Revenue folders).

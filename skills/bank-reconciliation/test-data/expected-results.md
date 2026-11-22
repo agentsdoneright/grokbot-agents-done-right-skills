@@ -32,6 +32,7 @@ Fixture CSV has **10** rows. Totals from signed `Amount` (negative = out):
 After filling Bank, the agent must seed these tabs in the **same run**. Do **not** require fixed category names — assert structure and consistency with Bank / the fixture merchants:
 
 - [ ] `Categories` has data rows (not header-only); every Category used on Bank appears there
+- [ ] `Categories` has a **Type** column; expense-only categories are typed Expense (or Debit), revenue-only as Revenue (or Credit); blank Type only when a category appears on both Debit and Credit
 - [ ] `Counterparties` lists each distinct Bank `Counterparty` (**10** names; casing may vary). Includes credit clients (e.g. Riverstone Consulting, Pixelforge Studio) as well as expense vendors
 - [ ] `Counterparty-Match` has a row per those names; `Match` loosely matches the fixture merchants: `ACME CLOUD *SUB`, `NORTHWIND SAAS`, `CLIENT PAYMENT ACME`, `BRIGHTLINE OPS`, `BANK SERVICE FEE`, `HARBOR TOOLS`, `RIVERSTONE CONSULTING PAYMENT`, `STAPLES OFFICE SUPPLY`, `PIXELFORGE STUDIO WIRE`, `CITY RIDES *TRIP`
 - [ ] `Counterparty-Category` maps each Counterparties name to the Category used on that Bank row
@@ -91,6 +92,15 @@ Two Credits should get a PDF in `{drive.revenue_folder}` and an **Invoice** Driv
 - [ ] **City Rides** Debit (18.75): no EML; still missing invoice; **Source** blank
 - [ ] Unmatched Debits listed in the report (Date, Counterparty, Debit) for fee + Staples + City Rides
 
+## Summary tab
+
+- [ ] **Missing Expense Invoices** block is present (default fixture has unmatched Staples + City Rides; bank fee excluded from this table) with formula-driven rows — not static pasted values
+- [ ] **Missing Revenue Invoices** block is present (unmatched Client Payment / Acme credit) with formula-driven rows
+- [ ] If a missing block would have **zero** rows, its title and entire table are **removed** (not left empty) — N/A for the default fixture above, but required on any run where all expenses or all revenues are matched
+- [ ] **Expenses by Category** Totals are **formulas** (e.g. `SUMIF` / `SUMIFS` / `QUERY`) summing Debit on the transactions tab by Category for categories whose Type is expense — not static numbers
+- [ ] Percentage column uses formulas over those Totals, format `0%`
+- [ ] One **Expenses by Category** pie chart is bound to Category + Total (created or updated in place; no duplicate charts)
+
 ## Report
 
-- [ ] Operator report includes sheet link, credit/debit totals, that reference tabs were seeded, `{drive.expenses_folder}` and `{drive.revenue_folder}` folder links, four expense matches, two revenue matches (Source=`Email` for those matches), unmatched debits/credits as above, any Counterparties contact updates, and confirmation that Gmail was not used
+- [ ] Operator report includes sheet link, credit/debit totals, that reference tabs were seeded, `{drive.expenses_folder}` and `{drive.revenue_folder}` folder links, four expense matches, two revenue matches (Source=`Email` for those matches), unmatched debits/credits as above, Summary (kept/removed missing blocks, formula-driven category totals, pie create/update), any Counterparties contact updates, and confirmation that Gmail was not used

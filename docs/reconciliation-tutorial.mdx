@@ -78,7 +78,7 @@ The skill maps common bank CSV layouts, so the agent can import statements even 
 Before writing, confirm tab names and column headers. Tabs usually include:
 
 - Transactions tab (main reconciliation grid)
-- `Categories` — allowed category spellings
+- `Categories` — allowed category spellings plus **Type** (`Expense` or `Revenue`)
 - `Counterparty-Match` — formatted name ↔ raw bank name
 - `Counterparties` — unique formatted names plus Email, Phone, Registration, Address
 - `Counterparty-Category` — formatted name ↔ category
@@ -201,6 +201,14 @@ Unfiled revenue invoices live at `Drive root / Accounts / Unfiled / Revenue Invo
 
 Report the revenue folder link, credit matches (with Source counts), and credit rows still missing an invoice. Manual chat uploads set **Source = `Manual`**.
 
+## Fill the Summary tab
+
+After invoice matching, fill **Summary**:
+
+- **Missing Expense Invoices** / **Missing Revenue Invoices** — live formulas over the transactions tab (Debit/Credit with blank Invoice). If a block has **no** missing rows, **delete** its title and entire table; do not leave an empty titled table. Recreate the block on a later refresh if missing rows appear again.
+- **Expenses by Category** — Category labels from expense-typed rows on `Categories` (**Type** = Expense). **Total** cells use formulas that sum **Debit** on the transactions tab by Category (for example `SUMIF`), so changing a bank row’s Category updates the table and the linked pie chart. **Percentage** is formula-driven over those Totals (`0%` display).
+- Create or update **one** **Expenses by Category** pie chart bound to Category + Total (spare rows under the table; no duplicate charts on reruns).
+
 ## Hand back
 
-Tell the operator they may update Category names or Counterparty names directly on the spreadsheet. When they are finished, they should let the agent know so it can verify everything and correctly relink the reference tabs (`Counterparty-Match`, `Counterparties`, `Counterparty-Category`, `Categories`, and `Email matching` if names changed).
+Tell the operator they may update Category names, Category Type, or Counterparty names directly on the spreadsheet. When they are finished, they should let the agent know so it can verify everything and correctly relink the reference tabs (`Counterparty-Match`, `Counterparties`, `Counterparty-Category`, `Categories`, and `Email matching` if names changed) and refresh Summary formulas and the pie chart if needed.
