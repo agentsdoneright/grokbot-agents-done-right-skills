@@ -17,8 +17,8 @@ repo:
   setup: quick_start
 
 drive:
-  # Parent Drive folder. Quick start suggests /agents-done-right; operator may change.
-  root_path: /agents-done-right
+  # Parent Drive folder. Quick start suggests /Agents Done Right; operator may change.
+  root_path: /Agents Done Right
   # Bookkeeping tree: {root_path}/{accounts_folder}/…
   accounts_folder: Accounts
   # Action logs (Sheets): {root_path}/{logs_folder}/…
@@ -41,10 +41,11 @@ drive:
   unfiled_revenue_invoices: Revenue Invoices
 
 logging:
-  # disk = local JSONL only. disk_and_sheet = also append to a daily Google Sheet under Logs.
+  # off = no action logs. disk = local JSONL only.
+  # disk_and_sheet = local JSONL plus a daily Google Sheet under Logs.
   destination: disk_and_sheet
 
 workspace:
   # Repo-relative folder for disposable local files from the reconciliation tutorial.
   # Easy cleanup: delete this directory.
-  local_path: tutorial-workspace
+  local_path: agents-done-right

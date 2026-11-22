@@ -1,5 +1,5 @@
 ---
-version: 1.0.0
+version: 1.1.0
 ---
 # Action recording
 
@@ -7,11 +7,21 @@ Record sanitized metadata about what the agent did while following this workspac
 
 Read `config/profile.yaml` for `{workspace.local_path}`, `{drive.*}`, `{logging.destination}`, and `{company.name}`.
 
+## Destination (`{logging.destination}`)
+
+| Value | Behavior |
+| --- | --- |
+| `off` | Do not write action logs (no local JSONL, no Drive Sheet) |
+| `disk` | Local JSONL only |
+| `disk_and_sheet` | Local JSONL and a daily Google Sheet under Logs |
+
+If `{logging.destination}` is missing, treat it as `disk_and_sheet` (same as `config/profile.example.yaml`). If it is `off`, skip the rest of this rule.
+
 ## When to record
 
 After each action: tool call, shell command, browser navigation, computer-use session summary, connector/MCP call, file transfer, guardrail refuse/allow, skill or rule read, subagent or cloud-agent handoff.
 
-Apply for guided work in this workspace (Quick start, skill runs, rule application, Customizable setup), not only bank reconciliation.
+Apply for guided work in this workspace (Quick start, skill runs, rule application, Customizable setup), not only bank reconciliation — **except** when destination is `off`.
 
 ## Guidance provenance (every event)
 
@@ -48,13 +58,13 @@ Build year/month segments with `{drive.year_folder_pattern}` and `{drive.month_f
       2026-11-22_Action_Log         # Drive Sheet when enabled
 ```
 
-## Local JSONL (always)
+## Local JSONL — when destination is `disk` or `disk_and_sheet`
 
 Path:
 
 `{workspace.local_path}/action-logs/{drive.year_folder_pattern}/{drive.month_folder_pattern}/{YYYY-MM-DD}.jsonl`
 
-Create year/month folders if missing. If today’s file does not exist, create it; otherwise append one JSON object per line. Never commit these files (they live under `{workspace.local_path}/`).
+Create year/month folders if missing. If today’s file does not exist, create it; otherwise append one JSON object per line. Never commit these files — they are gitignored (`**/action-logs/` and `{workspace.local_path}/`).
 
 Example event:
 

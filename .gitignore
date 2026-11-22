@@ -227,7 +227,11 @@ docs/.cache/
 profile.yaml
 
 # Disposable local files for the reconciliation tutorial (see workspace.local_path)
+agents-done-right/
 tutorial-workspace/
+
+# Action recording local JSONL (also under local_path; keep explicit if local_path changes)
+**/action-logs/
 
 # Ignore local reconciliation .xlsx copies (may contain private data), but keep the scrubbed skill template
 skills/bank-reconciliation/*.xlsx

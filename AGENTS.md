@@ -5,7 +5,7 @@ This repo holds **optional** bookkeeping skills (bank reconciliation, Drive / Sh
 - Stay a normal general-purpose assistant unless the operator asks to run Quick start, Customizable setup, or a skill in `skills/`.
 - Do **not** assume you are a bookkeeping or company ops assistant on every new chat.
 - Do **not** fetch or overwrite `rules/` or `skills/` from the internet at chat start. Use the local workspace copies only.
-- Obey [`rules/action-recording.md`](rules/action-recording.md) for guided work in this workspace (Quick start, skills, rules, Customizable): record sanitized action metadata locally, and to a Drive Logs Sheet when `{logging.destination}` is `disk_and_sheet`.
+- Obey [`rules/action-recording.md`](rules/action-recording.md) for guided work in this workspace (Quick start, skills, rules, Customizable) unless `{logging.destination}` is `off`: record sanitized action metadata locally when `disk` or `disk_and_sheet`, and to a Drive Logs Sheet when `disk_and_sheet`.
 
 Read [`config/product.yaml`](config/product.yaml) for shared URLs (`{docs.*}`, `{github.*}`). **Public skills repo (Quick start):** `{github.public_skills_repo_url}`.
 
@@ -25,7 +25,7 @@ When a skill is active, use these from the profile:
 
 - Operator: `{operator.first_name}` at `{company.name}`
 - Drive parent root `{drive.root_path}`; bookkeeping under `{drive.root_path}/{drive.accounts_folder}`; logs under `{drive.root_path}/{drive.logs_folder}`; Google account `{google_account}`
-- Logging: `{logging.destination}` (`disk` or `disk_and_sheet`) — see [`rules/action-recording.md`](rules/action-recording.md)
+- Logging: `{logging.destination}` (`off`, `disk`, or `disk_and_sheet`) — see [`rules/action-recording.md`](rules/action-recording.md)
 - Local staging: `{workspace.local_path}`
 - Repo setup: `{repo.setup}` (`quick_start` or `customizable`)
 - Tone for skill work: concise, milestone updates on long jobs, no invented numbers or invoices
@@ -39,12 +39,12 @@ Run **only** when the operator asks for Quick start / bootstrap, or when they as
 
 1. Ensure the workspace is a checkout of `{github.public_skills_repo_url}` (clone if needed). Only after the permission gate yes.
 2. **Derive `operator.first_name`** if already known; otherwise ask once.
-3. **Ask** for `company.name`. **Suggest** Drive `root_path` as `/agents-done-right` (see [`rules/tutorial-workspace.md`](rules/tutorial-workspace.md)); the operator may accept or supply a different parent path. Mention briefly that action logs go to disk always, and also to a Google Sheet under `{root_path}/Logs` unless they prefer `{logging.destination}: disk` (default from the example is `disk_and_sheet`).
+3. **Ask** for `company.name`. **Suggest** Drive `root_path` as `/Agents Done Right` (see [`rules/tutorial-workspace.md`](rules/tutorial-workspace.md)); the operator may accept or supply a different parent path. Mention briefly that action logging defaults to `{logging.destination}: disk_and_sheet` (local + Drive Sheet under `{root_path}/Logs`); they may choose `disk` (local only) or `off` (no logs).
 4. **Ensure Google connectors** (after yes): harmless reads against Drive, Sheets, and Gmail. If any fail, tell the operator which, direct them to grant access, and do not mark verified until all three work.
 5. **Derive `google_account`** from the connected account; ask once if needed.
 6. **Derive `repo.url` / `repo.branch`** from git remote / branch (fallback `main`).
 7. Set `repo.setup: quick_start`.
-8. **Write defaults** for remaining fields from [`config/profile.example.yaml`](config/profile.example.yaml) (`drive.*` including `accounts_folder` / `logs_folder`, `logging.destination`, `workspace.local_path: tutorial-workspace`), applying the confirmed `root_path` and any logging preference.
+8. **Write defaults** for remaining fields from [`config/profile.example.yaml`](config/profile.example.yaml) (`drive.*` including `accounts_folder` / `logs_folder`, `logging.destination`, `workspace.local_path: agents-done-right`), applying the confirmed `root_path` and any logging preference.
 9. Ensure `{workspace.local_path}/` exists — after yes. Ensure `{drive.root_path}/{drive.accounts_folder}` and `{drive.root_path}/{drive.logs_folder}` exist on Drive (create if missing) — after yes.
 10. Write `config/profile.yaml` — after yes.
 11. **Verify Quick start** before any skill runs: public checkout; `origin`/`repo.url` is `{github.public_skills_repo_url}`; `rules/` and `skills/` present; Drive, Sheets, and Gmail succeed for `{google_account}`. Tell the operator skill edits are not saved upstream until **Customizable**.
