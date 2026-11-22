@@ -106,3 +106,5 @@ Two Credits should get a PDF in `{drive.revenue_folder}` and an **Invoice** Driv
 ## Report
 
 - [ ] Operator report includes sheet link, credit/debit totals, that reference tabs were seeded, `{drive.expenses_folder}` and `{drive.revenue_folder}` folder links, four expense matches, two revenue matches (Source=`Email` for those matches), unmatched debits/credits as above, Summary (kept/removed missing blocks, formula-driven category totals, pie create/update), any Counterparties contact updates, and confirmation that Gmail was not used
+- [ ] Hand back **lists** remaining missing invoices, points the operator to the **Summary** tab lists, instructs chat upload **or** Unfiled Expense/Revenue folders, and asks them to say when ready so matching can **re-run** on the same sheet
+- [ ] On a re-run after new matches, Summary missing-invoice tables **drop** those rows (and remove an empty block); Bank light-red highlights clear for matched rows

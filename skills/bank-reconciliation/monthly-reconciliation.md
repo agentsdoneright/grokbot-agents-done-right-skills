@@ -1,8 +1,8 @@
 ---
 name: Bank reconciliation
-version: 1.6.0
+version: 1.7.1
 description: >-
-  Version 1.6.0. Use when the user wants to reconcile a month's bank transactions
+  Version 1.7.1. Use when the user wants to reconcile a month's bank transactions
   (e.g. a bank CSV export) in their Google Sheets reconciliation workbook: on the
   first month upload the skill's scrubbed `.xlsx` template and convert it to a
   Google Sheet, copy last month's sheet thereafter, import the CSV, fill date,
@@ -16,10 +16,11 @@ description: >-
   categories change); remove empty missing-invoice title/table blocks; when both
   missing-invoice blocks are kept, leave exactly one blank row between them;
   highlight Bank Transactions rows that match those missing-invoice lists in
-  light red.
-  Also use for test mode / sample data / try with test data — run against
-  skills/bank-reconciliation/test-data fixtures instead of a live bank CSV
-  download and Gmail.
+  light red. At the end, list remaining missing invoices, point to Summary, ask
+  the operator to drop files in chat or Unfiled Expense/Revenue folders, then
+  re-run matching on the same sheet. Also use for test mode / sample data /
+  try with test data — run against skills/bank-reconciliation/test-data fixtures
+  instead of a live bank CSV download and Gmail.
 ---
 # Monthly bank reconciliation in Google Sheets
 
@@ -170,7 +171,9 @@ Then fill the Summary tab (section 10). In **test mode**, after Summary, also re
 
 ## 10. Fill the Summary tab
 
-Run this after invoice matching (sections 8–9) so the Invoice column is up to date. If the operator later asks only to refresh Summary, re-read the current transactions tab and Categories Type values and update the formulas and chart; do not rebuild Expenses by Category table formatting.
+Run this after invoice matching (sections 8–9) so the Invoice column is up to date — including **every re-run** after the operator supplies more invoices (section 11). If the operator later asks only to refresh Summary, re-read the current transactions tab and Categories Type values and update the formulas and chart; do not rebuild Expenses by Category table formatting.
+
+**After new matches:** rows that now have an Invoice must **disappear** from Missing Expense / Missing Revenue (live `FILTER`/`QUERY` formulas do this automatically when Invoice is filled). Re-evaluate candidates; **delete** a missing-invoice title and table if it has no remaining rows. Clear light-red highlights on newly matched bank rows. Leave Expenses by Category formulas and the pie chart in place (re-bind range only if needed).
 
 ### Read the template layout first
 
@@ -263,4 +266,23 @@ Create or update **one** embedded pie chart on the Summary tab titled **Expenses
 Include: the locations you used (title cells, ranges, or named ranges); whether each missing-invoice block was **kept**, **removed**, or **recreated**; when both blocks are kept, that there is exactly one blank row between the last expense-table row and the Missing Revenue Invoices title (re-checked after any spilling formula); that Bank Transactions light-red highlights match those Summary missing rows; that Expenses by Category Totals are `SUMIF`-style formulas against the transactions tab (**confirmed** on re-read, or **corrected** from static numbers); the expense-category totals and integer percentages; the missing expense and revenue rows (if any); any Type mismatches or blank Types; and whether the pie chart was created or updated.
 
 ## 11. Final step: hand back to the user
-End every run by telling the user: they may update Category names, Category Type, or Counterparty names directly on the spreadsheet; when they are finished, they should let you know so you can verify everything and correctly relink the reference tabs (`Counterparty-Match`, `Counterparties`, `Counterparty-Category`, `Categories`, and `Email matching` if names changed) and refresh the Summary formulas, the one-blank-row gap between missing-invoice tables, missing-invoice highlights, and pie chart if needed — see sections 7 and 10.
+
+### Missing invoices (required when any remain)
+
+If any missing expense or revenue invoice candidates remain after Summary (section 10):
+
+1. **List them clearly** in the chat (Date, Counterparty, Debit or Credit), grouped as expenses vs revenue. Use the same membership as the Summary Missing Expense / Missing Revenue tables (bank fees excluded from the expense list).
+2. **Point to the Summary tab** — tell the operator these lists are also on **Summary** under **Missing Expense Invoices** and **Missing Revenue Invoices**, and that matching Bank Transactions rows are highlighted in light red.
+3. **How to supply the files** — instruct the operator to either:
+   - **Drop / upload the invoice PDFs into this chat**, or
+   - Upload them into the Unfiled folders: expenses → `{drive.root_path}/{drive.accounts_folder}/{drive.unfiled_folder}/{drive.unfiled_expense_invoices}`; revenue → `{drive.root_path}/{drive.accounts_folder}/{drive.unfiled_folder}/{drive.unfiled_revenue_invoices}`.
+4. **Then re-run** — ask them to tell you when the files are in chat or Unfiled. When they have (or when they paste/upload invoices in chat), **continue on the same spreadsheet**:
+   - Match from Unfiled and/or chat uploads (sections 8–9: Unfiled → move into month Expenses/Revenue, Source=`Drive`; chat uploads → Source=`Manual`); update Invoice / VAT / Ref on the transactions tab.
+   - **Update Summary (section 10) required:** missing-invoice tables must drop every newly matched row; if a table is empty, **delete** its title and table; clear light-red highlights on matched rows; keep remaining missing rows listed and highlighted; refresh Expenses by Category / pie only as section 10 requires.
+   - Hand back again (list any invoices still missing, or confirm none remain). Do **not** rebuild the month sheet from scratch unless the operator asks.
+
+If there are **no** missing invoices, say so and skip the supply/re-run ask.
+
+### Sheet edits
+
+Also tell the operator: they may update Category names, Category Type, or Counterparty names directly on the spreadsheet; when they are finished, they should let you know so you can verify everything and correctly relink the reference tabs (`Counterparty-Match`, `Counterparties`, `Counterparty-Category`, `Categories`, and `Email matching` if names changed) and refresh the Summary formulas, the one-blank-row gap between missing-invoice tables, missing-invoice highlights, and pie chart if needed — see sections 7 and 10.

@@ -211,4 +211,11 @@ After invoice matching, fill **Summary**:
 
 ## Hand back
 
-Tell the operator they may update Category names, Category Type, or Counterparty names directly on the spreadsheet. When they are finished, they should let the agent know so it can verify everything and correctly relink the reference tabs (`Counterparty-Match`, `Counterparties`, `Counterparty-Category`, `Categories`, and `Email matching` if names changed) and refresh Summary formulas and the pie chart if needed.
+If any invoices are still missing:
+
+1. List them in chat (Date, Counterparty, amount), expenses vs revenue.
+2. Point the operator to the same lists on the **Summary** tab (**Missing Expense Invoices** / **Missing Revenue Invoices**); matching Bank Transactions rows are light red.
+3. Ask them to either drop the PDFs into the chat, or upload them to Unfiled Expense Invoices / Unfiled Revenue Invoices under Accounts.
+4. When they have done that, re-run invoice matching on the **same** spreadsheet (Unfiled → Source=`Drive`; chat upload → Source=`Manual`). **Update Summary** so newly matched rows leave the Missing Expense / Missing Revenue tables (delete an empty block entirely), clear light-red highlights on those Bank rows, and hand back again.
+
+Also tell the operator they may update Category names, Category Type, or Counterparty names directly on the spreadsheet. When they are finished, they should let the agent know so it can verify everything and correctly relink the reference tabs (`Counterparty-Match`, `Counterparties`, `Counterparty-Category`, `Categories`, and `Email matching` if names changed) and refresh Summary formulas and the pie chart if needed.
