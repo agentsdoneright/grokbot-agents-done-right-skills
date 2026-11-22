@@ -25,7 +25,7 @@ Manual alternative (always offer it): `{docs.github_account_setup}` (older pages
 ## 1. Explain and ask about permissions (required gate)
 Before anything else, tell the user plainly:
 - Doing this automatically needs your computer signed in to GitHub via GitHub's device sign-in (`gh auth login`), granting the **`repo`** permission (create a private repo, push) and the **`workflow`** permission (the repo contains `.github/workflows/` files, which GitHub refuses to push without it).
-- In Customizable mode, every later skill/rule change is committed and pushed to their private repo automatically.
+- In Customizable mode, when they finish a round of skill or rule edits, the agent will recommend saving those changes to their private copy (with a suggested message and version bump) and only save after they confirm.
 - **If they do not want to grant these permissions, they can do the steps manually** by following the GitHub account setup documentation: `{docs.github_account_setup}`. (Manual route: fork, Settings > Danger Zone > Leave fork network, then Change visibility > Make private. Afterwards give the repo URL so the local checkout can be retargeted; pushing later still needs some GitHub credential on the box.)
 
 Ask with a widget: automatic (grant permissions) vs. manual (send the doc link). If manual, send `{docs.github_account_setup}`, offer to retarget the checkout once they share their private repo URL, and stop.
@@ -67,7 +67,7 @@ git remote set-url --push upstream no_push   # keep public repo fetch-only
 In `config/profile.yaml` (never commit it): set `repo.url` to `https://github.com/<login>/{github.public_skills_repo_name}` (this becomes `{repo.url}`), keep `repo.branch: main`, set `repo.setup: customizable`.
 
 ## 8. Report
-Tell the user: repo link, that it's private and standalone, pushes to the public repo are blocked, and that skill edits will now be committed and pushed to their private repo automatically. If anything was too hard, it's fine to stay on Quick start and retry later.
+Tell the user: repo link, that it's private and standalone, saving back to the public repo is blocked, and that when they finish skill or rule edits the agent will recommend saving to their private copy (message + version) and only save after they confirm. If anything was too hard, it's fine to stay on Quick start and retry later.
 
 ## Rules
 - Never delete, rename, or change visibility of a repo without the user's explicit yes for that specific action.
