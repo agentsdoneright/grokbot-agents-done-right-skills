@@ -46,7 +46,7 @@ The four PDFs use **different layouts and field labels** on purpose (so matching
 | Brightline Ops | Left sidebar tax invoice | Sold to | GST | Balance payable |
 | Harbor Tools | Monospace receipt | Sold / Ship to | Tax | Grand total |
 
-Four Debits should get a PDF in `{drive.expenses_folder}` and a **Ref** Drive link. Suggested formatted names (clean casing OK if close):
+Four Debits should get a PDF in `{drive.expenses_folder}` and an **Invoice** Drive link. Suggested formatted names (clean casing OK if close):
 
 | Bank date | Recipient / Payer (approx) | Debit | EML `From` | Expenses filename |
 | --- | --- | ---: | --- | --- |
@@ -55,16 +55,17 @@ Four Debits should get a PDF in `{drive.expenses_folder}` and a **Ref** Drive li
 | 2024-11-12 | Brightline Ops | 75.50 | `accounts@brightline-ops.example` | `2024-11-12_Brightline Ops_75.50.pdf` |
 | 2024-11-19 | Harbor Tools | 32.99 | `billing@harbor-tools.example` | `2024-11-19_Harbor Tools_32.99.pdf` |
 
-- [ ] All four rows have non-empty **Ref** hyperlinks to Drive PDFs
-- [ ] Each **Ref** cell’s visible label is the saved expenses **filename** (not the raw URL)
-- [ ] **Ref** column/cells use **Clip** text overflow (not Wrap)
+- [ ] All four rows have non-empty **Invoice** hyperlinks to Drive PDFs
+- [ ] Each **Invoice** cell’s visible label is the saved expenses **filename** (not the raw URL)
+- [ ] **Invoice** column/cells use **Clip** text overflow (not Wrap)
+- [ ] Transactions header for that column is **Invoice** (not `Ref`)
 - [ ] PDFs came from EML attachments (not Gmail)
 - [ ] Agent matched despite differing layouts / tax field names (VAT vs GST vs sales tax vs Tax)
 - [ ] Each matched counterparty has an `Email matching` rule saved (sender / subject / attachment)
 
 ## Unmatched / skipped
 
-- [ ] **Credit** row (Client Payment / 2500.00): no invoice required; **Ref** blank
+- [ ] **Credit** row (Client Payment / 2500.00): no invoice required; **Invoice** blank
 - [ ] **Bank service fee** Debit (12.00): skipped / still missing invoice; listed in unmatched report
 
 ## Report

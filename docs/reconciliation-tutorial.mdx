@@ -33,7 +33,7 @@ This tutorial walks through a monthly bank reconciliation using a Grok Bot agent
 
 After Quick start, you can exercise the skill **without** exporting a live bank CSV or searching your Gmail inbox. Ask the agent to run bank reconciliation in **test mode** (or “try with sample / test data”).
 
-Test mode still creates a Google Sheet under your Drive root for **November 2024** (from the skill `.xlsx` template on a first month, or a copy of the prior month), imports a fixture CSV, seeds Categories / Counterparty reference tabs from the filled Bank rows, matches four sample invoice `.eml` files (with PDF attachments) from `skills/bank-reconciliation/test-data/`, and uploads expense PDFs with Ref links. It does **not** read Gmail. Compare the agent’s report to `skills/bank-reconciliation/test-data/expected-results.md`.
+Test mode still creates a Google Sheet under your Drive root for **November 2024** (from the skill `.xlsx` template on a first month, or a copy of the prior month), imports a fixture CSV, seeds Categories / Counterparty reference tabs from the filled Bank rows, matches four sample invoice `.eml` files (with PDF attachments) from `skills/bank-reconciliation/test-data/`, and uploads expense PDFs with Invoice links. It does **not** read Gmail. Compare the agent’s report to `skills/bank-reconciliation/test-data/expected-results.md`.
 
 When you are ready for a real month, continue with the live CSV export steps below.
 
@@ -86,7 +86,7 @@ Before writing, confirm tab names and column headers. Tabs usually include:
 
 On the transactions tab, locate columns by header name. Typical layout:
 
-`Date | Recipient / Payer | Category | Credit | Debit | Ref | Note` then the raw CSV area to the right.
+`Date | Recipient / Payer | Category | Credit | Debit | Invoice | Note` then the raw CSV area to the right.
 
 ## Import the CSV
 
@@ -149,7 +149,7 @@ Run this when the operator asks, or as a final optional step for debit rows.
     Otherwise search by counterparty name, raw merchant text, a window of about two weeks before to a few days after the bank date, and the amount (include original FX amounts from the raw CSV when relevant).
   </Step>
   <Step title="Attach the invoice">
-    Prefer a PDF attachment. Upload to an expenses subfolder inside the spreadsheet's folder as `YYYY-MM-DD_Counterparty_Amount.pdf`. Put a Drive hyperlink in **Ref** whose **visible label is that filename** (not the raw URL), and format **Ref** with **Clip** overflow (not Wrap). Add a **Note** only when something needs attention (FX/VAT mismatch, multi-charge invoice, uncertain match, and similar).
+    Prefer a PDF attachment. Upload to an expenses subfolder inside the spreadsheet's folder as `YYYY-MM-DD_Counterparty_Amount.pdf`. Put a Drive hyperlink in **Invoice** whose **visible label is that filename** (not the raw URL), and format **Invoice** with **Clip** overflow (not Wrap). Add a **Note** only when something needs attention (FX/VAT mismatch, multi-charge invoice, uncertain match, and similar).
 
     Immediately save or update the working Gmail rule in `Email matching`. Skip bank-fee rows unless an invoice clearly exists. Never send, reply to, or change emails.
   </Step>
