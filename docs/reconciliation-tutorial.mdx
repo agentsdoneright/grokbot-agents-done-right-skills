@@ -159,7 +159,7 @@ Unfiled expense invoices live at `Drive root / Unfiled / Expense Invoices` (prof
 
 <Steps>
   <Step title="Check Unfiled expense invoices">
-    For each debit row, search the Unfiled expense invoices folder first. On a match, **move** the PDF into the month Expenses folder (rename to `YYYY-MM-DD_Counterparty_Amount.pdf` if needed), set Invoice / VAT / Ref as usual, and set **Source = `Drive`**. Do not add an `Email matching` rule solely for a Drive match.
+    For each debit row, search the Unfiled expense invoices folder first. On a match, **move** the PDF into the month Expenses folder (rename to `YYYYMMDD_Counterparty_Ref.pdf` if needed — `Ref` is the invoice reference number, e.g. `20261115_Acme_INV78.pdf`), set Invoice / VAT / Ref as usual, and set **Source = `Drive`**. Do not add an `Email matching` rule solely for a Drive match.
   </Step>
   <Step title="Search with Email matching rules">
     If Unfiled has no match, check `Email matching`. If the counterparty is listed, search Gmail with that rule, narrowed by date and amount.
@@ -168,7 +168,7 @@ Unfiled expense invoices live at `Drive root / Unfiled / Expense Invoices` (prof
     Otherwise search by counterparty name, raw merchant text, a window of about two weeks before to a few days after the bank date, and the amount (include original FX amounts from the raw CSV when relevant).
   </Step>
   <Step title="Attach an email-matched invoice">
-    Prefer a PDF attachment. Upload to an expenses subfolder inside the spreadsheet's folder as `YYYY-MM-DD_Counterparty_Amount.pdf`. Put a Drive hyperlink in **Invoice** whose **visible label is that filename** (not the raw URL), and format **Invoice** with **Clip** overflow (not Wrap). Fill **VAT** (tax amount) and **Ref** (invoice number) from the invoice when present. Set **Source = `Email`**. Add **Notes** only when something needs attention (FX/VAT mismatch, multi-charge invoice, uncertain match, and similar).
+    Prefer a PDF attachment. Upload to an expenses subfolder inside the spreadsheet's folder as `YYYYMMDD_Counterparty_Ref.pdf` (`Ref` = invoice reference number, e.g. `20261115_Acme_INV78.pdf`). Put a Drive hyperlink in **Invoice** whose **visible label is that filename** (not the raw URL), and format **Invoice** with **Clip** overflow (not Wrap). Fill **VAT** (tax amount) and **Ref** (invoice number) from the invoice when present. Set **Source = `Email`**. Add **Notes** only when something needs attention (FX/VAT mismatch, multi-charge invoice, uncertain match, and similar).
 
     Update `Counterparties` Email, Phone, Registration, and Address from the invoice. Prefer a finance / billing / accounts email when several appear. If those values changed versus what was already on the sheet, overwrite them and tell the operator what changed.
 
@@ -189,13 +189,13 @@ Unfiled revenue invoices live at `Drive root / Unfiled / Revenue Invoices` (prof
     Create a revenue subfolder inside the spreadsheet's folder if needed. Look there first for an existing matching PDF. If linking an already-filed file and Source is empty, leave Source blank.
   </Step>
   <Step title="Check Unfiled revenue invoices">
-    Otherwise search Unfiled revenue invoices. On a match, **move** the PDF into the month Revenue folder, rename if needed, and set **Source = `Drive`**.
+    Otherwise search Unfiled revenue invoices. On a match, **move** the PDF into the month Revenue folder, rename to `YYYYMMDD_Counterparty_Ref.pdf` if needed (`Ref` = invoice reference number), and set **Source = `Drive`**.
   </Step>
   <Step title="Search Gmail Sent">
     Otherwise search Sent mail for outbound invoices to that client (name, amount, similar date window). In test mode, use the sample sent `.eml` fixtures instead of Gmail.
   </Step>
   <Step title="Attach an email-matched outbound invoice">
-    Upload to the revenue folder as `YYYY-MM-DD_Counterparty_Amount.pdf`. Set the **Invoice** hyperlink (filename label, Clip overflow), fill **VAT** / **Ref** when present, and set **Source = `Email`**. Update client contact fields on `Counterparties` from the invoice when available; tell the operator if values changed. The Bank **Counterparty** remains the paying client from the bank CSV — seed that name on `Counterparties` if it is new.
+    Upload to the revenue folder as `YYYYMMDD_Counterparty_Ref.pdf` (`Ref` = invoice reference number, e.g. `20261115_Acme_INV78.pdf`). Set the **Invoice** hyperlink (filename label, Clip overflow), fill **VAT** / **Ref** when present, and set **Source = `Email`**. Update client contact fields on `Counterparties` from the invoice when available; tell the operator if values changed. The Bank **Counterparty** remains the paying client from the bank CSV — seed that name on `Counterparties` if it is new.
   </Step>
 </Steps>
 

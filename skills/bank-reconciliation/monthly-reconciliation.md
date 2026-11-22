@@ -1,8 +1,8 @@
 ---
 name: Bank reconciliation
-version: 1.1.0
+version: 1.1.1
 description: >-
-  Version 1.1.0. Use when the user wants to reconcile a month's bank transactions
+  Version 1.1.1. Use when the user wants to reconcile a month's bank transactions
   (e.g. a bank CSV export) in their Google Sheets reconciliation workbook: on the
   first month upload the skill's scrubbed `.xlsx` template and convert it to a
   Google Sheet, copy last month's sheet thereafter, import the CSV, fill date,
@@ -113,13 +113,13 @@ Unfiled expense path: `{drive.root_path}/{drive.unfiled_folder}/{drive.unfiled_e
 For every `{drive.sheet_tab}` row with a Debit:
 
 1. **Check Unfiled first.** Search `{drive.root_path}/{drive.unfiled_folder}/{drive.unfiled_expense_invoices}` for a PDF that matches Date / Counterparty / Debit.
-   - **When an Unfiled match is found:** **move** (do not copy) the file into the month `{drive.expenses_folder}`. Rename to `YYYY-MM-DD_Counterparty_Amount.pdf` if needed; do not leave duplicates. Set **Invoice** as a filename-labeled hyperlink with **Clip** overflow (same rules as below). Fill **VAT** / **Ref** from the invoice when present. Write **Notes** only when something needs attention. Set **Source = `Drive`**. Update `Counterparties` contact fields from the invoice when present (same rules as email matches). Do **not** add or update `Email matching` solely because of a Drive match.
+   - **When an Unfiled match is found:** **move** (do not copy) the file into the month `{drive.expenses_folder}`. Rename to `YYYYMMDD_Counterparty_Ref.pdf` if needed (`Ref` = invoice reference number, e.g. `20261115_Acme_INV78.pdf`); do not leave duplicates. Set **Invoice** as a filename-labeled hyperlink with **Clip** overflow (same rules as below). Fill **VAT** / **Ref** from the invoice when present. Write **Notes** only when something needs attention. Set **Source = `Drive`**. Update `Counterparties` contact fields from the invoice when present (same rules as email matches). Do **not** add or update `Email matching` solely because of a Drive match.
 2. **Else check `Email matching`.** (Live mode only for Gmail.) Read the tab's headers and rows. If the row's Counterparty is listed, search Gmail on `{google_account}` with that rule (sender, subject keywords, attachment hints, etc.), narrowed by the row's Date and Debit amount. In **test mode**, use the EML fixtures instead of Gmail.
 3. **Otherwise do a general search** on `{google_account}` (live mode): the counterparty name and raw merchant text, a date window of about two weeks before to a few days after the bank date, and the amount (also the original currency amount from the raw CSV columns for FX charges, e.g. USD or GBP). Use Date, Counterparty and Debit as the key fields to confirm the match. In **test mode**, match against expense EMLs as in Test mode.
 4. **When an email match is found:**
    - Get the invoice: prefer a PDF attachment. If it's only in the body or behind a link, save the email as a PDF or download the linked PDF under `{workspace.local_path}/`, and say so in Notes.
-   - Upload it to `{drive.expenses_folder}` inside the spreadsheet's folder. Name it `YYYY-MM-DD_Counterparty_Amount.pdf` and don't upload duplicates.
-   - Put a link to the Drive file in the row's **Invoice** column: the **visible link text must be the saved filename** (e.g. `2024-11-05_Acme Cloud_49.00.pdf`), not the raw URL. Use a Sheets hyperlink whose label is that filename (for example `=HYPERLINK("https://…", "YYYY-MM-DD_Counterparty_Amount.pdf")`, or the connector equivalent). Format the **Invoice** column (or those cells) with **Clip** text overflow — do not Wrap — so long labels stay readable in a narrow column.
+   - Upload it to `{drive.expenses_folder}` inside the spreadsheet's folder. Name it `YYYYMMDD_Counterparty_Ref.pdf` (`Ref` = invoice reference number, e.g. `20261115_Acme_INV78.pdf`) and don't upload duplicates.
+   - Put a link to the Drive file in the row's **Invoice** column: the **visible link text must be the saved filename** (e.g. `20241105_Acme Cloud_INV-AC-1042.pdf`), not the raw URL. Use a Sheets hyperlink whose label is that filename (for example `=HYPERLINK("https://…", "YYYYMMDD_Counterparty_Ref.pdf")`, or the connector equivalent). Format the **Invoice** column (or those cells) with **Clip** text overflow — do not Wrap — so long labels stay readable in a narrow column.
    - Fill **VAT** with the tax amount extracted from the invoice when present; leave blank if the invoice has no tax line.
    - Fill **Ref** with the invoice reference / invoice number when present; leave blank if none.
    - Set **Source = `Email`**.
@@ -141,12 +141,12 @@ Unfiled revenue path: `{drive.root_path}/{drive.unfiled_folder}/{drive.unfiled_r
 For every `{drive.sheet_tab}` row with a Credit:
 
 1. Ensure a Drive subfolder named `{drive.revenue_folder}` exists inside the spreadsheet's folder (create once, then reuse).
-2. **Check `{drive.revenue_folder}` first** for an existing PDF that matches Date / Counterparty / Credit (same `YYYY-MM-DD_Counterparty_Amount.pdf` naming when possible). If linking that already-filed file this run and **Source** is empty, leave **Source** blank (it was not matched from Unfiled this run).
-3. **Else check Unfiled.** Search `{drive.root_path}/{drive.unfiled_folder}/{drive.unfiled_revenue_invoices}` for a matching PDF. On match: **move** (do not copy) into the month `{drive.revenue_folder}`, rename to `YYYY-MM-DD_Counterparty_Amount.pdf` if needed, set Invoice / VAT / Ref / Notes as for expenses, and set **Source = `Drive`**.
+2. **Check `{drive.revenue_folder}` first** for an existing PDF that matches Date / Counterparty / Credit (same `YYYYMMDD_Counterparty_Ref.pdf` naming when possible). If linking that already-filed file this run and **Source** is empty, leave **Source** blank (it was not matched from Unfiled this run).
+3. **Else check Unfiled.** Search `{drive.root_path}/{drive.unfiled_folder}/{drive.unfiled_revenue_invoices}` for a matching PDF. On match: **move** (do not copy) into the month `{drive.revenue_folder}`, rename to `YYYYMMDD_Counterparty_Ref.pdf` if needed (`Ref` = invoice reference number), set Invoice / VAT / Ref / Notes as for expenses, and set **Source = `Drive`**.
 4. **Otherwise search Gmail Sent** on `{google_account}` for outbound invoices to that client (counterparty name, amount, date window of about two weeks before to a few days after the bank date). In **test mode**, use `skills/bank-reconciliation/test-data/emails/sent/*.eml` instead of Gmail Sent.
 5. **When an email match is found:**
    - Prefer a PDF attachment; stage under `{workspace.local_path}/` if extracting from email.
-   - Upload to `{drive.revenue_folder}` as `YYYY-MM-DD_Counterparty_Amount.pdf` (no duplicates).
+   - Upload to `{drive.revenue_folder}` as `YYYYMMDD_Counterparty_Ref.pdf` (`Ref` = invoice reference number, e.g. `20261115_Acme_INV78.pdf`; no duplicates).
    - Set **Invoice** as a filename-labeled hyperlink with Clip overflow (same rules as expenses).
    - Fill **VAT** and **Ref** from the outbound invoice when present.
    - Set **Source = `Email`**.

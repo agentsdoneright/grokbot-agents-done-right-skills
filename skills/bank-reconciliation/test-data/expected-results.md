@@ -51,10 +51,10 @@ Four Debits should get a PDF in `{drive.expenses_folder}` and an **Invoice** Dri
 
 | Bank date | Counterparty (approx) | Debit | Ref (approx) | VAT (approx) | EML `From` | Expenses filename |
 | --- | --- | ---: | --- | ---: | --- | --- |
-| 2024-11-05 | Acme Cloud | 49.00 | INV-AC-1042 | 3.63 | `billing@acme-cloud.example` | `2024-11-05_Acme Cloud_49.00.pdf` (or equivalent) |
-| 2024-11-08 | Northwind SaaS | 120.00 | NW-8891 | 20.00 | `invoices@northwind-saas.example` | `2024-11-08_Northwind SaaS_120.00.pdf` |
-| 2024-11-12 | Brightline Ops | 75.50 | BL-2207 | (from invoice if stated) | `accounts@brightline-ops.example` | `2024-11-12_Brightline Ops_75.50.pdf` |
-| 2024-11-19 | Harbor Tools | 32.99 | HT-5510 | (from invoice if stated) | `billing@harbor-tools.example` | `2024-11-19_Harbor Tools_32.99.pdf` |
+| 2024-11-05 | Acme Cloud | 49.00 | INV-AC-1042 | 3.63 | `billing@acme-cloud.example` | `20241105_Acme Cloud_INV-AC-1042.pdf` (or equivalent) |
+| 2024-11-08 | Northwind SaaS | 120.00 | NW-8891 | 20.00 | `invoices@northwind-saas.example` | `20241108_Northwind SaaS_NW-8891.pdf` |
+| 2024-11-12 | Brightline Ops | 75.50 | BL-2207 | (from invoice if stated) | `accounts@brightline-ops.example` | `20241112_Brightline Ops_BL-2207.pdf` |
+| 2024-11-19 | Harbor Tools | 32.99 | HT-5510 | (from invoice if stated) | `billing@harbor-tools.example` | `20241119_Harbor Tools_HT-5510.pdf` |
 
 - [ ] All four rows have non-empty **Invoice** hyperlinks to Drive PDFs under `{drive.expenses_folder}`
 - [ ] Each **Invoice** cell’s visible label is the saved expenses **filename** (not the raw URL)
@@ -73,8 +73,8 @@ Two Credits should get a PDF in `{drive.revenue_folder}` and an **Invoice** Driv
 
 | Bank date | Counterparty (approx) | Credit | Ref | VAT | Sent EML | Revenue filename |
 | --- | --- | ---: | --- | ---: | --- | --- |
-| 2024-11-20 | Riverstone Consulting | 1800.00 | DC-2401 | 0.00 | `01-riverstone-dc-2401.eml` | `2024-11-20_Riverstone Consulting_1800.00.pdf` (or equivalent spelling) |
-| 2024-11-22 | Pixelforge Studio | 950.00 | DC-2402 | 64.17 | `02-pixelforge-dc-2402.eml` | `2024-11-22_Pixelforge Studio_950.00.pdf` |
+| 2024-11-20 | Riverstone Consulting | 1800.00 | DC-2401 | 0.00 | `01-riverstone-dc-2401.eml` | `20241120_Riverstone Consulting_DC-2401.pdf` (or equivalent spelling) |
+| 2024-11-22 | Pixelforge Studio | 950.00 | DC-2402 | 64.17 | `02-pixelforge-dc-2402.eml` | `20241122_Pixelforge Studio_DC-2402.pdf` |
 
 - [ ] Both revenue rows have **Invoice** hyperlinks to PDFs under `{drive.revenue_folder}` (not Expenses)
 - [ ] **Source** = `Email` on both matched revenue rows
