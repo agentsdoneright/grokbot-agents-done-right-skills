@@ -2,17 +2,14 @@
 title: "Reconciliation tutorial"
 description: "Reconcile a month of bank transactions with invoices"
 ---
-This tutorial walks through a monthly bank reconciliation using a Grok Bot agent.
+This tutorial walks through a monthly bank reconciliation using a Grok Bot agent. Work is split across three skills: **Import bank CSV**, **Categorise bank data**, and **Match invoices**.
 
 <Info>
  The agent will:
 
-1. Prepare the month's Google Drive folder and Google Sheet import the bank CSV data
-2. Fill the reconciliation columns and categorise each transaction
-3. Seed Categories and Counterparty reference tabs from those Bank rows
-4. Verify totals
-5. Match expense invoices (received) and revenue invoices (sent) with the bank transactions — Unfiled Drive folders first, then email, then manual chat uploads
-6. Set each Bank row's **Source** (`Drive`, `Email`, or `Manual`) and save links in the month Expenses and Revenue folders (moving Unfiled matches into those folders)
+1. **Import** — prepare the month's Google Drive folder and Google Sheet, paste the bank CSV into the raw import columns only
+2. **Categorise** — fill Date, Counterparty, Category, Credit, and Debit; seed Categories and Counterparty reference tabs; verify totals
+3. **Match invoices** — match expense invoices (received) and revenue invoices (sent) — Unfiled Drive folders first, then email, then manual chat uploads; set each Bank row's **Source** (`Drive`, `Email`, or `Manual`); fill Summary; save links in the month Expenses and Revenue folders
 </Info>
 
 ## Prerequisites
@@ -31,11 +28,17 @@ This tutorial walks through a monthly bank reconciliation using a Grok Bot agent
 
 ## Try with test data
 
-After Quick start, you can exercise the skill **without** exporting a live bank CSV or searching your Gmail inbox. Ask the agent to run bank reconciliation in **test mode** (or “try with sample / test data”).
+After Quick start, you can exercise the skills **without** exporting a live bank CSV or searching your Gmail inbox. Ask the agent to run the **Bookkeeping test** skill (or “try with sample / test data”).
 
-Test mode still creates a Google Sheet under your Drive Accounts root (`{drive.root_path}/{drive.accounts_folder}`) for **November 2024** (from the skill `.xlsx` template on a first month, or a copy of the prior month), imports a fixture CSV, seeds Categories / Counterparty reference tabs from the filled Bank rows, matches sample expense `.eml` files and outbound revenue `.eml` files (with PDF attachments) from `skills/bank-reconciliation/test-data/`, and uploads PDFs to Expenses and Revenue with Invoice links. It does **not** read Gmail. Compare the agent’s report to `skills/bank-reconciliation/test-data/expected-results.md`.
+That skill only **stages** fixtures and writes a session file under `{workspace.local_path}/`. You then run the real skills between phases:
 
-When you are ready for a real month, continue with the live CSV export steps below.
+1. **Test Phase 1** — stages `skills/bank-reconciliation/test-data/bank-statement.csv` into Extracts and defines the recon `.eml` fixtures as the inbox/sent mail. Then run **Import → Categorise → Match invoices**.
+2. **Test Phase 2** — adds `skills/unpaid-invoices/test-data/emails/01-cobalt-mail.eml` to the fixture inbox. Then run **Unpaid expense invoices**.
+3. **Test Phase 3** — stages `skills/unpaid-invoices/test-data/bank-statement-with-payment.csv` into Extracts only. Then run **Import → Categorise → Unpaid expense invoices** again.
+
+While the session is active, live skills use November 2024 and local EMLs instead of Gmail. Compare results to `skills/bookkeeping-test/expected-results.md`.
+
+When you are ready for a real month, deactivate the test session (or delete the session file) and continue with the live CSV export steps below.
 
 ## Export your monthly bank statement
 
@@ -53,7 +56,7 @@ The skill maps common bank CSV layouts, so the agent can import statements even 
   Automating monthly bank pulls is possible later, but only with tightly restricted access. For this tutorial, export a CSV by hand — simpler and safer.
 </Tip>
 
-## Run the Reconciliation Skill
+## Run Import bank CSV
 
 ## Prepare the month's folder and sheet
 
@@ -94,7 +97,9 @@ On the transactions tab, locate columns by header name. Typical layout:
 
 Paste the CSV into the first empty column to the right of the reconciliation columns (often starting at column K). If the template already has raw CSV headers there, keep them and write data from row 2; otherwise put headers in row 1 and data from row 2. Write numbers as numbers and dates as real dates.
 
-After writing the import, hide every imported raw CSV column (typically K onward). Keep the ten reconciliation columns visible. The agent may still read the hidden columns when filling or matching; do not unhide them unless the operator asks.
+**Import stops here** — do not fill Date, Counterparty, Category, Credit, or Debit in this skill. Then run **Categorise bank data**.
+
+## Run Categorise bank data
 
 ## Fill the reconciliation columns
 
@@ -141,16 +146,18 @@ When the operator says they have finished editing Category or Counterparty names
 3. Sync `Counterparty-Category` and unique spellings into `Categories`
 4. If a counterparty was renamed, update `Email matching` so invoice rules still line up
 
+## Run Match invoices
+
 ## Match expense invoices (debits)
 
-Run this when the operator asks, or as a final optional step for debit rows.
+Run this when the operator asks to match invoices to bank rows.
 
 **Source** on the Bank row records how the invoice was found:
 
 | Source | Meaning |
 | --- | --- |
 | `Drive` | Found under Unfiled expense invoices and moved into the month Expenses folder |
-| `Email` | Found in Gmail (or test-mode `.eml` fixtures) |
+| `Email` | Found in Gmail (or test-session `.eml` fixtures) |
 | `Manual` | Operator uploaded the file into the agent chat |
 
 Search order: **Unfiled → email → Manual** (Manual only after the unmatched report, when the operator uploads).
@@ -192,7 +199,7 @@ Unfiled revenue invoices live at `Drive root / Accounts / Unfiled / Revenue Invo
     Otherwise search Unfiled revenue invoices. On a match, **move** the PDF into the month Revenue folder, rename to `YYYYMMDD_Counterparty_Ref.pdf` if needed (`Ref` = invoice reference number), and set **Source = `Drive`**.
   </Step>
   <Step title="Search Gmail Sent">
-    Otherwise search Sent mail for outbound invoices to that client (name, amount, similar date window). In test mode, use the sample sent `.eml` fixtures instead of Gmail.
+    Otherwise search Sent mail for outbound invoices to that client (name, amount, similar date window). When a bookkeeping test session is active, use the sample sent `.eml` fixtures instead of Gmail.
   </Step>
   <Step title="Attach an email-matched outbound invoice">
     Upload to the revenue folder as `YYYYMMDD_Counterparty_Ref.pdf` (`Ref` = invoice reference number, e.g. `20261115_Acme_INV78.pdf`). Set the **Invoice** hyperlink (filename label, Clip overflow), fill **VAT** / **Ref** when present, and set **Source = `Email`**. Update client contact fields on `Counterparties` from the invoice when available; tell the operator if values changed. The Bank **Counterparty** remains the paying client from the bank CSV — seed that name on `Counterparties` if it is new.
@@ -203,12 +210,12 @@ Report the revenue folder link, credit matches (with Source counts), and credit 
 
 ## Fill the Summary tab
 
-After invoice matching, fill **Summary**:
+After invoice matching, fill **Summary** (Match invoices skill):
 
-- **Show when data / delete when empty** for every Summary table: if a block has no data rows, **delete** its title and entire table (and the Expenses by Category pie if that table is removed); if it has data, keep or **recreate** it. Same pattern for empty Unpaid shells from the template (delete empty; the unpaid-invoices skill recreates Unpaid Expense when it has rows).
+- **Keep blocks; clear data when empty** for every Summary table: never delete title/headers (or the Expenses by Category pie) when there are no data rows — clear data under the headers only. Leave empty Unpaid shells intact for the unpaid-invoices skill.
 - **Missing Expense Invoices** / **Missing Revenue Invoices** — live formulas over the transactions tab (Debit/Credit with blank Invoice). **Insert sheet rows** under a table header before writing a spill so lower titles (for example Missing Revenue under Missing Expense) are never overwritten. On **Bank Transactions**, highlight those same missing-invoice rows in light red so they match the Summary tables (bank-fee rows excluded from Missing Expense stay unhighlighted for this purpose).
 - **Expenses by Category** — Category labels from expense-typed rows on `Categories` (**Type** = Expense). **Total** cells use formulas that sum **Debit** on the transactions tab by Category (for example `SUMIF`), so changing a bank row’s Category updates the table and the linked pie chart. **Percentage** is formula-driven over those Totals (`0%` display).
-- When Expenses by Category is kept, create or update **one** pie chart bound to Category + Total (spare rows under the table; no duplicate charts on reruns).
+- Create or update **one** pie chart bound to Category + Total (spare rows under the table; no duplicate charts on reruns; do not delete the pie when the category table is empty).
 
 ## Hand back
 
@@ -217,6 +224,6 @@ If any invoices are still missing:
 1. List them in chat (Date, Counterparty, amount), expenses vs revenue.
 2. Point the operator to the same lists on the **Summary** tab (**Missing Expense Invoices** / **Missing Revenue Invoices**); matching Bank Transactions rows are light red.
 3. Ask them to either drop the PDFs into the chat, or upload them to Unfiled Expense Invoices / Unfiled Revenue Invoices under Accounts.
-4. When they have done that, re-run invoice matching on the **same** spreadsheet (Unfiled → Source=`Drive`; chat upload → Source=`Manual`). **Update Summary** so newly matched rows leave the Missing Expense / Missing Revenue tables (delete an empty block entirely), clear light-red highlights on those Bank rows, and hand back again.
+4. When they have done that, re-run **Match invoices** on the **same** spreadsheet (Unfiled → Source=`Drive`; chat upload → Source=`Manual`). **Update Summary** so newly matched rows leave the Missing Expense / Missing Revenue data rows (keep the table blocks; clear data when empty), clear light-red highlights on those Bank rows, and hand back again.
 
-Also tell the operator they may update Category names, Category Type, or Counterparty names directly on the spreadsheet. When they are finished, they should let the agent know so it can verify everything and correctly relink the reference tabs (`Counterparty-Match`, `Counterparties`, `Counterparty-Category`, `Categories`, and `Email matching` if names changed) and refresh Summary formulas and the pie chart if needed.
+Also tell the operator they may update Category names, Category Type, or Counterparty names directly on the spreadsheet. When they are finished, they should let the agent know so it can remapping via **Categorise bank data**, then refresh Summary via **Match invoices** if needed.

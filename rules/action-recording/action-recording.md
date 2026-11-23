@@ -30,7 +30,7 @@ Apply for guided work in this workspace (Quick start, skill runs, rule applicati
 Include on every event:
 
 - `guidance.kind`: `skill` | `rule` | `user_instruction` | `agents`
-- `guidance.id`: repo-relative path (e.g. `skills/bank-reconciliation/monthly-reconciliation.md`, `rules/action-recording/action-recording.md`) or a short label for `AGENTS.md` / user instruction
+- `guidance.id`: repo-relative path (e.g. `skills/bank-reconciliation/import-bank-csv.md`, `rules/action-recording/action-recording.md`) or a short label for `AGENTS.md` / user instruction
 - `guidance.version`: frontmatter `version` when present; `unversioned` if the file has no version; omit or `null` for pure `user_instruction`
 
 When several skills/rules apply, use the primary one driving the action.
@@ -78,7 +78,7 @@ Example event:
   "tool": { "namespace": "plugin-google-drive-google-drive", "name": "search" },
   "guidance": {
     "kind": "skill",
-    "id": "skills/bank-reconciliation/monthly-reconciliation.md",
+    "id": "skills/bank-reconciliation/import-bank-csv.md",
     "version": "1.2.0"
   }
 }
