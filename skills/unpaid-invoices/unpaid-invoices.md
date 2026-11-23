@@ -1,8 +1,8 @@
 ---
 name: Unpaid expense invoices
-version: 1.1.2
+version: 1.1.3
 description: >-
-  Version 1.1.2. Use when the user wants to find unpaid expense invoices in their
+  Version 1.1.3. Use when the user wants to find unpaid expense invoices in their
   inbox, list invoices received but not yet paid, check pending payments awaiting
   the bank statement, or refresh the Summary Unpaid Expense Invoices table.
   Searches Gmail inbox from the first day of last month, matches Debit rows on
@@ -36,36 +36,28 @@ Run **test mode** when the operator asks for unpaid invoices with **test mode**,
 
 **Prerequisite:** bank reconciliation **test mode** already completed for November 2024 (`{YYYY}` = `2024`, `{YYYYMM}` = `202411`) so the Nov recon sheet and Debits exist. If it has not been run, stop and tell the operator to run bank-reconciliation test mode first.
 
-In test mode the Drive / Sheets path is unchanged (read Nov sheet Debits; write Summary Unpaid Expense Invoices; upload PDFs to month `{drive.expenses_folder}`). Only **today**, **inbox search**, and (in phase 2) the **bank extract update** change:
+In test mode only **today** and **inbox search** change; then continue with the rest of this skill as usual (sections 1–9). Do **not** import a payment CSV, append bank Debits, or otherwise change the Nov transactions tab.
 
 | Live | Test mode |
 | --- | --- |
 | Real calendar today | Fixed **`2024-11-25`** — last transaction date on the bank-reconciliation test extract (when that extract was last done). Do **not** use the real calendar date |
-| Gmail inbox on `{google_account}` | Parse local `.eml` files — **never** search or change Gmail. Unpaid fixture: `skills/unpaid-invoices/test-data/emails/*.eml`. Also parse `skills/bank-reconciliation/test-data/emails/*.eml` (not under `sent/`) so already-paid Nov vendors settle against existing Debits |
-| Bank Debits from current + previous month sheets | Read Debits from the **November 2024** recon sheet from bank-reconciliation test mode (previous month Oct usually missing — note it; do not invent Oct data) |
+| Gmail inbox on `{google_account}` | Parse local `.eml` files — **never** search or change Gmail |
+| Bank Debits from current + previous month sheets | Read Debits from the **November 2024** recon sheet from bank-reconciliation test mode (previous month Oct usually missing — note it; do not invent Oct data). Do **not** add rows to that sheet |
 
-**Derived windows with fixed today:** `email_after` = `2024-10-01`; current month = Nov 2024; grace last working days = 20, 21, 22, 25 Nov. Cobalt Mail EML dated **18 Nov** is outside grace → `unpaid` when unmatched.
+**Test-mode start (then run the rest of the skill):**
+
+1. Set **today** = `2024-11-25`. Resolve months / sheets as in section 1 using that date (target = Nov `Y202411` sheet).
+2. Skip live Gmail. Open each EML in `skills/unpaid-invoices/test-data/emails/` and each in `skills/bank-reconciliation/test-data/emails/` (not `sent/`).
+
+Then continue from section 2 (or section 3 extraction through sections 4–9) using those EMLs as the inbox. Never search or change Gmail. Never write to the Bank / transactions tab.
+
+**Derived windows with fixed today:** `email_after` = `2024-10-01`; current month = Nov 2024; grace last working days = 20, 21, 22, 25 Nov. Cobalt Mail EML dated **18 Nov** is outside grace → `unpaid` when unmatched. The four recon expense EMLs should settle against existing Nov Debits; Cobalt Mail (`CM-4418`, `$88.00`) has no Debit → appears on **Unpaid Expense Invoices**.
 
 **Invoice addressee:** expense fixtures use **Demo Company Ltd**. For addressee checks in test mode, treat that name as the expected company (do not flag a mismatch solely because it differs from `{company.name}`).
 
 **Fixture paths** are repo-relative (`skills/unpaid-invoices/test-data/…` and the recon email pack above). They are committed sample data — not `{workspace.local_path}` disposable files. When extracting a PDF from an EML before Drive upload, stage under `{workspace.local_path}/`.
 
-### Phase 1 — unpaid invoice
-
-1. Set **today** = `2024-11-25`. Resolve months / sheets as in section 1 using that date (target = Nov `Y202411` sheet).
-2. Skip live Gmail. Open each EML in `skills/unpaid-invoices/test-data/emails/` and each in `skills/bank-reconciliation/test-data/emails/` (not `sent/`). Extract Counterparty, Amount, Ref, received date, PDF as in section 3.
-3. Read Nov Debits (section 4). Match and assign Status (sections 5–6). The four recon expense vendors settle against Nov Debits; **Cobalt Mail** (`CM-4418`, `$88.00`) has no Debit → **Status = `unpaid`**.
-4. Upload Cobalt PDF to month `{drive.expenses_folder}` and fill Summary **Unpaid Expense Invoices** (sections 7–8). Hide the block only if zero rows (phase 1 has one row — show it).
-5. Report (section 9), then read `skills/unpaid-invoices/test-data/expected-results.md` **Phase 1** and report pass/fail (including that Gmail was not used).
-
-### Phase 2 — payment appears on updated extract
-
-Run when the operator asks to continue test mode with the payment / updated statement (or after phase 1 when they say the payment extract is ready).
-
-1. Copy `skills/unpaid-invoices/test-data/bank-statement-with-payment.csv` into the Nov `{drive.extracts_folder}` month folder (create folders if needed). Import or append so the Nov transactions tab gains the Cobalt Debit row (`2024-11-25`, `COBALT MAIL *SUB`, Debit `88.00`) consistently with bank-reconciliation CSV import rules (fill Date / Counterparty / Debit on the new row; leave Invoice blank on the bank row unless matching elsewhere). Do **not** rebuild the whole Nov sheet from scratch unless the operator asks.
-2. Re-run unpaid match with the same fixed today and the same EML set as phase 1.
-3. Cobalt now matches the new Debit → **drop** from Unpaid Expense Invoices; **delete** the entire unpaid block if zero rows remain.
-4. Report, then check `skills/unpaid-invoices/test-data/expected-results.md` **Phase 2** pass/fail.
+After the run, read `skills/unpaid-invoices/test-data/expected-results.md` and report pass/fail (including that Gmail was not used and the transactions tab was not modified).
 
 ## Prerequisites
 
@@ -75,7 +67,7 @@ Run when the operator asks to continue test mode with the payment / updated stat
 
 ## 1. Resolve months, sheets, and email window
 
-- **Today** = the run date in the operator’s locale (calendar date). In **test mode**, today is fixed to **`2024-11-25`** (see Test mode).
+- **Today** = the run date in the operator’s locale (calendar date). In **test mode**, today is fixed to `2024-11-25` (see Test mode).
 - **Current month** = calendar month of today; **previous month** = the month before that (year rolls for January).
 - **Email search start (`email_after`):** first calendar day of the **previous** month. Example: today 23 Nov → search mail after `YYYY/10/01` (Gmail `after:YYYY/M/D` with no leading zeros required). In **test mode**, `email_after` = `2024-10-01`.
 - **Locate recon sheets** the same way as bank reconciliation:
@@ -102,7 +94,7 @@ On `{google_account}` (live mode), search **inbox only** (not Sent, not Trash) f
 
 - Subject / body cues: `invoice`, `tax invoice`; treat `receipt` as an invoice only when it is clearly a payable vendor bill.
 - Prefer messages with PDF attachments.
-- Optionally boost with sender addresses / domains from the target sheet’s **`Email matching`** tab when that tab has rows.
+- Optionally boost with sender addresses / domains from the target sheet’s `Email matching` tab when that tab has rows.
 
 For each candidate message:
 
@@ -142,9 +134,9 @@ Identity key: **Ref + Counterparty + Amount** (same dedupe rules as section 3). 
 **Status priority** (apply in order):
 
 1. Bank match (section 5) → **drop** the row (settled). Count for the report.
-2. Else if **Paid** is true → **Status = `pending`** (awaiting statement). If **Date Paid** is blank, set **Date Paid** to **today**. Do not clear a non-blank Date Paid or Note.
-3. Else if the **email received** date is within the last `{grace_working_days}` **working days** (Mon–Fri only, counting backward from today) → **Status = `pending`**.
-4. Else → **Status = `unpaid`**.
+2. Else if **Paid** is true → **Status =** `pending` (awaiting statement). If **Date Paid** is blank, set **Date Paid** to **today**. Do not clear a non-blank Date Paid or Note.
+3. Else if the **email received** date is within the last `{grace_working_days}` **working days** (Mon–Fri only, counting backward from today) → **Status =** `pending`.
+4. Else → **Status =** `unpaid`.
 
 Allowed Status values on the sheet: `pending` and `unpaid` only (lowercase).
 
@@ -152,7 +144,7 @@ Allowed Status values on the sheet: `pending` and `unpaid` only (lowercase).
 
 1. Operator sees an `unpaid` (or grace `pending`) row.
 2. Operator pays the vendor, then ticks **Paid**.
-3. Status becomes / stays **`pending`** until a matching Debit appears on a loaded recon sheet; then the skill drops the row on a later run.
+3. Status becomes / stays `pending` until a matching Debit appears on a loaded recon sheet; then the skill drops the row on a later run.
 
 **Date Paid when Paid is checked:**
 
