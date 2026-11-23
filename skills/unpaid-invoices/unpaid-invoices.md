@@ -1,8 +1,8 @@
 ---
 name: Unpaid expense invoices
-version: 1.1.1
+version: 1.1.2
 description: >-
-  Version 1.1.1. Use when the user wants to find unpaid expense invoices in their
+  Version 1.1.2. Use when the user wants to find unpaid expense invoices in their
   inbox, list invoices received but not yet paid, check pending payments awaiting
   the bank statement, or refresh the Summary Unpaid Expense Invoices table.
   Searches Gmail inbox from the first day of last month, matches Debit rows on
@@ -172,15 +172,17 @@ For every row that remains after section 6:
 
 ## 8. Write or hide the Summary block
 
-Locate **Unpaid Expense Invoices** by header text. Do **not** restyle the table. Do **not** touch **Missing Expense Invoices**, **Missing Revenue Invoices**, **Expenses by Category**, or **Unpaid Revenue Invoices**.
+**Show when data / delete when empty** (same pattern as bank reconciliation Summary): if **Unpaid Expense Invoices** has **no** rows after section 6, **delete** the entire block (title, helper, headers, data). Do **not** leave an empty titled table. If it has **at least one** row, **keep or recreate** the full block and fill it. When data returns on a later run, recreate; when it drops to zero, delete again.
 
-**Helper text** (title row area; overwrite every run when the block is shown), using configured grace:
+Locate **Unpaid Expense Invoices** by header text. Do **not** restyle the table. Do **not** touch **Missing Expense Invoices**, **Missing Revenue Invoices**, or **Expenses by Category** (bank reconciliation owns those). **Unpaid Revenue Invoices** is out of scope for data in this skill version — if that block is present with **no data rows**, **delete** the empty shell so Summary has no empty unpaid-revenue table; do not fill revenue unpaid rows here.
+
+**Helper text** (title row area; overwrite every run when the Unpaid Expense block is shown), using configured grace:
 
 `Status = 'pending' when the invoice was only received {grace_working_days} working days ago`
 
 (Also pending when **Paid** is checked awaiting bank — the helper focuses on the grace rule; the chat report explains Paid.)
 
-### If there is at least one row to show
+### If there is at least one Unpaid Expense row to show
 
 1. Keep or recreate the title, helper, and headers: **Date | Counterparty | Amount | Ref | Invoice | Status | Paid | Date Paid | Note**.
 2. Place the block in a clear area of Summary without covering Expenses by Category or the Missing invoice blocks. Prefer the template’s existing location when still present.
@@ -190,13 +192,11 @@ Locate **Unpaid Expense Invoices** by header text. Do **not** restyle the table.
 6. Date / Date Paid as real dates; Amount as a number; Status as `unpaid` or `pending`.
 7. Re-read Summary and confirm nothing below the unpaid block was corrupted by the write.
 
-### If there are zero rows
+### If there are zero Unpaid Expense rows
 
-**Delete the entire Unpaid Expense Invoices block** — title, helper, headers, and any data. Do **not** leave an empty titled table. (Same empty-block rule as Missing Expense Invoices in bank reconciliation.)
+**Delete the entire Unpaid Expense Invoices block** — title, helper, headers, and any data.
 
-On a later run when rows appear again, recreate title + helper + headers + data without covering other Summary content.
-
-Bank reconciliation owns Missing / Expenses-by-Category Summary updates; **this skill owns** Unpaid Expense Invoices (including removing it when empty).
+Bank reconciliation owns Missing / Expenses-by-Category Summary updates; **this skill owns** Unpaid Expense Invoices show/hide and data (and deleting empty Unpaid Revenue shells only).
 
 ## 9. Report (chat)
 

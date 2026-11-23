@@ -48,14 +48,14 @@ Cobalt Mail PDF layout (distinct from recon expense fixtures): teal top band, `I
 | --- | --- | ---: | --- | --- | --- | --- | --- | --- |
 | 2024-11-18 | Cobalt Mail | 88.00 | CM-4418 | `unpaid` | unchecked / FALSE | blank | `billing@cobalt-mail.example` | `20241118_Cobalt Mail_CM-4418.pdf` |
 
-- [ ] **Unpaid Expense Invoices** block is **present** (not hidden)
+- [ ] **Unpaid Expense Invoices** block is **present** (recreated if it was deleted as an empty shell after recon) — show when data
 - [ ] Helper text reflects configured grace (default: received `{grace_working_days}` working days ago)
 - [ ] Exactly **one** data row: Cobalt Mail as above
 - [ ] **Invoice** hyperlink to Drive PDF under month `{drive.expenses_folder}`; visible label = filename; Clip overflow
 - [ ] PDF came from unpaid `01-cobalt-mail.eml` (not Gmail)
 - [ ] **Status** = `unpaid` (outside grace; no matching Debit)
 - [ ] **Paid** unchecked; **Date Paid** blank; **Note** blank unless attention needed
-- [ ] **Unpaid Revenue Invoices** untouched
+- [ ] Empty **Unpaid Revenue Invoices** shell deleted if present; no revenue unpaid rows filled by this skill
 
 ### Report (phase 1)
 
