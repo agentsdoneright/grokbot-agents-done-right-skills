@@ -1,8 +1,8 @@
 ---
 name: Bank reconciliation
-version: 1.7.3
+version: 1.7.4
 description: >-
-  Version 1.7.3. Use when the user wants to reconcile a month's bank transactions
+  Version 1.7.4. Use when the user wants to reconcile a month's bank transactions
   (e.g. a bank CSV export) in their Google Sheets reconciliation workbook: on the
   first month upload the skill's scrubbed `.xlsx` template and convert it to a
   Google Sheet, copy last month's sheet thereafter, import the CSV, fill date,
@@ -13,16 +13,17 @@ description: >-
   tab with live formulas for Missing Expense Invoices, Missing Revenue
   Invoices, and Expenses by Category (required SUMIF Totals against Bank
   Transactions Debits by Category + Type so the pie chart updates when
-  categories change); delete every Summary table with no data rows and recreate
-  it when data returns; when both missing-invoice blocks are kept, leave exactly
-  one blank row between them; before any Summary table spill or data write,
-  insert sheet rows so content below is never overwritten; highlight Bank
-  Transactions rows that match those missing-invoice lists in light red. At the
-  end, list remaining missing invoices, point to Summary, ask the operator to
-  drop files in chat or Unfiled Expense/Revenue folders, then re-run matching on
-  the same sheet. Also use for test mode / sample data / try with test data —
-  run against skills/bank-reconciliation/test-data fixtures instead of a live
-  bank CSV download and Gmail.
+  categories change); never delete a Summary table block when it has no data
+  rows — keep title and headers, clear data only; when both missing-invoice
+  blocks are present, leave exactly one blank row between them; before any
+  Summary table spill or data write, insert sheet rows so content below is
+  never overwritten; highlight Bank Transactions rows that match those
+  missing-invoice lists in light red. At the end, list remaining missing
+  invoices, point to Summary, ask the operator to drop files in chat or Unfiled
+  Expense/Revenue folders, then re-run matching on the same sheet. Also use for
+  test mode / sample data / try with test data — run against
+  skills/bank-reconciliation/test-data fixtures instead of a live bank CSV
+  download and Gmail.
 ---
 # Monthly bank reconciliation in Google Sheets
 
@@ -56,7 +57,7 @@ In test mode the Sheets / Drive path is unchanged (month folders, template or co
 3. Copy `skills/bank-reconciliation/test-data/bank-statement.csv` into `{drive.root_path}/{drive.accounts_folder}/{drive.year_folder_pattern}/{drive.extracts_folder}/{drive.month_folder_pattern}/` (create folders if needed). Then continue sections 1–6 as usual (CSV is already on Drive) — fill the transactions tab, seed reference tabs including Categories Type (section 5), then verify before invoice matching.
 4. For expense invoice matching (section 8): check Unfiled expense invoices first (usually empty in the default fixture run). Then open each `skills/bank-reconciliation/test-data/emails/*.eml` (not under `sent/`). Match each Debit row using `From`, subject, amount, and date (confirmation fields: Date, Counterparty, Debit). Prefer the PDF attachment; extract under `{workspace.local_path}/`, upload to `{drive.expenses_folder}`, set Invoice / VAT / Ref, set **Source = `Email`**, update Counterparties contact fields and `Email matching` as in section 8. Skip bank-fee rows unless an invoice clearly exists. Fixture pack includes unmatched debits with no EML — leave those unmatched (Source blank).
 5. For revenue invoice matching (section 9): check the month `{drive.revenue_folder}` and Unfiled revenue invoices first (usually empty). Then open each `skills/bank-reconciliation/test-data/emails/sent/*.eml`. Match Credit rows (Date, Counterparty, Credit); upload to `{drive.revenue_folder}`; set Invoice / VAT / Ref; set **Source = `Email`**.
-6. Fill the Summary tab (section 10): **show when data / delete when empty** for Missing Expense, Missing Revenue, Expenses by Category (and pie), and empty unpaid shells; when both missing-invoice blocks are kept, exactly one blank row between them; **insert sheet rows** before spills so lower titles are never overwritten; light-red highlight on matching Bank Transactions rows.
+6. Fill the Summary tab (section 10): keep every Summary table block (title + headers) even when empty — clear data only; fill Missing Expense, Missing Revenue, Expenses by Category (and pie) when they have data; leave empty unpaid shells intact; when both missing-invoice blocks are present, exactly one blank row between them; **insert sheet rows** before spills so lower titles are never overwritten; light-red highlight on matching Bank Transactions rows.
 7. After the run, read `skills/bank-reconciliation/test-data/expected-results.md` and report pass/fail against that checklist (including that Gmail was not used, and the Summary tables and pie chart).
 
 ## 1. Prepare the month's folder and sheet
@@ -173,22 +174,22 @@ Then fill the Summary tab (section 10). In **test mode**, after Summary, also re
 
 ## 10. Fill the Summary tab
 
-Run this after invoice matching (sections 8–9) so the Invoice column is up to date — including **every re-run** after the operator supplies more invoices (section 11). If the operator later asks only to refresh Summary, re-read the current transactions tab and Categories Type values and apply the show/hide and formula rules below (including recreating or deleting Expenses by Category when needed).
+Run this after invoice matching (sections 8–9) so the Invoice column is up to date — including **every re-run** after the operator supplies more invoices (section 11). If the operator later asks only to refresh Summary, re-read the current transactions tab and Categories Type values and apply the keep-blocks and formula rules below (including clearing or refilling Expenses by Category data when needed — never delete the table block).
 
-**After new matches:** rows that now have an Invoice must **disappear** from Missing Expense / Missing Revenue (live `FILTER`/`QUERY` formulas do this automatically when Invoice is filled). Re-evaluate candidates; apply **Show when data / delete when empty** below. Clear light-red highlights on newly matched bank rows.
+**After new matches:** rows that now have an Invoice must **disappear** from Missing Expense / Missing Revenue (live `FILTER`/`QUERY` formulas do this automatically when Invoice is filled). Re-evaluate candidates; apply **Keep blocks; clear data when empty** below. Clear light-red highlights on newly matched bank rows.
 
-### Show when data / delete when empty (final Summary state)
+### Keep blocks; clear data when empty (final Summary state)
 
-**Standing rule for every Summary table this run touches:** if the table has **no data rows** for this run, **delete** its entire block (title, helper text if any, headers, formulas/data, and for Expenses by Category also the **Expenses by Category** pie chart). Do **not** leave an empty titled table. If it has **at least one** data row, **keep or recreate** the full block (title + headers + formulas/data) and fill it. On a later run when data returns for a deleted block, **recreate** it; when data goes to zero, **delete** it again.
+**Standing rule for every Summary table this run touches:** **never delete** a table block (title, helper text if any, headers, or the Expenses by Category pie chart) because it has no data rows. Always **keep** the title and headers. If the table has **at least one** data row, fill it (formulas/data). If it has **no** data rows, **clear** data/formula rows under the headers so only the titled empty table remains. Do **not** remove the block and recreate it later — leave the shell in place for the next run.
 
 Apply that independently to:
 
-| Block | “Has data” means |
+| Block | When empty |
 | --- | --- |
-| **Missing Expense Invoices** | ≥1 missing expense candidate (section below) |
-| **Missing Revenue Invoices** | ≥1 missing revenue candidate |
-| **Expenses by Category** | ≥1 expense-typed category to show (with live Total formulas) |
-| **Unpaid Expense Invoices** / **Unpaid Revenue Invoices** | ≥1 unpaid/pending row — **filled only by** the unpaid-invoices skill; this recon skill must **not** invent unpaid rows. If an unpaid block is present with **no data rows** (typical after a fresh template upload), **delete** that empty block so the final Summary has no empty unpaid shell. Never recreate an empty unpaid table from reconciliation. |
+| **Missing Expense Invoices** | Keep title + headers; clear data/formula rows under the headers |
+| **Missing Revenue Invoices** | Keep title + headers; clear data/formula rows under the headers |
+| **Expenses by Category** | Keep title + headers (and pie chart); clear category data rows under the headers |
+| **Unpaid Expense Invoices** / **Unpaid Revenue Invoices** | **Filled only by** the unpaid-invoices skill; this recon skill must **not** invent unpaid rows. If an unpaid block is present with **no data rows** (typical after a fresh template upload), **leave it** — do **not** delete the empty shell. Never recreate or invent unpaid data from reconciliation. |
 
 ### Read the template layout first
 
@@ -199,9 +200,9 @@ Look for these titles and headers (case-insensitive; close wording is fine):
 - **Missing Expense Invoices** — columns such as Date, Counterparty (or Description), Amount, and Note (or reason).
 - **Missing Revenue Invoices** — the same kind of columns.
 - **Expenses by Category** — columns such as Category, Total, and Percentage.
-- **Unpaid Expense Invoices** / **Unpaid Revenue Invoices** — owned by the unpaid-invoices skill for **data**; see show/hide table above for empty shells.
+- **Unpaid Expense Invoices** / **Unpaid Revenue Invoices** — owned by the unpaid-invoices skill for **data**; leave empty shells in place (see keep-blocks table above).
 
-If a named range exists for one of these (a name containing `MissingExpense`, `MissingRevenue`, or `ExpensesByCategory`, or similar), use it as the start of that table. If the Summary tab is missing, add a minimal tab named `Summary` — no decorative formatting (the operator maintains formats in the `.xlsx` template). Only add a block’s title and headers when that block **has data** to show (or will immediately get formulas that produce rows); do not leave empty titled shells.
+If a named range exists for one of these (a name containing `MissingExpense`, `MissingRevenue`, or `ExpensesByCategory`, or similar), use it as the start of that table. If the Summary tab is missing, add a minimal tab named `Summary` with the expected block titles and headers from the template — no decorative formatting (the operator maintains formats in the `.xlsx` template). Prefer keeping the template’s empty titled tables rather than omitting them.
 
 #### Unpaid invoice blocks (data owned by unpaid-invoices)
 
@@ -209,7 +210,7 @@ If a named range exists for one of these (a name containing `MissingExpense`, `M
 
 - Do **not** fill unpaid blocks from Bank Transactions or invent unpaid rows.
 - Do **not** restyle or overwrite unpaid blocks that already have data rows (leave them for the unpaid skill).
-- **Do** delete an unpaid block that has **no data rows** (empty title/headers only), so the recon run’s final Summary has no empty tables. The unpaid skill recreates the block when it has invoices to list.
+- Do **not** delete an unpaid block that has **no data rows** (empty title/headers only) — leave the shell for the unpaid skill to fill later.
 
 ### Fill with live formulas
 
@@ -230,7 +231,7 @@ Before writing a formula or rows that will occupy **N** data rows under a table�
 
 Do **not** rely on “there might be room in the template.” Template gaps are often only one data row deep; two missing expenses will overwrite the next heading unless you insert rows first.
 
-#### Missing invoice blocks (keep, remove, or recreate)
+#### Missing invoice blocks (keep; fill or clear)
 
 Evaluate which rows would appear before writing:
 
@@ -239,39 +240,40 @@ Evaluate which rows would appear before writing:
 
 Then:
 
-- If there is **at least one** missing expense candidate: keep or recreate the **Missing Expense Invoices** title and table; fill with live `FILTER`/`QUERY` (or equivalent) formulas for Date, Counterparty, Amount (Debit), and Note (for example `No invoice found`). You may mention excluded bank-fee rows in the report; do not list them as missing invoices.
-- If there are **no** missing expense candidates: **delete** the **Missing Expense Invoices** title and its **entire** table (headers and any data or formula rows). Do **not** leave an empty titled table.
-- Same rules for **Missing Revenue Invoices** (Amount = Credit): keep/fill with formulas when candidates exist; **delete** title and whole table when there are none.
-- On a later Summary refresh, if a previously deleted block is needed again: recreate the title and headers (Date, Counterparty, Amount, Note) in a clear area of Summary **without covering Expenses by Category**, then fill with live formulas. Do not invent decorative formatting. If the other missing-invoice block is also present, stack them with exactly one blank row between the tables (see below).
+- **Always keep** the **Missing Expense Invoices** title and headers (create them only if the Summary tab is missing that block entirely).
+- If there is **at least one** missing expense candidate: fill with live `FILTER`/`QUERY` (or equivalent) formulas for Date, Counterparty, Amount (Debit), and Note (for example `No invoice found`). You may mention excluded bank-fee rows in the report; do not list them as missing invoices.
+- If there are **no** missing expense candidates: **clear** any data or formula rows under the headers, but **keep** the title and headers. Do **not** delete the block.
+- Same rules for **Missing Revenue Invoices** (Amount = Credit): keep title/headers always; fill with formulas when candidates exist; clear data/formula rows under the headers when there are none.
+- On a later Summary refresh, refill or clear under the existing headers — do not delete and recreate the block. Do not invent decorative formatting. Keep the two missing-invoice blocks stacked with exactly one blank row between them (see below).
 
 #### One blank row between the two missing-invoice tables
 
-When **both** Missing Expense Invoices and Missing Revenue Invoices blocks are kept, stack them vertically with **exactly one blank row** between them: after the last occupied row of the expense table (the last spilled data row, or the header row if the formula has not yet produced visible rows) leave one empty row, then the Missing Revenue Invoices title.
+Keep **both** Missing Expense Invoices and Missing Revenue Invoices blocks (even when one or both have no data rows). Stack them vertically with **exactly one blank row** between them: after the last occupied row of the expense table (the last spilled data row, or the header row when there are no data rows) leave one empty row, then the Missing Revenue Invoices title.
 
 **Required order** (row inserts first — see **Insert rows** above):
 
-1. Count missing-expense candidates **Ne** and missing-revenue candidates **Nr**.
-2. **Before** writing the expense `FILTER`/`QUERY`, insert sheet rows under the Missing Expense header so there is room for **Ne** spilled rows **and** one blank row **and** the full Missing Revenue block (title + header + room for **Nr** rows) without colliding with anything below (including Unpaid blocks if present). Prefer inserting rows so existing lower titles shift down intact — do not delete and retype a title that would have been overwritten.
-3. Write the expense live formula; re-read and confirm the revenue title (and anything further down) is still intact on its own row with exactly one blank above it (or adjust with insert/delete until the gap is 1).
-4. **Before** writing the revenue formula, ensure **Nr** empty rows exist under the Missing Revenue header; insert rows if needed so the revenue spill cannot overwrite Unpaid / other content below.
-5. Write the revenue live formula; re-read again. No title may share a cell with spilled data.
-6. On a later Summary refresh, repeat: if candidate counts grew, **insert rows** again before rewriting formulas. If a block is removed because it has zero rows, this one-blank-row rule does not apply (do not leave a stranded gap or an empty titled table).
+1. Count missing-expense candidates **Ne** and missing-revenue candidates **Nr** (either may be 0).
+2. **Before** writing the expense `FILTER`/`QUERY` (when **Ne** ≥ 1), insert sheet rows under the Missing Expense header so there is room for **Ne** spilled rows **and** one blank row **and** the full Missing Revenue block (title + header + room for **Nr** rows) without colliding with anything below (including Unpaid blocks if present). Prefer inserting rows so existing lower titles shift down intact — do not delete and retype a title that would have been overwritten.
+3. When **Ne** ≥ 1, write the expense live formula; when **Ne** = 0, clear data under the expense headers. Re-read and confirm the revenue title (and anything further down) is still intact on its own row with exactly one blank above it (or adjust with insert/delete until the gap is 1).
+4. **Before** writing the revenue formula (when **Nr** ≥ 1), ensure **Nr** empty rows exist under the Missing Revenue header; insert rows if needed so the revenue spill cannot overwrite Unpaid / other content below.
+5. When **Nr** ≥ 1, write the revenue live formula; when **Nr** = 0, clear data under the revenue headers. Re-read again. No title may share a cell with spilled data.
+6. On a later Summary refresh, repeat: if candidate counts grew, **insert rows** again before rewriting formulas. When a block has zero rows, clear its data but keep title/headers and the one-blank-row gap to the next block.
 
-Do **not** leave a large multi-row empty buffer between blocks after the lists settle — the gap between the last expense data row and the Missing Revenue title must be **exactly one** blank row. Use inserts sized to **Ne** / **Nr**, not an arbitrary tall spacer.
+Do **not** leave a large multi-row empty buffer between blocks after the lists settle — the gap between the last expense data row (or expense header when empty) and the Missing Revenue title must be **exactly one** blank row. Use inserts sized to **Ne** / **Nr**, not an arbitrary tall spacer.
 
 #### Highlight missing-invoice rows on Bank Transactions
 
-After the Summary missing-invoice blocks are filled (or removed), sync row highlighting on the **transactions tab** so it matches those lists exactly:
+After the Summary missing-invoice blocks are filled (or cleared), sync row highlighting on the **transactions tab** so it matches those lists exactly:
 
-- **Same membership as Summary:** highlight a bank row if and only if it is a **missing expense candidate** or **missing revenue candidate** (same rules as above). Bank-fee rows excluded from Missing Expense Invoices must **not** be highlighted for missing invoices. Rows that appear on Summary Missing Expense or Missing Revenue tables must be highlighted; rows that do not must not stay highlighted for this reason.
+- **Same membership as Summary:** highlight a bank row if and only if it is a **missing expense candidate** or **missing revenue candidate** (same rules as above). Bank-fee rows excluded from Missing Expense Invoices must **not** be highlighted for missing invoices. Rows that appear on Summary Missing Expense or Missing Revenue data rows must be highlighted; rows that do not must not stay highlighted for this reason.
 - **Colour:** light red fill on the **full reconciliation data columns** for that row (Date through Source/Notes — the ten reconciliation columns, not the raw CSV import columns to the right). Use a pale red such as `#FFCDD2` (or the Sheets theme light-red equivalent). Do not invent other colours.
 - Prefer **conditional formatting** on the transactions tab driven by blank Invoice plus Debit/Credit (and excluding bank fees), so the highlight stays aligned when Invoice is filled later. If the connector cannot set conditional formatting, apply/clear the light-red fill on the matching rows for this run, then on a later Summary refresh clear fill from rows that are no longer missing and apply it to any newly missing rows.
 - Clear light-red missing-invoice highlighting from rows that now have an Invoice (or that are bank fees). Do not strip unrelated formatting the operator added.
-- **Verify:** the set of highlighted bank rows (Date, Counterparty, Debit or Credit) must match the rows shown in the Summary Missing Expense and Missing Revenue tables (when those blocks exist). If a Summary block was deleted because it is empty, no bank rows should remain highlighted for that missing type.
+- **Verify:** the set of highlighted bank rows (Date, Counterparty, Debit or Credit) must match the data rows shown in the Summary Missing Expense and Missing Revenue tables. When a Summary missing block has no data rows (headers only), no bank rows should remain highlighted for that missing type.
 
 #### Expenses by Category (formula-linked to Bank)
 
-Same show/hide rule: if there are **no** expense-typed categories to list, **delete** the entire **Expenses by Category** title and table **and** any **Expenses by Category** pie chart. If there is at least one expense-typed category, keep or recreate the block and pie as below.
+**Always keep** the **Expenses by Category** title, headers, and pie chart. If there are **no** expense-typed categories to list, **clear** category data rows under the headers but do **not** delete the table or the pie chart. If there is at least one expense-typed category, fill the block and update the pie as below.
 
 Build this table so changing a bank row’s **Category** or **Debit** updates Totals, Percentages, and the pie chart without rewriting Summary by hand:
 
@@ -294,23 +296,20 @@ Do not invent amounts. If a formula cannot resolve (tab or column missing), stop
 
 ### Pie chart (Expenses by Category)
 
-Only when the **Expenses by Category** table is kept (has data):
-
-Create or update **one** embedded pie chart on the Summary tab titled **Expenses by Category**:
+Keep **one** embedded pie chart on the Summary tab titled **Expenses by Category** (create it if missing; never delete it solely because the category table has no data rows):
 
 - Bind the chart to the Expenses by Category **Category** and **Total** columns (not Percentage). Include the header row in the chart range (`headerCount` 1, or equivalent).
 - Give the data range **spare rows** below the current last category (about 5–10 extra rows, or a modest window under the table) so newly seeded expense categories appear without a manual range edit. Empty trailing rows should not become extra slices (Sheets typically ignores blanks).
 - Because Totals are live formulas over Bank Debits by Category, a category change on the transactions tab updates the pie without inserting a new chart.
 - **Do not add a second chart on reruns.** If a chart with that title (or an existing pie already bound to this table) is present, update its data range in place instead of inserting another.
 - When creating a new chart, place it in empty space on Summary; do not cover the table headers.
-
-When the Expenses by Category **table is deleted** because it has no data, **delete** the pie chart too. Recreate the chart only when the table is recreated with data.
+- When the Expenses by Category table has **no data rows**, leave the pie in place bound to the (empty) table range — do **not** delete the chart.
 
 **Connector limits** (do not fail the step because of these): the Google Sheets connector has no hide-columns tool, and no setting for pie slice label format (for example forcing integer percents on the slices). The Percentage column (`0%`) is the reliable integer display. The pie may show slice percentages by default; that is enough.
 
 ### Report (Summary)
 
-Include: the locations you used (title cells, ranges, or named ranges); for **each** Summary block whether it was **kept**, **removed** (no data), or **recreated** (data returned); that empty unpaid shells were removed if present; that Summary row **inserts** were used so no lower title/header was overwritten by spills; when both missing-invoice blocks are kept, that there is exactly one blank row between the last expense-table row and the Missing Revenue Invoices title (re-checked after any spilling formula); that Bank Transactions light-red highlights match those Summary missing rows; that Expenses by Category Totals are `SUMIF`-style formulas against the transactions tab (**confirmed** on re-read, or **corrected** from static numbers) when that block is kept; the expense-category totals and integer percentages when kept; the missing expense and revenue rows (if any); any Type mismatches or blank Types; and whether the pie chart was created, updated, or removed with an empty category table.
+Include: the locations you used (title cells, ranges, or named ranges); for **each** Summary block whether it was **filled** or left **empty** (headers only — never deleted); that empty unpaid shells were left intact; that Summary row **inserts** were used so no lower title/header was overwritten by spills; that there is exactly one blank row between the last expense-table row (or expense header when empty) and the Missing Revenue Invoices title (re-checked after any spilling formula); that Bank Transactions light-red highlights match those Summary missing data rows; that Expenses by Category Totals are `SUMIF`-style formulas against the transactions tab (**confirmed** on re-read, or **corrected** from static numbers) when that table has data; the expense-category totals and integer percentages when filled; the missing expense and revenue rows (if any); any Type mismatches or blank Types; and whether the pie chart was created or updated in place (never removed solely for an empty category table).
 
 ## 11. Final step: hand back to the user
 
@@ -325,7 +324,7 @@ If any missing expense or revenue invoice candidates remain after Summary (secti
    - Upload them into the Unfiled folders: expenses → `{drive.root_path}/{drive.accounts_folder}/{drive.unfiled_folder}/{drive.unfiled_expense_invoices}`; revenue → `{drive.root_path}/{drive.accounts_folder}/{drive.unfiled_folder}/{drive.unfiled_revenue_invoices}`.
 4. **Then re-run** — ask them to tell you when the files are in chat or Unfiled. When they have (or when they paste/upload invoices in chat), **continue on the same spreadsheet**:
    - Match from Unfiled and/or chat uploads (sections 8–9: Unfiled → move into month Expenses/Revenue, Source=`Drive`; chat uploads → Source=`Manual`); update Invoice / VAT / Ref on the transactions tab.
-   - **Update Summary (section 10) required:** missing-invoice tables must drop every newly matched row; apply **show when data / delete when empty** for all Summary blocks this skill manages; clear light-red highlights on matched rows; keep remaining missing rows listed and highlighted; refresh or remove Expenses by Category / pie as section 10 requires.
+   - **Update Summary (section 10) required:** missing-invoice tables must drop every newly matched row; apply **keep blocks; clear data when empty** for all Summary blocks this skill manages (never delete title/headers); clear light-red highlights on matched rows; keep remaining missing rows listed and highlighted; refresh Expenses by Category / pie as section 10 requires (clear data under headers when empty; leave blocks and pie in place).
    - Hand back again (list any invoices still missing, or confirm none remain). Do **not** rebuild the month sheet from scratch unless the operator asks.
 
 If there are **no** missing invoices, say so and skip the supply/re-run ask.

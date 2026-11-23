@@ -1,8 +1,8 @@
 ---
 name: Unpaid expense invoices
-version: 1.1.3
+version: 1.1.4
 description: >-
-  Version 1.1.3. Use when the user wants to find unpaid expense invoices in their
+  Version 1.1.4. Use when the user wants to find unpaid expense invoices in their
   inbox, list invoices received but not yet paid, check pending payments awaiting
   the bank statement, or refresh the Summary Unpaid Expense Invoices table.
   Searches Gmail inbox from the first day of last month, matches Debit rows on
@@ -10,13 +10,15 @@ description: >-
   the month Expenses folder, and maintains Status (unpaid / pending) with a
   configurable working-day grace and a Paid checkbox workflow. Requires bank
   reconciliation to have been run for the months being read. Expense / inbox
-  only — does not fill Unpaid Revenue Invoices. Also use for test mode / sample
-  data / try with test data — run against skills/unpaid-invoices/test-data
-  fixtures after bank-reconciliation test mode (fixed today 2024-11-25).
+  only — does not fill Unpaid Revenue Invoices. Never deletes Summary table
+  blocks when empty — keeps title/headers and clears data only. Also use for
+  test mode / sample data / try with test data — run against
+  skills/unpaid-invoices/test-data fixtures after bank-reconciliation test mode
+  (fixed today 2024-11-25).
 ---
 # Unpaid expense invoices
 
-Find invoices **received** in Gmail that are not yet settled by a bank Debit on the current or previous month’s reconciliation workbook. Write (or hide) the Summary **Unpaid Expense Invoices** table. This skill depends on **bank reconciliation** having already been run — it does **not** import CSVs or create month sheets.
+Find invoices **received** in Gmail that are not yet settled by a bank Debit on the current or previous month’s reconciliation workbook. Write the Summary **Unpaid Expense Invoices** table (keep the block even when empty). This skill depends on **bank reconciliation** having already been run — it does **not** import CSVs or create month sheets.
 
 **Config (skill-local):**
 
@@ -162,13 +164,13 @@ For every row that remains after section 6:
 - Else upload the PDF to the target month `{drive.expenses_folder}` as `YYYYMMDD_Counterparty_Ref.pdf` (`YYYYMMDD` from invoice/document date, else email received date; `Ref` = invoice reference; no duplicates). Same naming as bank reconciliation expense matching.
 - Set **Invoice** to a Sheets hyperlink whose **visible label is the saved filename** (not the raw URL), e.g. `=HYPERLINK("https://…", "YYYYMMDD_Counterparty_Ref.pdf")` or the connector equivalent. Format the Invoice column (or those cells) with **Clip** text overflow — not Wrap.
 
-## 8. Write or hide the Summary block
+## 8. Write the Summary block
 
-**Show when data / delete when empty** (same pattern as bank reconciliation Summary): if **Unpaid Expense Invoices** has **no** rows after section 6, **delete** the entire block (title, helper, headers, data). Do **not** leave an empty titled table. If it has **at least one** row, **keep or recreate** the full block and fill it. When data returns on a later run, recreate; when it drops to zero, delete again.
+**Keep blocks; clear data when empty** (same pattern as bank reconciliation Summary): **never delete** the **Unpaid Expense Invoices** block because it has no rows. Always **keep** the title, helper, and headers. If it has **at least one** row after section 6, fill the table. If it has **no** rows, **clear** data under the headers so only the titled empty table remains. Do **not** remove the block and recreate it later.
 
-Locate **Unpaid Expense Invoices** by header text. Do **not** restyle the table. Do **not** touch **Missing Expense Invoices**, **Missing Revenue Invoices**, or **Expenses by Category** (bank reconciliation owns those). **Unpaid Revenue Invoices** is out of scope for data in this skill version — if that block is present with **no data rows**, **delete** the empty shell so Summary has no empty unpaid-revenue table; do not fill revenue unpaid rows here.
+Locate **Unpaid Expense Invoices** by header text. Do **not** restyle the table. Do **not** touch **Missing Expense Invoices**, **Missing Revenue Invoices**, or **Expenses by Category** (bank reconciliation owns those). **Unpaid Revenue Invoices** is out of scope for data in this skill version — if that block is present, **leave it** (including when it has no data rows); do not fill revenue unpaid rows here and do not delete the empty shell.
 
-**Helper text** (title row area; overwrite every run when the Unpaid Expense block is shown), using configured grace:
+**Helper text** (title row area; overwrite every run when the Unpaid Expense block is present), using configured grace:
 
 `Status = 'pending' when the invoice was only received {grace_working_days} working days ago`
 
@@ -176,7 +178,7 @@ Locate **Unpaid Expense Invoices** by header text. Do **not** restyle the table.
 
 ### If there is at least one Unpaid Expense row to show
 
-1. Keep or recreate the title, helper, and headers: **Date | Counterparty | Amount | Ref | Invoice | Status | Paid | Date Paid | Note**.
+1. Keep or create the title, helper, and headers: **Date | Counterparty | Amount | Ref | Invoice | Status | Paid | Date Paid | Note**. Prefer the template’s existing location; create the block only if it is missing entirely.
 2. Place the block in a clear area of Summary without covering Expenses by Category or the Missing invoice blocks. Prefer the template’s existing location when still present.
 3. **Insert sheet rows before writing data.** Count the rows to write (**N**). If fewer than **N** empty rows exist under the header before the next Summary content, **insert** enough rows so lower titles/tables shift down intact. **Never** overwrite another block’s title, headers, or data (same hard rule as bank reconciliation Summary).
 4. Clear previous data rows under the headers, then write static rows for this run (not `FILTER` over Bank — source is Gmail + merge).
@@ -186,9 +188,9 @@ Locate **Unpaid Expense Invoices** by header text. Do **not** restyle the table.
 
 ### If there are zero Unpaid Expense rows
 
-**Delete the entire Unpaid Expense Invoices block** — title, helper, headers, and any data.
+**Keep** the Unpaid Expense Invoices title, helper, and headers. **Clear** any data rows under the headers. Do **not** delete the block.
 
-Bank reconciliation owns Missing / Expenses-by-Category Summary updates; **this skill owns** Unpaid Expense Invoices show/hide and data (and deleting empty Unpaid Revenue shells only).
+Bank reconciliation owns Missing / Expenses-by-Category Summary updates; **this skill owns** Unpaid Expense Invoices data (fill or clear under existing headers). Leave Unpaid Revenue shells untouched.
 
 ## 9. Report (chat)
 
