@@ -96,6 +96,7 @@ Two Credits should get a PDF in `{drive.revenue_folder}` and an **Invoice** Driv
 
 - [ ] **Missing Expense Invoices** block is present (default fixture has unmatched Staples + City Rides; bank fee excluded from this table) with formula-driven rows — not static pasted values
 - [ ] **Missing Revenue Invoices** block is present (unmatched Client Payment / Acme credit) with formula-driven rows
+- [ ] Missing Expense spill did **not** overwrite the Missing Revenue title (or any lower Summary heading); sheet **rows were inserted** under the expense header before the spill so both titles remain intact on their own rows with exactly one blank row between the last expense data row and the Missing Revenue title
 - [ ] If a missing block would have **zero** rows, its title and entire table are **removed** (not left empty) — N/A for the default fixture above, but required on any run where all expenses or all revenues are matched
 - [ ] On the transactions tab, those same missing expense/revenue rows (Staples, City Rides, Client Payment / Acme — **not** the bank fee) are highlighted with **light red** fill on the reconciliation columns; highlighted rows match the Summary missing tables exactly
 - [ ] **Expenses by Category** Totals are live **`SUMIF` / `SUMIFS` / equivalent** formulas that **reference the transactions tab** (e.g. `'Bank Transactions'!…`) and sum Debit by Category for expense-typed categories — **not** static pasted numbers
