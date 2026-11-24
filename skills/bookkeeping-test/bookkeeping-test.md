@@ -86,14 +86,15 @@ Prefer a single active bank CSV name in that folder (e.g. `bank-statement.csv`).
 
 When called from **Reconcile Bank Statement Test**, return after step 3 so the bundle can continue.
 
-## Phase 2 — Add unpaid Cobalt invoice to inbox
+## Phase 2 — Add unpaid Cobalt + grace-pending Lumen invoices to inbox
 
 1. Require session `active: true` and `phase` ≥ 1. If missing, stop and tell the operator to run **Reconcile Bank Statement Test** (or Phase 1) first.
 2. Update the session file: set `phase: 2`. Keep existing inbox/sent entries. **Append** (do not remove recon EMLs):
 
-   - `skills/unpaid-invoices/test-data/emails/01-cobalt-mail.eml`
+   - `skills/unpaid-invoices/test-data/emails/01-cobalt-mail.eml` (outside grace → unpaid)
+   - `skills/unpaid-invoices/test-data/emails/02-lumen-analytics.eml` (within 4 working-day grace → pending)
 
-   Prefer listing explicit paths after expansion so Cobalt is clearly included, e.g. each recon `*.eml` path plus the Cobalt path.
+   Prefer listing explicit paths after expansion so both are clearly included, e.g. each recon `*.eml` path plus Cobalt and Lumen.
 3. Do **not** stage a new CSV. Do **not** edit the Google Sheet or Gmail.
 4. When this skill runs **alone**: **Stop.** Tell the operator to run **Find Unpaid Invoices**. Point at [`expected-results.md`](expected-results.md) § After Phase 2.
 
@@ -103,7 +104,7 @@ When called from **Find Unpaid Invoices Test**, return after step 3 so the bundl
 
 1. Require session `active: true` and `phase` ≥ 2. If missing, stop and tell the operator to run **Find Unpaid Invoices Test** (or Phase 2) first.
 2. Copy **only** `skills/unpaid-invoices/test-data/bank-statement-with-payment.csv` into the Extracts month folder, replacing the active bank CSV Import will read (overwrite `bank-statement.csv` contents or replace the file so Import uses the payment extract).
-3. Update the session file: set `phase: 3`, `payment_csv_staged: true`. Keep inbox/sent as after Phase 2 (include Cobalt).
+3. Update the session file: set `phase: 3`, `payment_csv_staged: true`. Keep inbox/sent as after Phase 2 (include Cobalt and Lumen).
 4. Do **not** edit the Google Sheet. Do **not** import, categorise, or run Find Unpaid Invoices here.
 5. When this skill runs **alone**: **Stop.** Tell the operator to run **Import → Categorise → Find Unpaid Invoices** (or **Update Bank Statement Test**). Point at [`expected-results.md`](expected-results.md) § After Phase 3.
 

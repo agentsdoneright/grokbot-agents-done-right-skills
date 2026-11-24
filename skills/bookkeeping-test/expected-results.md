@@ -47,12 +47,16 @@ Fixed month: **November 2024** (`202411`). Fixed today for unpaid windows: **202
 
 ## After Phase 2 live skill (Find Unpaid Invoices Test)
 
-Session inbox includes recon expense EMLs **plus** `skills/unpaid-invoices/test-data/emails/01-cobalt-mail.eml`.
+Session inbox includes recon expense EMLs **plus**:
 
-- [ ] Today treated as `2024-11-25`; `email_after` = `2024-10-01`
+- `skills/unpaid-invoices/test-data/emails/01-cobalt-mail.eml` (received 2024-11-18)
+- `skills/unpaid-invoices/test-data/emails/02-lumen-analytics.eml` (received 2024-11-22)
+
+- [ ] Today treated as `2024-11-25`; `email_after` = `2024-10-01`; grace = 4 working days
 - [ ] Gmail was not used; transactions tab was **not** modified by unpaid skill
 - [ ] Recon expense EMLs settle against existing Nov Debits (not listed as unpaid)
-- [ ] Cobalt Mail (`CM-4418`, `$88.00`) appears on **Unpaid Expense Invoices** with Status `unpaid` (outside grace)
+- [ ] Cobalt Mail (`CM-4418`, `$88.00`) appears on **Unpaid Expense Invoices** as report **`unpaid`** (outside grace); sheet Status formula `unpaid`; Paid unchecked; no grace Note
+- [ ] Lumen Analytics (`LA-3301`, `$156.40`) appears as report **`pending`** (grace); **Note** = `Pending as invoice received less than 4 working days`; sheet Status formula still `unpaid`; Paid unchecked
 - [ ] Unpaid Expense block kept (title/headers); Invoice link filename-labeled under month Expenses when uploaded
 - [ ] Unpaid Revenue block left untouched
 
@@ -60,7 +64,7 @@ Session inbox includes recon expense EMLs **plus** `skills/unpaid-invoices/test-
 
 ## After Phase 3 live skills (Update Bank Statement Test)
 
-Extracts contain the payment CSV (includes Cobalt Mail debit `-88.00` on 2024-11-25).
+Extracts contain the payment CSV (includes Cobalt Mail debit `-88.00` on 2024-11-25). Lumen has **no** matching Debit.
 
 ### Import + Categorise
 
@@ -70,5 +74,6 @@ Extracts contain the payment CSV (includes Cobalt Mail debit `-88.00` on 2024-11
 ### Find Unpaid Invoices
 
 - [ ] Cobalt invoice **settled** (dropped from Unpaid Expense Invoices) against the new Debit
+- [ ] Lumen Analytics (`LA-3301`, `$156.40`) **still pending** (grace, unmatched); Note still the grace text; sheet Status formula `unpaid`
 - [ ] Gmail not used; Find Unpaid Invoices did not invent Bank rows (Import/Categorise added them)
-- [ ] Unpaid Expense block kept; data cleared under headers if no remaining unpaid/pending rows
+- [ ] Unpaid Expense block kept (title/headers) with the Lumen row still present
