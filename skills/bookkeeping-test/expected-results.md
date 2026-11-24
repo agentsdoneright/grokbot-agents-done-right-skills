@@ -1,12 +1,18 @@
 # Bookkeeping test — expected results
 
-Use after the live skills that follow each **Bookkeeping test** phase. Confirm Gmail was not searched or changed while a test session is active.
+Use after each **test bundle** (or after the live skills that follow a staged phase). Confirm Gmail was not searched or changed while a test session is active.
+
+| Bundle | Checklist section |
+| --- | --- |
+| **Reconcile Bank Statement Test** | After Phase 1 |
+| **Find Unpaid Invoices Test** | After Phase 2 |
+| **Update Bank Statement Test** | After Phase 3 |
 
 Fixed month: **November 2024** (`202411`). Fixed today for unpaid windows: **2024-11-25**.
 
 ---
 
-## After Phase 1 live skills (Import → Categorise → Match invoices)
+## After Phase 1 live skills (Reconcile Bank Statement Test)
 
 ### Import
 
@@ -39,7 +45,7 @@ Fixed month: **November 2024** (`202411`). Fixed today for unpaid windows: **202
 
 ---
 
-## After Phase 2 live skill (Unpaid invoices)
+## After Phase 2 live skill (Find Unpaid Invoices Test)
 
 Session inbox includes recon expense EMLs **plus** `skills/unpaid-invoices/test-data/emails/01-cobalt-mail.eml`.
 
@@ -52,7 +58,7 @@ Session inbox includes recon expense EMLs **plus** `skills/unpaid-invoices/test-
 
 ---
 
-## After Phase 3 live skills (Import → Categorise → Unpaid invoices)
+## After Phase 3 live skills (Update Bank Statement Test)
 
 Extracts contain the payment CSV (includes Cobalt Mail debit `-88.00` on 2024-11-25).
 
@@ -61,8 +67,8 @@ Extracts contain the payment CSV (includes Cobalt Mail debit `-88.00` on 2024-11
 - [ ] Payment CSV pasted; Bank rows include Cobalt Mail debit after categorise
 - [ ] Reference tabs updated for any new counterparty/category
 
-### Unpaid invoices
+### Find Unpaid Invoices
 
 - [ ] Cobalt invoice **settled** (dropped from Unpaid Expense Invoices) against the new Debit
-- [ ] Gmail not used; unpaid skill did not invent Bank rows (Import/Categorise added them)
+- [ ] Gmail not used; Find Unpaid Invoices did not invent Bank rows (Import/Categorise added them)
 - [ ] Unpaid Expense block kept; data cleared under headers if no remaining unpaid/pending rows

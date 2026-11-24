@@ -27,6 +27,26 @@ Per `AGENTS.md`, this repo is **not** standing bookkeeping identity for every ch
 
 Later if you decide that you want to customize a skill for your own purposes, the agent can run the **Customizable** upgrade via the `private-repo-copy` skill: either **automatically** (if you grant GitHub `repo` + `workflow` permissions through `gh`) or **manually** using the GitHub account setup docs URL in `config/product.yaml` (`docs.github_account_setup`). That creates a private GitHub copy so changes are versioned and saved. Public repo identity also lives in `config/product.yaml` (`github.public_skills_repo_*`).
 
+## Live bookkeeping prompts
+
+After Quick start, paste one of these when you want a real month (not fixtures):
+
+> Run Reconcile Bank Statement
+
+> Run Find Unpaid Invoices
+
+## Try with test data
+
+After Quick start, paste these **in order** (each stages sample data then runs the matching live skills). Do not use your live inbox CSV for these.
+
+> Run Reconcile Bank Statement Test
+
+> Run Find Unpaid Invoices Test
+
+> Run Update Bank Statement Test
+
+Compare results to `skills/bookkeeping-test/expected-results.md`.
+
 ## Clean up the workspace
 
 To remove the Quick start checkout and associated skills/rules from the Grok Bot workspace, paste:

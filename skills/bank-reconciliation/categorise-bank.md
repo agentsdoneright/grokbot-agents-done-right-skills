@@ -8,7 +8,8 @@ description: >-
   Categories (including Type) and Counterparty reference tabs, verify totals,
   and remapping after the operator edits names. Requires Import bank CSV first.
   Does not paste the CSV, match invoices, or update Summary — run Match invoices
-  after categorising when invoice matching is needed.
+  after categorising when invoice matching is needed (or use Reconcile Bank
+  Statement for the full chain).
 ---
 # Categorise bank data
 
@@ -18,7 +19,7 @@ If you must save a scratch file **locally**, write it under `{workspace.local_pa
 
 **Prerequisite:** the month’s reconciliation sheet already has raw bank CSV data pasted (see [`import-bank-csv.md`](import-bank-csv.md)). If the raw CSV area is empty, stop and tell the operator to run Import first.
 
-**Next skill (when matching invoices):** [`match-invoices.md`](match-invoices.md).
+**Next skill (when matching invoices):** [`match-invoices.md`](match-invoices.md). One-shot Import → Categorise → Match: [`reconcile-bank-statement.md`](reconcile-bank-statement.md).
 
 This skill does **not** update the Summary tab (Match invoices owns Summary).
 

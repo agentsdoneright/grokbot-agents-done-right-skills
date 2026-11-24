@@ -1,23 +1,24 @@
 ---
-name: Unpaid expense invoices
-version: 1.3.1
+name: Find Unpaid Invoices
+version: 1.4.0
 description: >-
-  Version 1.3.1. Use when the user wants to find unpaid expense invoices in their
-  inbox, list invoices received but not yet paid, check pending payments awaiting
-  the bank statement, or refresh the Summary Unpaid Expense Invoices table.
-  Searches Gmail inbox from the first day of last month, matches Debit rows on
-  the current and previous month reconciliation sheets, uploads invoice PDFs to
-  the month Expenses folder, and maintains a Paid checkbox with Status and Date
-  Paid as live formulas on Paid (`pending`/`unpaid` and `TODAY()`). Grace
-  working days classify pending in the chat report and write a Note
-  (`Pending as invoice received less than {grace_working_days} working days`).
-  Requires Import bank CSV and Categorise bank data (and usually Match invoices)
-  for the months being read. Expense / inbox only — does not fill Unpaid Revenue
-  Invoices. Never deletes Summary table blocks when empty — keeps title/headers
-  and clears data only. If `{workspace.local_path}/bookkeeping-test-session.yaml`
-  is active, use that session’s today and fixture inbox EMLs instead of Gmail.
+  Version 1.4.0. Use when the user wants to Find Unpaid Invoices — find unpaid
+  expense invoices in their inbox, list invoices received but not yet paid, check
+  pending payments awaiting the bank statement, or refresh the Summary Unpaid
+  Expense Invoices table. Searches Gmail inbox from the first day of last month,
+  matches Debit rows on the current and previous month reconciliation sheets,
+  uploads invoice PDFs to the month Expenses folder, and maintains a Paid
+  checkbox with Status and Date Paid as live formulas on Paid (`pending`/`unpaid`
+  and `TODAY()`). Grace working days classify pending in the chat report and
+  write a Note (`Pending as invoice received less than {grace_working_days}
+  working days`). Requires Import bank CSV and Categorise bank data (and usually
+  Match invoices / Reconcile Bank Statement) for the months being read. Expense /
+  inbox only — does not fill Unpaid Revenue Invoices. Never deletes Summary table
+  blocks when empty — keeps title/headers and clears data only. If
+  `{workspace.local_path}/bookkeeping-test-session.yaml` is active, use that
+  session’s today and fixture inbox EMLs instead of Gmail.
 ---
-# Unpaid expense invoices
+# Find Unpaid Invoices
 
 Find invoices **received** in Gmail (or a test-session fixture inbox) that are not yet settled by a bank Debit on the current or previous month’s reconciliation workbook. Write the Summary **Unpaid Expense Invoices** table (keep the block even when empty). This skill depends on **Import** + **Categorise** having already been run for the months being read — it does **not** import CSVs or create month sheets.
 

@@ -7,9 +7,10 @@ description: >-
   month Drive folders, create or copy the month sheet from the prior month or
   the scrubbed `.xlsx` template, and paste the CSV into the raw import columns
   only. Does not fill Date, Counterparty, Category, Credit, Debit, or Invoice
-  columns — run Categorise bank data next. If
-  `{workspace.local_path}/bookkeeping-test-session.yaml` is active, use that
-  session’s statement month and the CSV already staged in Extracts.
+  columns — run Categorise bank data next (or the one-shot Reconcile Bank
+  Statement wrapper). If `{workspace.local_path}/bookkeeping-test-session.yaml`
+  is active, use that session’s statement month and the CSV already staged in
+  Extracts.
 ---
 # Import bank CSV
 
@@ -19,7 +20,7 @@ If you must save a CSV or other file **locally** before uploading to Drive (or a
 
 **First-month workbook template (committed, scrubbed):** `skills/bank-reconciliation/Y[date]_[company]_Reconciliation.xlsx`. Upload a copy of that file for the initial month only; never edit the repo file in place, and never leave a filled private copy under `skills/`.
 
-**Next skill:** after a successful import, tell the operator to run [`categorise-bank.md`](categorise-bank.md).
+**Next skill:** after a successful import, tell the operator to run [`categorise-bank.md`](categorise-bank.md). For Import → Categorise → Match in one go, use [`reconcile-bank-statement.md`](reconcile-bank-statement.md).
 
 ## Test session (optional)
 

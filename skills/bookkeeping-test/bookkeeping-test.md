@@ -1,24 +1,31 @@
 ---
 name: Bookkeeping test
-version: 1.0.0
+version: 1.1.0
 description: >-
-  Version 1.0.0. Use when the user wants to run bookkeeping skills with sample /
-  test data, try fixtures, or advance a bookkeeping test phase. Stages Drive CSV
-  fixtures and writes `{workspace.local_path}/bookkeeping-test-session.yaml` so
-  Import, Categorise, Match invoices, and Unpaid invoices use a fixed Nov 2024
-  month and local EML “inbox” instead of live Gmail. Does not itself import,
-  categorise, match, or fill unpaid tables — only sets up data, then tells the
-  operator which live skill to run next. Phases: (1) stage bank-statement.csv +
-  recon inbox/sent EMLs; (2) add Cobalt Mail EML to inbox; (3) stage
-  bank-statement-with-payment.csv into Extracts only.
+  Version 1.1.0. Use when the user wants to stage bookkeeping test fixtures only
+  (phase 1 / 2 / 3), or debug sample data setup. Preferred operator entry points
+  are the bundles: Reconcile Bank Statement Test, Find Unpaid Invoices Test, and
+  Update Bank Statement Test. This skill stages Drive CSVs and writes
+  `{workspace.local_path}/bookkeeping-test-session.yaml` so Import, Categorise,
+  Match invoices, and Find Unpaid Invoices use Nov 2024 and local EML inboxes.
+  Does not itself import, categorise, match, or find unpaid — only sets up data
+  unless a bundle skill continues after staging.
 ---
 # Bookkeeping test (phased setup)
 
-This skill **only stages fixtures** and maintains a test session file. It does **not** run Import, Categorise, Match invoices, or Unpaid invoices.
+**Preferred:** run the orchestrator skills instead of this file alone:
+
+| Bundle | Stages | Then runs |
+| --- | --- | --- |
+| [`reconcile-bank-statement-test.md`](reconcile-bank-statement-test.md) | Phase 1 | Reconcile Bank Statement |
+| [`find-unpaid-invoices-test.md`](find-unpaid-invoices-test.md) | Phase 2 | Find Unpaid Invoices |
+| [`update-bank-statement-test.md`](update-bank-statement-test.md) | Phase 3 | Import → Categorise → Find Unpaid Invoices |
+
+This skill **only stages fixtures** and maintains a test session file. When invoked alone, it does **not** run Import, Categorise, Match invoices, or Find Unpaid Invoices — it stops after staging and tells the operator the next step (or the matching bundle).
 
 Read [`config/profile.yaml`](../../config/profile.yaml) for `{drive.*}`, `{workspace.local_path}`, `{company.name}`. Load Google Drive when staging CSVs. Ensure `{workspace.local_path}/` exists before writing the session file.
 
-**Expected results checklist:** [`expected-results.md`](expected-results.md) — point the operator (or compare after live-skill runs) at the section for the phase just completed. Live skills do not auto-run pass/fail.
+**Expected results checklist:** [`expected-results.md`](expected-results.md).
 
 ## Session file
 
@@ -48,10 +55,11 @@ payment_csv_staged: false
 
 ## Which phase to run
 
-- Operator says **phase 1** / start test / sample data / try with test data → **Phase 1**.
-- Operator says **phase 2** → **Phase 2** (require existing session with `phase` ≥ 1).
-- Operator says **phase 3** → **Phase 3** (require existing session with `phase` ≥ 2).
-- If unclear, ask which phase (1, 2, or 3).
+- Operator says **phase 1** only / stage fixtures only → **Phase 1** (prefer **Reconcile Bank Statement Test** for the full first segment).
+- Operator says **phase 2** → **Phase 2** (require existing session with `phase` ≥ 1; prefer **Find Unpaid Invoices Test**).
+- Operator says **phase 3** → **Phase 3** (require existing session with `phase` ≥ 2; prefer **Update Bank Statement Test**).
+- “Try with sample / test data” without a phase → suggest **Reconcile Bank Statement Test**.
+- If unclear, ask which phase (1, 2, or 3) or which bundle.
 
 ## Shared Drive layout (all phases)
 
@@ -74,45 +82,33 @@ Prefer a single active bank CSV name in that folder (e.g. `bank-statement.csv`).
 1. Ensure Drive year / Extracts / `202411` month folders exist.
 2. Copy `skills/bank-reconciliation/test-data/bank-statement.csv` into the Extracts month folder (overwrite any prior test CSV in that folder).
 3. Write the session file with `phase: 1`, `today: "2024-11-25"`, statement `2024`/`202411`, `company_addressee_override: "Demo Company Ltd"`, inbox = `skills/bank-reconciliation/test-data/emails/*.eml` (not under `sent/`), sent = `skills/bank-reconciliation/test-data/emails/sent/*.eml`, `payment_csv_staged: false`.
-4. **Stop.** Do not import, categorise, or match.
+4. When this skill runs **alone**: **Stop.** Do not import, categorise, or match. Tell the operator to run **Reconcile Bank Statement** (or **Reconcile Bank Statement Test** if they have not staged yet — already done) / Import → Categorise → Match, then **Find Unpaid Invoices Test**. Point at [`expected-results.md`](expected-results.md) § After Phase 1.
 
-**Tell the operator to run, in order:**
-
-1. **Import bank CSV**
-2. **Categorise bank data**
-3. **Match invoices**
-
-Then return here for **Phase 2**. Point them at [`expected-results.md`](expected-results.md) § After Phase 1 live skills.
+When called from **Reconcile Bank Statement Test**, return after step 3 so the bundle can continue.
 
 ## Phase 2 — Add unpaid Cobalt invoice to inbox
 
-1. Require session `active: true` and `phase` ≥ 1. If missing, stop and tell the operator to run Phase 1 first.
+1. Require session `active: true` and `phase` ≥ 1. If missing, stop and tell the operator to run **Reconcile Bank Statement Test** (or Phase 1) first.
 2. Update the session file: set `phase: 2`. Keep existing inbox/sent entries. **Append** (do not remove recon EMLs):
 
    - `skills/unpaid-invoices/test-data/emails/01-cobalt-mail.eml`
 
    Prefer listing explicit paths after expansion so Cobalt is clearly included, e.g. each recon `*.eml` path plus the Cobalt path.
 3. Do **not** stage a new CSV. Do **not** edit the Google Sheet or Gmail.
-4. **Stop.**
+4. When this skill runs **alone**: **Stop.** Tell the operator to run **Find Unpaid Invoices**. Point at [`expected-results.md`](expected-results.md) § After Phase 2.
 
-**Tell the operator to run: Unpaid expense invoices.** Then return for **Phase 3**. Point at [`expected-results.md`](expected-results.md) § After Phase 2 live skill.
+When called from **Find Unpaid Invoices Test**, return after step 3 so the bundle can continue.
 
 ## Phase 3 — Stage payment bank CSV
 
-1. Require session `active: true` and `phase` ≥ 2. If missing, stop and tell the operator to run Phase 2 first.
+1. Require session `active: true` and `phase` ≥ 2. If missing, stop and tell the operator to run **Find Unpaid Invoices Test** (or Phase 2) first.
 2. Copy **only** `skills/unpaid-invoices/test-data/bank-statement-with-payment.csv` into the Extracts month folder, replacing the active bank CSV Import will read (overwrite `bank-statement.csv` contents or replace the file so Import uses the payment extract).
 3. Update the session file: set `phase: 3`, `payment_csv_staged: true`. Keep inbox/sent as after Phase 2 (include Cobalt).
-4. Do **not** edit the Google Sheet. Do **not** import, categorise, or run unpaid here.
-5. **Stop.**
+4. Do **not** edit the Google Sheet. Do **not** import, categorise, or run Find Unpaid Invoices here.
+5. When this skill runs **alone**: **Stop.** Tell the operator to run **Import → Categorise → Find Unpaid Invoices** (or **Update Bank Statement Test**). Point at [`expected-results.md`](expected-results.md) § After Phase 3.
 
-**Tell the operator to run, in order:**
-
-1. **Import bank CSV** (re-paste the payment CSV)
-2. **Categorise bank data** (new Cobalt debit row)
-3. **Unpaid expense invoices** (should settle Cobalt)
-
-Point at [`expected-results.md`](expected-results.md) § After Phase 3 live skills.
+When called from **Update Bank Statement Test**, return after step 3 so the bundle can continue.
 
 ## Report (every phase)
 
-Include: phase number; session file path; what was staged (CSV path on Drive and/or inbox EML list); confirmation that live skills were **not** executed; the exact next live skill(s) to run.
+Include: phase number; session file path; what was staged (CSV path on Drive and/or inbox EML list); whether live skills were left for a bundle or for the operator; the exact next skill(s) or bundle to run.

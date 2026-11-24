@@ -2,10 +2,10 @@
 title: "Reconciliation tutorial"
 description: "Reconcile a month of bank transactions with invoices"
 ---
-This tutorial walks through a monthly bank reconciliation using a Grok Bot agent. Work is split across three skills: **Import bank CSV**, **Categorise bank data**, and **Match invoices**.
+This tutorial walks through a monthly bank reconciliation using a Grok Bot agent. Prefer **Reconcile Bank Statement** (Import → Categorise → Match invoices in one go). You can still run **Import bank CSV**, **Categorise bank data**, and **Match invoices** separately. Use **Find Unpaid Invoices** for unpaid vendor bills.
 
 <Info>
- The agent will:
+ The agent will (via Reconcile Bank Statement or the three steps):
 
 1. **Import** — prepare the month's Google Drive folder and Google Sheet, paste the bank CSV into the raw import columns only
 2. **Categorise** — fill Date, Counterparty, Category, Credit, and Debit; seed Categories and Counterparty reference tabs; verify totals
@@ -28,17 +28,15 @@ This tutorial walks through a monthly bank reconciliation using a Grok Bot agent
 
 ## Try with test data
 
-After Quick start, you can exercise the skills **without** exporting a live bank CSV or searching your Gmail inbox. Ask the agent to run the **Bookkeeping test** skill (or “try with sample / test data”).
+After Quick start, exercise the skills **without** a live bank CSV or Gmail. Run these **in order** (each stages fixtures then runs the live skills):
 
-That skill only **stages** fixtures and writes a session file under `{workspace.local_path}/`. You then run the real skills between phases:
-
-1. **Test Phase 1** — stages `skills/bank-reconciliation/test-data/bank-statement.csv` into Extracts and defines the recon `.eml` fixtures as the inbox/sent mail. Then run **Import → Categorise → Match invoices**.
-2. **Test Phase 2** — adds `skills/unpaid-invoices/test-data/emails/01-cobalt-mail.eml` to the fixture inbox. Then run **Unpaid expense invoices**.
-3. **Test Phase 3** — stages `skills/unpaid-invoices/test-data/bank-statement-with-payment.csv` into Extracts only. Then run **Import → Categorise → Unpaid expense invoices** again.
+1. **Reconcile Bank Statement Test** — Phase 1 + Reconcile Bank Statement  
+2. **Find Unpaid Invoices Test** — Phase 2 + Find Unpaid Invoices  
+3. **Update Bank Statement Test** — Phase 3 + Import → Categorise → Find Unpaid Invoices  
 
 While the session is active, live skills use November 2024 and local EMLs instead of Gmail. Compare results to `skills/bookkeeping-test/expected-results.md`.
 
-When you are ready for a real month, deactivate the test session (or delete the session file) and continue with the live CSV export steps below.
+When you are ready for a real month, deactivate the test session (or delete the session file) and continue with the live CSV export steps below. For a live month, ask for **Reconcile Bank Statement** or **Find Unpaid Invoices**.
 
 ## Export your monthly bank statement
 
@@ -56,7 +54,9 @@ The skill maps common bank CSV layouts, so the agent can import statements even 
   Automating monthly bank pulls is possible later, but only with tightly restricted access. For this tutorial, export a CSV by hand — simpler and safer.
 </Tip>
 
-## Run Import bank CSV
+## Run Reconcile Bank Statement (or Import alone)
+
+Ask for **Reconcile Bank Statement** to run Import → Categorise → Match in one go. Or run **Import bank CSV** alone, then the later sections.
 
 ## Prepare the month's folder and sheet
 
@@ -212,7 +212,7 @@ Report the revenue folder link, credit matches (with Source counts), and credit 
 
 After invoice matching, fill **Summary** (Match invoices skill):
 
-- **Keep blocks; clear data when empty** for every Summary table: never delete title/headers (or the Expenses by Category pie) when there are no data rows — clear data under the headers only. Leave empty Unpaid shells intact for the unpaid-invoices skill.
+- **Keep blocks; clear data when empty** for every Summary table: never delete title/headers (or the Expenses by Category pie) when there are no data rows — clear data under the headers only. Leave empty Unpaid shells intact for Find Unpaid Invoices.
 - **Missing Expense Invoices** / **Missing Revenue Invoices** — live formulas over the transactions tab (Debit/Credit with blank Invoice). **Insert sheet rows** under a table header before writing a spill so lower titles (for example Missing Revenue under Missing Expense) are never overwritten. On **Bank Transactions**, highlight those same missing-invoice rows in light red so they match the Summary tables (bank-fee rows excluded from Missing Expense stay unhighlighted for this purpose).
 - **Expenses by Category** — Category labels from expense-typed rows on `Categories` (**Type** = Expense). **Total** cells use formulas that sum **Debit** on the transactions tab by Category (for example `SUMIF`), so changing a bank row’s Category updates the table and the linked pie chart. **Percentage** is formula-driven over those Totals (`0%` display).
 - Create or update **one** pie chart bound to Category + Total (spare rows under the table; no duplicate charts on reruns; do not delete the pie when the category table is empty).
