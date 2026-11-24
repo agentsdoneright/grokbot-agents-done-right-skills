@@ -19,7 +19,7 @@ description: >-
 | --- | --- | --- |
 | [`reconcile-bank-statement-test.md`](reconcile-bank-statement-test.md) | Phase 1 | Reconcile Bank Statement |
 | [`find-unpaid-invoices-test.md`](find-unpaid-invoices-test.md) | Phase 2 | Find Unpaid Invoices |
-| [`update-bank-statement-test.md`](update-bank-statement-test.md) | Phase 3 | Import → Categorise → Find Unpaid Invoices |
+| [`update-bank-statement-test.md`](update-bank-statement-test.md) | Phase 3 | Import → Categorise → Match invoices → Find Unpaid Invoices |
 
 This skill **only stages fixtures** and maintains a test session file. When invoked alone, it does **not** run Import, Categorise, Match invoices, or Find Unpaid Invoices — it stops after staging and tells the operator the next step (or the matching bundle).
 
@@ -105,8 +105,8 @@ When called from **Find Unpaid Invoices Test**, return after step 3 so the bundl
 1. Require session `active: true` and `phase` ≥ 2. If missing, stop and tell the operator to run **Find Unpaid Invoices Test** (or Phase 2) first.
 2. Copy **only** `skills/unpaid-invoices/test-data/bank-statement-with-payment.csv` into the Extracts month folder, replacing the active bank CSV Import will read (overwrite `bank-statement.csv` contents or replace the file so Import uses the payment extract).
 3. Update the session file: set `phase: 3`, `payment_csv_staged: true`. Keep inbox/sent as after Phase 2 (include Cobalt and Lumen).
-4. Do **not** edit the Google Sheet. Do **not** import, categorise, or run Find Unpaid Invoices here.
-5. When this skill runs **alone**: **Stop.** Tell the operator to run **Import → Categorise → Find Unpaid Invoices** (or **Update Bank Statement Test**). Point at [`expected-results.md`](expected-results.md) § After Phase 3.
+4. Do **not** edit the Google Sheet. Do **not** import, categorise, match, or run Find Unpaid Invoices here.
+5. When this skill runs **alone**: **Stop.** Tell the operator to run **Import → Categorise → Match invoices → Find Unpaid Invoices** (or **Update Bank Statement Test**). Point at [`expected-results.md`](expected-results.md) § After Phase 3.
 
 When called from **Update Bank Statement Test**, return after step 3 so the bundle can continue.
 

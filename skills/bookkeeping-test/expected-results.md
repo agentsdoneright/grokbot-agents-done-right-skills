@@ -38,7 +38,7 @@ Fixed month: **November 2024** (`202411`). Fixed today for unpaid windows: **202
 - [ ] **Summary — Missing Expense Invoices** lists Staples + City Rides (formula-driven; bank fee excluded)
 - [ ] **Summary — Missing Revenue Invoices** lists the unmatched credit
 - [ ] Exactly one blank row between each stacked Summary table (Missing Expense → Missing Revenue → Unpaid Expense → Unpaid Revenue); spills did not overwrite lower titles or consume gap rows
-- [ ] Summary table **data** cells are Arial 10 regular (not bold / not title-sized)
+- [ ] Summary table **data** cells are Arial 10 regular (not bold / not title-sized) with white / none background (not header blue)
 - [ ] Summary table blocks are **kept** even when empty (title + headers); empty unpaid shells left intact
 - [ ] Matching Bank rows highlighted light red; bank fee not highlighted for missing invoices
 - [ ] **Expenses by Category** Totals are live `SUMIF`-style formulas; pie chart present/updated
@@ -59,7 +59,7 @@ Session inbox includes recon expense EMLs **plus**:
 - [ ] Cobalt Mail (`CM-4418`, `$88.00`) appears on **Unpaid Expense Invoices** as report **`unpaid`** (outside grace); sheet Status formula `unpaid`; Paid unchecked; no grace Note
 - [ ] Lumen Analytics (`LA-3301`, `$156.40`) appears as report **`pending`** (grace); **Note** = `Pending as invoice received less than 4 working days`; sheet Status formula `pending` (Config grace); Paid unchecked
 - [ ] Unpaid Expense block kept (title/headers); Invoice link filename-labeled under month Expenses when uploaded
-- [ ] Unpaid Expense data cells Arial 10 regular; exactly one blank row between last Unpaid Expense data row and Unpaid Revenue title
+- [ ] Unpaid Expense data cells Arial 10 regular with white / none background; exactly one blank row between last Unpaid Expense data row and Unpaid Revenue title
 - [ ] Unpaid Revenue block left untouched
 
 ---
@@ -73,9 +73,15 @@ Extracts contain the payment CSV (includes Cobalt Mail debit `-88.00` on 2024-11
 - [ ] Payment CSV pasted; Bank rows include Cobalt Mail debit after categorise
 - [ ] Reference tabs updated for any new counterparty/category
 
+### Match invoices
+
+- [ ] Match ran after Categorise (before Find Unpaid Invoices)
+- [ ] Cobalt Mail Debit matched to its invoice when present in the fixture inbox / Expenses; Invoice link set on the Bank row
+- [ ] Staples + City Rides (and unmatched Acme credit) remain missing where still unmatched; Summary refreshed with one-blank-row gaps and Arial 10 white-background data
+
 ### Find Unpaid Invoices
 
 - [ ] Cobalt invoice **settled** (dropped from Unpaid Expense Invoices) against the new Debit
 - [ ] Lumen Analytics (`LA-3301`, `$156.40`) **still pending** (grace, unmatched); Note still the grace text; sheet Status formula `pending` (Config grace)
-- [ ] Gmail not used; Find Unpaid Invoices did not invent Bank rows (Import/Categorise added them)
-- [ ] Unpaid Expense block kept (title/headers) with the Lumen row still present; Arial 10 data; one blank row before Unpaid Revenue
+- [ ] Gmail not used; Find Unpaid Invoices did not invent Bank rows (Import/Categorise/Match added or updated them)
+- [ ] Unpaid Expense block kept (title/headers) with the Lumen row still present; Arial 10 white-background data; one blank row before Unpaid Revenue
