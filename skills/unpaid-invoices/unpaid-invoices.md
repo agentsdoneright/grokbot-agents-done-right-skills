@@ -1,8 +1,8 @@
 ---
 name: Find Unpaid Invoices
-version: 1.5.3
+version: 1.5.4
 description: >-
-  Version 1.5.3. Use when the user wants to Find Unpaid Invoices — find unpaid
+  Version 1.5.4. Use when the user wants to Find Unpaid Invoices — find unpaid
   expense invoices in their inbox, list invoices received but not yet paid, check
   pending payments awaiting the bank statement, or refresh the Summary Unpaid
   Expense Invoices table. Searches Gmail inbox from the first day of last month,
@@ -84,7 +84,7 @@ Session setup is owned by [`skills/bookkeeping-test/bookkeeping-test.md`](../boo
 
 On the target workbook’s **Summary** tab, locate **Unpaid Expense Invoices** by **title / header text**, not fixed coordinates.
 
-Expected headers (case-insensitive; close wording is fine): **Date | Counterparty | Amount | Ref | Invoice | Status | Paid | Date Paid | Note**.
+Expected headers (case-insensitive; close wording is fine): **Date | Counterparty | Amount | Ref | Invoice | Paid | Date Paid | Status | Note**.
 
 If the block exists, read every data row under the headers into memory (all columns). Treat **Paid** as true when the cell is boolean `TRUE`, checkbox checked, or a clear truthy value. Preserve these for merge (section 6). If the block is absent, start with an empty existing set.
 
@@ -173,7 +173,7 @@ Locate **Unpaid Expense Invoices** by header text. Do **not** redesign the table
 
 ### If there is at least one Unpaid Expense row to show
 
-1. Keep or create the title and headers: **Date | Counterparty | Amount | Ref | Invoice | Status | Paid | Date Paid | Note**. Prefer the template’s existing location; create the block only if it is missing entirely.
+1. Keep or create the title and headers: **Date | Counterparty | Amount | Ref | Invoice | Paid | Date Paid | Status | Note**. Prefer the template’s existing location; create the block only if it is missing entirely.
 2. Place the block in a clear area of Summary without covering Expenses by Category or the Missing invoice blocks. Prefer the template’s existing location when still present.
 3. **Insert sheet rows before writing data.** Count the rows to write (**N**). Under the Unpaid Expense header there must be room for **N** data rows **plus exactly one blank gap row** before the next Summary block title (usually **Unpaid Revenue Invoices**). If fewer empty rows exist, **insert** enough so lower titles/tables shift down intact. **Never** overwrite another block’s title, headers, or data, and **never** write into the gap row (same hard rule as match-invoices Summary).
 4. Clear previous data rows under the headers, then write rows for this run (not `FILTER` over Bank — source is inbox + merge).
@@ -186,7 +186,7 @@ Status:    =IF(NETWORKDAYS(<DateCell>,Config!$B$1)-1<Config!$B$2,"pending",IF(<P
 Date Paid: =IF(<PaidCell>,TODAY(),"")
 ```
 
-Example if Date is column A, Paid is column G, and the row is 35: Status `=IF(NETWORKDAYS(A35,Config!$B$1)-1<Config!$B$2,"pending",IF(G35,"pending","unpaid"))`, Date Paid `=IF(G35,TODAY(),"")`.
+Example if Date is column A, Paid is column F, Status is column H, Date Paid is column G, and the row is 35: Status `=IF(NETWORKDAYS(A35,Config!$B$1)-1<Config!$B$2,"pending",IF(F35,"pending","unpaid"))`, Date Paid `=IF(F35,TODAY(),"")`.
 
 `NETWORKDAYS` counts Mon–Fri only (no holiday calendar). Subtract `1` so the comparison is working-day **age** (`today − date`), matching calendar-style `today − date < grace`. `TODAY()` on Date Paid recalculates while Paid is true (shows the current calendar day, not a frozen stamp). That is expected.
 
