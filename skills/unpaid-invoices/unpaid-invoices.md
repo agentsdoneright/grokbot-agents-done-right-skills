@@ -1,22 +1,23 @@
 ---
 name: Find Unpaid Invoices
-version: 1.4.0
+version: 1.5.0
 description: >-
-  Version 1.4.0. Use when the user wants to Find Unpaid Invoices — find unpaid
+  Version 1.5.0. Use when the user wants to Find Unpaid Invoices — find unpaid
   expense invoices in their inbox, list invoices received but not yet paid, check
   pending payments awaiting the bank statement, or refresh the Summary Unpaid
   Expense Invoices table. Searches Gmail inbox from the first day of last month,
   matches Debit rows on the current and previous month reconciliation sheets,
   uploads invoice PDFs to the month Expenses folder, and maintains a Paid
-  checkbox with Status and Date Paid as live formulas on Paid (`pending`/`unpaid`
-  and `TODAY()`). Grace working days classify pending in the chat report and
-  write a Note (`Pending as invoice received less than {grace_working_days}
-  working days`). Requires Import bank CSV and Categorise bank data (and usually
-  Match invoices / Reconcile Bank Statement) for the months being read. Expense /
-  inbox only — does not fill Unpaid Revenue Invoices. Never deletes Summary table
-  blocks when empty — keeps title/headers and clears data only. If
-  `{workspace.local_path}/bookkeeping-test-session.yaml` is active, use that
-  session’s today and fixture inbox EMLs instead of Gmail.
+  checkbox with Status and Date Paid as live formulas (`pending`/`unpaid` from
+  Config grace working days or Paid; Date Paid via `TODAY()`). Ensures a Config
+  tab (Today, grace working days). Grace also classifies pending in the chat
+  report and writes a Note (`Pending as invoice received less than
+  {grace_working_days} working days`). Requires Import bank CSV and Categorise
+  bank data (and usually Match invoices / Reconcile Bank Statement) for the
+  months being read. Expense / inbox only — does not fill Unpaid Revenue
+  Invoices. Never deletes Summary table blocks when empty — keeps title/headers
+  and clears data only. If `{workspace.local_path}/bookkeeping-test-session.yaml`
+  is active, use that session’s today and fixture inbox EMLs instead of Gmail.
 ---
 # Find Unpaid Invoices
 
@@ -26,9 +27,18 @@ Find invoices **received** in Gmail (or a test-session fixture inbox) that are n
 
 | Key | Default | Meaning |
 | --- | --- | --- |
-| `grace_working_days` | `4` | Working days (Mon–Fri only; no holiday calendar) after the **email received** date during which an unmatched invoice is classified `pending` in the chat report and gets Note `Pending as invoice received less than {grace_working_days} working days` (sheet Status is formula-only from Paid) |
+| `grace_working_days` | `4` | Working days (Mon–Fri only; no holiday calendar) after the **email received** date during which an unmatched invoice is classified `pending` in the chat report, shows `pending` via the Status formula (Config grace), and gets Note `Pending as invoice received less than {grace_working_days} working days` |
 
-Substitute `{grace_working_days}` everywhere below with that configured integer. If the operator later changes the default in this file, use the new value for report classification and the Summary helper text.
+Substitute `{grace_working_days}` everywhere below with that configured integer. If the operator later changes the default in this file, use the new value for report classification, the spreadsheet **Config** tab, and the Summary helper text.
+
+**Spreadsheet Config tab** (target workbook):
+
+| Cell | Label (column A) | Value (column B) |
+| --- | --- | --- |
+| `Config!B1` | Today | Run/session today (real date value, not a formula, when a test session fixes today; otherwise `=TODAY()` or the run date) |
+| `Config!B2` | Invoice grace period (working days) | `{grace_working_days}` |
+
+On every unpaid run against the target workbook: ensure a sheet named **Config** exists with those labels; set `B1` and `B2` from today and `{grace_working_days}` before writing Status formulas.
 
 Read [`config/profile.yaml`](../../config/profile.yaml) for `{google_account}`, `{company.name}`, `{drive.*}`, `{workspace.local_path}`. Load the Google Drive, Google Sheets, and Gmail connectors (and their skills) before Drive / Sheets / Gmail work — skip Gmail when a test session is active. Never invent amounts, refs, or Drive links. Never send, reply to, or change any emails.
 
@@ -44,6 +54,7 @@ At the start, check `{workspace.local_path}/bookkeeping-test-session.yaml`. If i
 - When `company_addressee_override` is set (e.g. **Demo Company Ltd**), use it for addressee checks instead of flagging a mismatch vs `{company.name}` alone.
 - Do **not** import a payment CSV, append bank Debits, or otherwise change the transactions tab — Import / Categorise own Bank rows (after Test Phase 3, the operator re-runs those skills first).
 - When extracting a PDF from an EML before Drive upload, stage under `{workspace.local_path}/`.
+- Write that fixed today into `Config!B1` (static date) so Status grace formulas match the fixture.
 
 Session setup is owned by [`skills/bookkeeping-test/bookkeeping-test.md`](../bookkeeping-test/bookkeeping-test.md).
 
@@ -65,6 +76,7 @@ Session setup is owned by [`skills/bookkeeping-test/bookkeeping-test.md`](../boo
 - Open **current** and **previous** month sheets when present. If only one exists, continue with that one and note the missing month in the final report.
 - **Target workbook** for Summary writes and Expenses uploads: the **most recent available** month sheet (prefer current month when it exists).
 - Ensure `{drive.expenses_folder}` exists **inside that spreadsheet’s month folder** (create once if missing).
+- Ensure the target workbook has a **Config** tab and write today / `{grace_working_days}` into `Config!B1` / `Config!B2` (see Config table above) before Status formulas are written.
 
 ## 2. Read existing Unpaid Expense rows (if any)
 
@@ -130,13 +142,13 @@ Identity key: **Ref + Counterparty + Amount** (same dedupe rules as section 3). 
 3. Else if the **email received** date is within the last `{grace_working_days}` **working days** (Mon–Fri only, counting backward from today) → report as **pending** (grace) and set **Note** to the grace Note text above (section 8).
 4. Else → report as **unpaid**. Clear the grace Note text from **Note** if it was previously set for this row (leave other operator Notes alone).
 
-**Sheet Status / Date Paid** are owned by formulas on **Paid** (section 8). The Status column shows `pending` only when Paid is checked; grace pending is shown via the **Note** field and the chat report.
+**Sheet Status / Date Paid** are owned by formulas (section 8). Status is `pending` when the invoice Date is still inside the Config grace window **or** when Paid is checked; otherwise `unpaid`. Grace pending is also reflected in **Note** and the chat report.
 
 ### Paid checkbox workflow (operator)
 
-1. Operator sees a row (Status formula shows `unpaid` until Paid is checked; grace may still be “pending” in the chat report).
+1. Operator sees a row. During grace, Status already shows `pending` (and Note carries the grace text) even if Paid is unchecked. Outside grace with Paid unchecked, Status shows `unpaid`.
 2. Operator pays the vendor, then ticks **Paid**.
-3. Sheet **Status** becomes `pending` and **Date Paid** shows `TODAY()` via formulas immediately. The row stays until a matching Debit appears on a loaded recon sheet; then the skill drops the row on a later run.
+3. Sheet **Status** stays or becomes `pending` and **Date Paid** shows `TODAY()` via formulas immediately. The row stays until a matching Debit appears on a loaded recon sheet; then the skill drops the row on a later run.
 
 No Apps Script. Do not paste static Status or Date Paid. Preserve operator **Note** on re-runs unless the operator cleared it, except: always set or clear the grace Note text per classification above (overwrite Note when writing the grace message; if Note only contained the old helper-style Status grace message, replace it with the grace Note text).
 
@@ -157,7 +169,7 @@ Locate **Unpaid Expense Invoices** by header text. Do **not** restyle the table.
 
 **Helper text** (title row area; overwrite every run when the Unpaid Expense block is present):
 
-`Sheet Status = IF(Paid,"pending","unpaid"); Date Paid = IF(Paid,TODAY(),""). Grace pending uses Note: Pending as invoice received less than {grace_working_days} working days`
+`Sheet Status = IF(NETWORKDAYS(Date,Config!$B$1)-1<Config!$B$2,"pending",IF(Paid,"pending","unpaid")); Date Paid = IF(Paid,TODAY(),""). Grace Note: Pending as invoice received less than {grace_working_days} working days`
 
 Do **not** write the old Status helper line (`Status = 'pending' when the invoice was only received … working days ago`) into the title area — that message belongs in **Note** for grace rows only.
 
@@ -169,16 +181,16 @@ Do **not** write the old Status helper line (`Status = 'pending' when the invoic
 4. Clear previous data rows under the headers, then write rows for this run (not `FILTER` over Bank — source is inbox + merge).
 5. **Paid** cells must be checkboxes (boolean). Leave Paid unchecked (`FALSE`) for new rows unless preserved from an existing row.
 6. **Date** as a real date; **Amount** as a number. **Note:** for grace-pending rows (section 6 step 3), write exactly `Pending as invoice received less than {grace_working_days} working days`. For other rows, preserve an existing operator Note; clear Note if it only held the grace message and the row is no longer grace-pending.
-7. **Status** and **Date Paid** — write **formulas** keyed off that row’s Paid cell (locate Paid / Status / Date Paid by header; adapt column letters). Never paste static `pending` / `unpaid` or a static date into those columns. For each data row:
+7. **Status** and **Date Paid** — write **formulas** (locate Date / Paid / Status / Date Paid by header; adapt column letters). Never paste static `pending` / `unpaid` or a static date into those columns. For each data row:
 
 ```text
-Status:    =IF(<PaidCell>,"pending","unpaid")
+Status:    =IF(NETWORKDAYS(<DateCell>,Config!$B$1)-1<Config!$B$2,"pending",IF(<PaidCell>,"pending","unpaid"))
 Date Paid: =IF(<PaidCell>,TODAY(),"")
 ```
 
-Example if Paid is column H and the row is 12: Status `=IF(H12,"pending","unpaid")`, Date Paid `=IF(H12,TODAY(),"")`.
+Example if Date is column A, Paid is column G, and the row is 35: Status `=IF(NETWORKDAYS(A35,Config!$B$1)-1<Config!$B$2,"pending",IF(G35,"pending","unpaid"))`, Date Paid `=IF(G35,TODAY(),"")`.
 
-`TODAY()` recalculates while Paid is true (shows the current calendar day, not a frozen stamp). That is expected.
+`NETWORKDAYS` counts Mon–Fri only (no holiday calendar). Subtract `1` so the comparison is working-day **age** (`today − date`), matching calendar-style `today − date < grace`. `TODAY()` on Date Paid recalculates while Paid is true (shows the current calendar day, not a frozen stamp). That is expected.
 
 8. On re-runs, rewrite the same Status / Date Paid formula pattern for every kept row (do not leave stale static values). Re-read Summary and confirm nothing below the unpaid block was corrupted by the write.
 
@@ -193,10 +205,10 @@ Match invoices owns Missing / Expenses-by-Category Summary updates; **this skill
 Include:
 
 - Target sheet link and which month sheets were read; note any missing month.
-- Email window (`email_after` → today) and `{grace_working_days}`.
+- Email window (`email_after` → today) and `{grace_working_days}`; confirm Config `B1`/`B2` were set.
 - Counts: **settled** (dropped this run), **pending** (grace), **pending** (Paid awaiting bank), **unpaid** — using report classification from section 6.
 - Lists for unpaid vs pending: Date, Counterparty, Amount, Ref, Paid, and sheet Status / Date Paid (formula results).
-- That **Status** and **Date Paid** are formulas on **Paid** (`IF(Paid,"pending","unpaid")` and `IF(Paid,TODAY(),"")`); no Apps Script.
+- That **Status** uses Config grace via `NETWORKDAYS` then Paid (`IF(NETWORKDAYS(Date,Config!$B$1)-1<Config!$B$2,"pending",IF(Paid,"pending","unpaid"))`) and **Date Paid** is `IF(Paid,TODAY(),"")`; no Apps Script.
 - Month `{drive.expenses_folder}` link and that Invoice links use filename labels.
-- Reminder: after paying a vendor, tick **Paid**; sheet Status becomes `pending` and Date Paid shows today via formulas until the Debit appears on a recon sheet, then the row drops off on the next unpaid-invoices run.
+- Reminder: after paying a vendor, tick **Paid**; sheet Status is `pending` and Date Paid shows today via formulas until the Debit appears on a recon sheet, then the row drops off on the next unpaid-invoices run. During grace, Status may already show `pending` before Paid is ticked.
 - When a test session is active, confirm Gmail was not used and the transactions tab was not modified by this skill.

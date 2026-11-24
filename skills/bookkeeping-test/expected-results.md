@@ -56,7 +56,7 @@ Session inbox includes recon expense EMLs **plus**:
 - [ ] Gmail was not used; transactions tab was **not** modified by unpaid skill
 - [ ] Recon expense EMLs settle against existing Nov Debits (not listed as unpaid)
 - [ ] Cobalt Mail (`CM-4418`, `$88.00`) appears on **Unpaid Expense Invoices** as report **`unpaid`** (outside grace); sheet Status formula `unpaid`; Paid unchecked; no grace Note
-- [ ] Lumen Analytics (`LA-3301`, `$156.40`) appears as report **`pending`** (grace); **Note** = `Pending as invoice received less than 4 working days`; sheet Status formula still `unpaid`; Paid unchecked
+- [ ] Lumen Analytics (`LA-3301`, `$156.40`) appears as report **`pending`** (grace); **Note** = `Pending as invoice received less than 4 working days`; sheet Status formula `pending` (Config grace); Paid unchecked
 - [ ] Unpaid Expense block kept (title/headers); Invoice link filename-labeled under month Expenses when uploaded
 - [ ] Unpaid Revenue block left untouched
 
@@ -74,6 +74,6 @@ Extracts contain the payment CSV (includes Cobalt Mail debit `-88.00` on 2024-11
 ### Find Unpaid Invoices
 
 - [ ] Cobalt invoice **settled** (dropped from Unpaid Expense Invoices) against the new Debit
-- [ ] Lumen Analytics (`LA-3301`, `$156.40`) **still pending** (grace, unmatched); Note still the grace text; sheet Status formula `unpaid`
+- [ ] Lumen Analytics (`LA-3301`, `$156.40`) **still pending** (grace, unmatched); Note still the grace text; sheet Status formula `pending` (Config grace)
 - [ ] Gmail not used; Find Unpaid Invoices did not invent Bank rows (Import/Categorise added them)
 - [ ] Unpaid Expense block kept (title/headers) with the Lumen row still present
