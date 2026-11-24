@@ -47,8 +47,9 @@ Run Find Unpaid Invoices Test
 2. **Wait**, then read and follow [`find-unpaid-invoices-test.md`](find-unpaid-invoices-test.md).
 3. After the report, recap for a newcomer:
    - Share the **same spreadsheet link** again (from this run).
-   - On **Summary → Unpaid Expense Invoices**: **Cobalt Mail** should show as **unpaid** (outside the grace window); **Lumen Analytics** as **pending** with Note about receiving the invoice within the grace working days; **Paid** unchecked for both.
-   - Invoice PDFs were filed under the month **Expenses** folder; the unpaid skill did **not** change Bank rows; Gmail was not used.
+   - On **Summary → Unpaid Expense Invoices**: **Cobalt Mail** should show as **unpaid** (outside the expense grace window); **Lumen Analytics** as **pending** with Note about receiving the invoice within the grace working days; **Paid** unchecked for both.
+   - On **Summary → Unpaid Revenue Invoices**: **Northpeak Systems** (`DC-2403`) should show as **unpaid** (outside the 10 working-day revenue grace); **Reminder Sent** unchecked.
+   - Invoice PDFs were filed under the month **Expenses** / **Revenue** folders; the unpaid skill did **not** change Bank rows; Gmail was not used.
    - Point at [`expected-results.md`](expected-results.md) § After Phase 2 if useful.
 4. Give the next paste when they are ready.
 
@@ -63,7 +64,7 @@ Run Update Bank Statement Test
 2. **Wait**, then read and follow [`update-bank-statement-test.md`](update-bank-statement-test.md).
 3. After the report, recap for a newcomer:
    - Share the spreadsheet link again.
-   - A sample payment CSV was imported: **Cobalt Mail** now has a matching Debit, so Cobalt **drops off** Unpaid Expense Invoices; **Lumen Analytics** stays **pending** (still no matching bank payment); Summary / missing lists refreshed where needed.
+   - A sample payment CSV was imported: **Cobalt Mail** now has a matching Debit, so Cobalt **drops off** Unpaid Expense Invoices; **Northpeak Systems** has a matching Credit, so it **drops off** Unpaid Revenue Invoices; **Lumen Analytics** stays **pending** (still no matching bank payment); Summary / missing lists refreshed where needed.
    - Point at [`expected-results.md`](expected-results.md) § After Phase 3 if useful.
 
 ## Finale

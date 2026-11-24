@@ -53,35 +53,44 @@ Session inbox includes recon expense EMLs **plus**:
 - `skills/unpaid-invoices/test-data/emails/01-cobalt-mail.eml` (received 2024-11-18)
 - `skills/unpaid-invoices/test-data/emails/02-lumen-analytics.eml` (received 2024-11-22)
 
-- [ ] Today treated as `2024-11-25`; `email_after` = `2024-10-01`; grace = 4 working days
+Session sent includes recon revenue EMLs **plus**:
+
+- `skills/unpaid-invoices/test-data/emails/sent/03-northpeak-dc-2403.eml` (sent 2024-11-08)
+
+- [ ] Today treated as `2024-11-25`; `email_after` = `2024-10-01`; expense grace = 4 working days; revenue grace = 10 working days
+- [ ] Config labels: **Expense Invoice grace period (working days)** / **Revenue Invoice grace period (working days)**; `B2=4`, `B3=10`
 - [ ] Gmail was not used; transactions tab was **not** modified by unpaid skill
 - [ ] Recon expense EMLs settle against existing Nov Debits (not listed as unpaid)
-- [ ] Cobalt Mail (`CM-4418`, `$88.00`) appears on **Unpaid Expense Invoices** as report **`unpaid`** (outside grace); sheet Status formula `unpaid`; Paid unchecked; no grace Note
-- [ ] Lumen Analytics (`LA-3301`, `$156.40`) appears as report **`pending`** (grace); **Note** = `Pending as invoice received less than 4 working days`; sheet Status formula `pending` (Config grace); Paid unchecked
-- [ ] Unpaid Expense block kept (title/headers); Invoice link filename-labeled under month Expenses when uploaded
-- [ ] Unpaid Expense data cells Arial 10 regular with white / none background; exactly one blank row between last Unpaid Expense data row and Unpaid Revenue title
-- [ ] Unpaid Revenue block left untouched
+- [ ] Recon sent EMLs (Riverstone, Pixelforge) settle against existing Nov Credits (not listed as unpaid revenue)
+- [ ] Cobalt Mail (`CM-4418`, `$88.00`) appears on **Unpaid Expense Invoices** as report **`unpaid`** (outside grace); sheet Status formula `unpaid`; Paid unchecked; no grace Note; **Date Paid** blank (not a `TODAY()` formula)
+- [ ] Lumen Analytics (`LA-3301`, `$156.40`) appears as report **`pending`** (grace); **Note** = `Pending as invoice received less than 4 working days`; sheet Status formula `pending` (Config B2 grace); Paid unchecked
+- [ ] Northpeak Systems (`DC-2403`, `$1250.00`) appears on **Unpaid Revenue Invoices** as report **`unpaid`** (outside 10 working-day revenue grace); sheet Status `unpaid`; Reminder Sent unchecked; Date Reminder Sent blank; Invoice link under month Revenue when uploaded
+- [ ] Unpaid Expense / Unpaid Revenue blocks kept (title/headers); Invoice links filename-labeled
+- [ ] Unpaid data cells Arial 10 regular with white / none background; exactly one blank row between last Unpaid Expense data row and Unpaid Revenue title
+- [ ] Checkbox date-stamp Apps Script ensured (or failure reported with static-date backstop)
 
 ---
 
 ## After Phase 3 live skills (Update Bank Statement Test)
 
-Extracts contain the payment CSV (includes Cobalt Mail debit `-88.00` on 2024-11-25). Lumen has **no** matching Debit.
+Extracts contain the payment CSV (includes Cobalt Mail debit `-88.00` and Northpeak Systems credit `1250.00` on 2024-11-25). Lumen has **no** matching Debit.
 
 ### Import + Categorise
 
-- [ ] Payment CSV pasted; Bank rows include Cobalt Mail debit after categorise
+- [ ] Payment CSV pasted; Bank rows include Cobalt Mail debit and Northpeak Systems credit after categorise
 - [ ] Reference tabs updated for any new counterparty/category
 
 ### Match invoices
 
 - [ ] Match ran after Categorise (before Find Unpaid Invoices)
 - [ ] Cobalt Mail Debit matched to its invoice when present in the fixture inbox / Expenses; Invoice link set on the Bank row
+- [ ] Northpeak Systems Credit matched to DC-2403 when present in sent fixtures / Revenue; Invoice link set on the Bank row when matched
 - [ ] Staples + City Rides (and unmatched Acme credit) remain missing where still unmatched; Summary refreshed with one-blank-row gaps and Arial 10 white-background data
 
 ### Find Unpaid Invoices
 
 - [ ] Cobalt invoice **settled** (dropped from Unpaid Expense Invoices) against the new Debit
-- [ ] Lumen Analytics (`LA-3301`, `$156.40`) **still pending** (grace, unmatched); Note still the grace text; sheet Status formula `pending` (Config grace)
+- [ ] Northpeak invoice **settled** (dropped from Unpaid Revenue Invoices) against the new Credit
+- [ ] Lumen Analytics (`LA-3301`, `$156.40`) **still pending** (grace, unmatched); Note still the expense grace text; sheet Status formula `pending` (Config B2 grace)
 - [ ] Gmail not used; Find Unpaid Invoices did not invent Bank rows (Import/Categorise/Match added or updated them)
-- [ ] Unpaid Expense block kept (title/headers) with the Lumen row still present; Arial 10 white-background data; one blank row before Unpaid Revenue
+- [ ] Unpaid Expense block kept with the Lumen row still present; Unpaid Revenue block kept (empty shell or no Northpeak row); Arial 10 white-background data; one blank row before Unpaid Revenue

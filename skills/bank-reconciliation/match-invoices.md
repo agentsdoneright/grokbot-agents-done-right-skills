@@ -1,8 +1,8 @@
 ---
 name: Match invoices
-version: 1.1.1
+version: 1.1.2
 description: >-
-  Version 1.1.1. Use when the user wants to match paid invoices to bank statement
+  Version 1.1.2. Use when the user wants to match paid invoices to bank statement
   rows in their Google Sheets reconciliation workbook: Unfiled Drive folders
   first (Source=Drive), then email (Source=Email), then Manual chat uploads
   (Source=Manual) for expense Debits and revenue Credits. Fill the Summary tab
@@ -24,7 +24,7 @@ If you must save a PDF or scratch file **locally**, write it under `{workspace.l
 
 **Prerequisites:** the month sheet has categorised Bank rows (Date, Counterparty, Category, Credit, Debit filled) — see [`import-bank-csv.md`](import-bank-csv.md) and [`categorise-bank.md`](categorise-bank.md). If Category / Debit columns are empty, stop and tell the operator to categorise first.
 
-**Unpaid Summary data** is owned by **Find Unpaid Invoices** ([`skills/unpaid-invoices/unpaid-invoices.md`](../unpaid-invoices/unpaid-invoices.md)) — do not invent unpaid rows here.
+**Unpaid Summary data** (**Unpaid Expense Invoices** and **Unpaid Revenue Invoices**) is owned by **Find Unpaid Invoices** ([`skills/unpaid-invoices/unpaid-invoices.md`](../unpaid-invoices/unpaid-invoices.md)) — do not invent unpaid rows here.
 
 ## Test session (optional)
 
@@ -124,7 +124,7 @@ Apply that independently to:
 | **Missing Expense Invoices** | Keep title + headers; clear data/formula rows under the headers |
 | **Missing Revenue Invoices** | Keep title + headers; clear data/formula rows under the headers |
 | **Expenses by Category** | Keep title + headers (and pie chart); clear category data rows under the headers |
-| **Unpaid Expense Invoices** / **Unpaid Revenue Invoices** | **Filled only by** Find Unpaid Invoices; this skill must **not** invent unpaid rows. If an unpaid block is present with **no data rows**, **leave it** — do **not** delete the empty shell. |
+| **Unpaid Expense Invoices** / **Unpaid Revenue Invoices** | **Filled only by** Find Unpaid Invoices (expense + revenue); this skill must **not** invent unpaid rows. If an unpaid block is present with **no data rows**, **leave it** — do **not** delete the empty shell. |
 
 ### Read the template layout first
 
@@ -135,7 +135,7 @@ Look for these titles and headers (case-insensitive; close wording is fine):
 - **Missing Expense Invoices** — columns such as Date, Counterparty (or Description), Amount, and Note (or reason).
 - **Missing Revenue Invoices** — the same kind of columns.
 - **Expenses by Category** — columns such as Category, Total, and Percentage.
-- **Unpaid Expense Invoices** / **Unpaid Revenue Invoices** — owned by Find Unpaid Invoices for **data**; leave empty shells in place.
+- **Unpaid Expense Invoices** / **Unpaid Revenue Invoices** — owned by Find Unpaid Invoices for **data** (both blocks); leave empty shells in place when that skill has not run yet.
 
 If a named range exists for one of these (a name containing `MissingExpense`, `MissingRevenue`, or `ExpensesByCategory`, or similar), use it as the start of that table. If the Summary tab is missing, add a minimal tab named `Summary` with the expected block titles and headers — no decorative formatting. Prefer keeping the template’s empty titled tables rather than omitting them.
 
@@ -143,7 +143,7 @@ If a named range exists for one of these (a name containing `MissingExpense`, `M
 
 When refreshing Summary in this skill:
 
-- Do **not** fill unpaid blocks from Bank Transactions or invent unpaid rows.
+- Do **not** fill Unpaid Expense or Unpaid Revenue from Bank Transactions or invent unpaid rows — Find Unpaid Invoices owns both.
 - Do **not** restyle or overwrite unpaid blocks that already have data rows.
 - Do **not** delete an unpaid block that has **no data rows** — leave the shell for the unpaid skill.
 

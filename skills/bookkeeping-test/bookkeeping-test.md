@@ -1,8 +1,8 @@
 ---
 name: Bookkeeping test
-version: 1.1.0
+version: 1.2.0
 description: >-
-  Version 1.1.0. Use when the user wants to stage bookkeeping test fixtures only
+  Version 1.2.0. Use when the user wants to stage bookkeeping test fixtures only
   (phase 1 / 2 / 3), or debug sample data setup. Preferred operator entry points
   are the bundles: Reconcile Bank Statement Test, Find Unpaid Invoices Test, and
   Update Bank Statement Test. This skill stages Drive CSVs and writes
@@ -86,15 +86,16 @@ Prefer a single active bank CSV name in that folder (e.g. `bank-statement.csv`).
 
 When called from **Reconcile Bank Statement Test**, return after step 3 so the bundle can continue.
 
-## Phase 2 — Add unpaid Cobalt + grace-pending Lumen invoices to inbox
+## Phase 2 — Add unpaid Cobalt + grace-pending Lumen (inbox) and overdue Northpeak revenue (sent)
 
 1. Require session `active: true` and `phase` ≥ 1. If missing, stop and tell the operator to run **Reconcile Bank Statement Test** (or Phase 1) first.
 2. Update the session file: set `phase: 2`. Keep existing inbox/sent entries. **Append** (do not remove recon EMLs):
 
-   - `skills/unpaid-invoices/test-data/emails/01-cobalt-mail.eml` (outside grace → unpaid)
-   - `skills/unpaid-invoices/test-data/emails/02-lumen-analytics.eml` (within 4 working-day grace → pending)
+   - Inbox: `skills/unpaid-invoices/test-data/emails/01-cobalt-mail.eml` (outside expense grace → unpaid)
+   - Inbox: `skills/unpaid-invoices/test-data/emails/02-lumen-analytics.eml` (within 4 working-day expense grace → pending)
+   - Sent: `skills/unpaid-invoices/test-data/emails/sent/03-northpeak-dc-2403.eml` (outside 10 working-day revenue grace → unpaid revenue)
 
-   Prefer listing explicit paths after expansion so both are clearly included, e.g. each recon `*.eml` path plus Cobalt and Lumen.
+   Prefer listing explicit paths after expansion so all are clearly included, e.g. each recon inbox/sent path plus Cobalt, Lumen, and Northpeak.
 3. Do **not** stage a new CSV. Do **not** edit the Google Sheet or Gmail.
 4. When this skill runs **alone**: **Stop.** Tell the operator to run **Find Unpaid Invoices**. Point at [`expected-results.md`](expected-results.md) § After Phase 2.
 
@@ -103,8 +104,8 @@ When called from **Find Unpaid Invoices Test**, return after step 3 so the bundl
 ## Phase 3 — Stage payment bank CSV
 
 1. Require session `active: true` and `phase` ≥ 2. If missing, stop and tell the operator to run **Find Unpaid Invoices Test** (or Phase 2) first.
-2. Copy **only** `skills/unpaid-invoices/test-data/bank-statement-with-payment.csv` into the Extracts month folder, replacing the active bank CSV Import will read (overwrite `bank-statement.csv` contents or replace the file so Import uses the payment extract).
-3. Update the session file: set `phase: 3`, `payment_csv_staged: true`. Keep inbox/sent as after Phase 2 (include Cobalt and Lumen).
+2. Copy **only** `skills/unpaid-invoices/test-data/bank-statement-with-payment.csv` into the Extracts month folder, replacing the active bank CSV Import will read (overwrite `bank-statement.csv` contents or replace the file so Import uses the payment extract). That CSV includes the Cobalt Debit and the Northpeak Credit so both unpaid rows can settle.
+3. Update the session file: set `phase: 3`, `payment_csv_staged: true`. Keep inbox/sent as after Phase 2 (include Cobalt, Lumen, and Northpeak sent EML).
 4. Do **not** edit the Google Sheet. Do **not** import, categorise, match, or run Find Unpaid Invoices here.
 5. When this skill runs **alone**: **Stop.** Tell the operator to run **Import → Categorise → Match invoices → Find Unpaid Invoices** (or **Update Bank Statement Test**). Point at [`expected-results.md`](expected-results.md) § After Phase 3.
 
