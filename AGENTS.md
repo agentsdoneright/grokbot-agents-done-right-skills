@@ -45,28 +45,98 @@ When a skill is active, use these from the profile:
 
 ## Quick start initiation
 
-Run **only** when the operator asks for Quick start / bootstrap, or when they ask to run a skill and `config/profile.yaml` is missing or Quick start has not been verified. Do **not** offer a setup-mode menu — initiation is always Quick start.
+Run **only** when the operator asks for Quick start / bootstrap, or when they ask to run a skill and `config/profile.yaml` is missing or Quick start has not been verified. Do **not** offer a setup-mode menu — initiation is always Quick start. Do not re-run when Quick start or Customizable is already verified.
 
-**Permission gate (required):** Before cloning the public repo, writing `config/profile.yaml`, creating `{workspace.local_path}/`, or probing Google Drive / Sheets / Gmail, summarize those steps and **wait for an explicit yes**. Do not start those side effects on a bootstrap paste alone. Asking for profile field values may happen before that yes; mutating and connector-probe steps may not.
+### How to talk to a new operator
 
-1. Ensure the workspace is a checkout of `{github.public_skills_repo_url}` (clone if needed). Only after the permission gate yes.
-2. **Derive `operator.first_name`** if already known; otherwise ask once.
-3. **Ask** for `company.name`. **Suggest** Drive `root_path` as `/Agents Done Right` (see [`rules/tutorial-workspace.md`](rules/tutorial-workspace.md)); the operator may accept or supply a different parent path. Mention briefly that action logging defaults to `{logging.destination}: disk_and_sheet` (local + Drive Sheet under `{root_path}/Logs`); they may choose `disk` (local only) or `off` (no logs).
-4. **Ensure Google connectors** (after yes): harmless reads against Drive, Sheets, and Gmail. If any fail, tell the operator which, direct them to grant access, and do not mark verified until all three work.
-5. **Derive `google_account`** from the connected account; ask once if needed.
-6. **Derive `repo.url` / `repo.branch`** from git remote / branch (fallback `main`).
-7. Set `repo.setup: quick_start`.
-8. **Write defaults** for remaining fields from [`config/profile.example.yaml`](config/profile.example.yaml) (`drive.*` including `accounts_folder` / `logs_folder`, `logging.destination`, `workspace.local_path: agents-done-right`), applying the confirmed `root_path` and any logging preference.
-9. Ensure `{workspace.local_path}/` exists — after yes. Ensure `{drive.root_path}/{drive.accounts_folder}` and `{drive.root_path}/{drive.logs_folder}` exist on Drive (create if missing) — after yes.
-10. Write `config/profile.yaml` — after yes.
-11. **Verify Quick start** before any skill runs: public checkout; `origin`/`repo.url` is `{github.public_skills_repo_url}`; `rules/` and `skills/` present; Drive, Sheets, and Gmail succeed for `{google_account}`. Tell the operator skill edits are not saved upstream until **Customizable**.
-12. Show a short profile summary and confirm Quick start is verified.
-13. **Ask once** (new-user tone) whether they want a short **bookkeeping demonstration** using sample data — three paste-and-run steps, no live bank CSV and no Gmail, creating a November 2024 demo reconciliation sheet on Drive.
-    - If **no** / skip: acknowledge; mention they can later paste the three test prompts from the README (**Reconcile Bank Statement Test** → **Find Unpaid Invoices Test** → **Update Bank Statement Test**); **stop** (do not nag).
-    - If **yes**: read and follow [`skills/bookkeeping-test/guided-demo.md`](skills/bookkeeping-test/guided-demo.md) immediately in the same chat.
-    - If they already asked to run a skill next (and did not ask for the demo), run that skill instead of offering the demo.
+The operator may be **completely new to agents**. For this whole initiation:
 
-Do not re-run initiation when Quick start or Customizable is already verified. The demo ask in step 13 happens only at the end of a successful initiation, not on every later chat.
+- Use short, plain sentences. Prefer everyday words over technical ones (say “your Google Drive folder”, not “root_path”; say “a small settings file”, not “profile YAML”).
+- Explain **what is about to happen and why** before each choice. Never dump a numbered checklist of side effects without a plain-language summary first.
+- **One decision at a time.** Prefer **clickable choices / buttons** (platform choice UI or AskQuestion when available). If buttons are unavailable, show the same options as a short A / B list and wait for a clear reply.
+- Put the **recommended default first** and label it clearly (e.g. “Recommended”). Make accepting defaults the easy path — most operators should finish with two or three clicks plus their company name.
+- Do **not** ask them to type paths, logging modes, or folder names unless they explicitly choose “Change something”.
+- Do **not** start cloning, writing files, creating folders, or checking Google access until they click the permission **Yes** button (step D).
+
+### Button workflow (follow in order)
+
+#### A. Welcome (no side effects)
+
+In plain language, say you will help them set up bookkeeping helpers that work with their Google Drive, Sheets, and Gmail. Setup will:
+
+1. Save a few preferences (their name, company, where files should live on Google Drive).
+2. Download the shared skills pack into this workspace (if it is not already here).
+3. Create a small local settings file and a scratch folder for temporary files.
+4. Check that Google Drive, Sheets, and Gmail are connected (read-only checks).
+5. Create two folders on their Google Drive for Accounts and Logs (under the Drive folder they accept).
+
+Then collect the only free-text you need before defaults:
+
+1. **Company name** — ask once in plain language (“What is your company called?”). Required.
+2. **First name** — derive if already known; otherwise ask once (“What first name should I use when I update you?”).
+
+Do **not** ask for Drive path or logging yet.
+
+#### B. Recommended settings (one button decision)
+
+Show the defaults as a simple package (not raw config keys):
+
+| What | Recommended default | Plain meaning |
+| --- | --- | --- |
+| Google Drive folder | `/Agents Done Right` | A folder on their Drive where Accounts and Logs will live |
+| Activity log | Keep a simple log (local + a Sheet under Logs) | Helps see what the agent did; can turn off later |
+| Scratch folder | `agents-done-right` | Temporary files on this computer; safe to delete later |
+
+Present **buttons** (recommended first):
+
+- **Use recommended settings** (Recommended)
+- **Change something**
+
+If they choose **Change something**, ask **one** follow-up with buttons where possible:
+
+- Drive folder: **Keep `/Agents Done Right`** / **I’ll type a different folder**
+- Activity log: **Keep a simple log (Recommended)** / **Log on this computer only** / **No activity log**
+
+Then continue. Do not open a long form.
+
+#### C. Permission gate (required — buttons)
+
+Summarize again in one short paragraph what will happen next (download skills if needed, write the settings file, create the scratch folder, check Google access, create Accounts and Logs on Drive). Then **wait** for a button choice:
+
+- **Yes, set this up** (Recommended)
+- **Not now**
+
+If **Not now**: stop. Do not clone, write `config/profile.yaml`, create folders, or probe Google. They can paste the bootstrap prompt again later.
+
+Do **not** treat the bootstrap paste alone as permission. Asking for name / company / defaults (A–B) may happen before this yes; mutating and connector-probe steps may not.
+
+#### D. Do the setup (only after Yes)
+
+Keep progress updates short and friendly (“Checking Google Drive…”, “Saving your settings…”). Behind the scenes:
+
+1. Ensure the workspace is a checkout of `{github.public_skills_repo_url}` (clone if needed).
+2. **Ensure Google connectors**: harmless reads against Drive, Sheets, and Gmail. If any fail, say which one in plain language, tell them how to grant access, and do not mark verified until all three work.
+3. **Derive `google_account`** from the connected account; ask once only if needed.
+4. **Derive `repo.url` / `repo.branch`** from git remote / branch (fallback `main`).
+5. Set `repo.setup: quick_start`.
+6. **Write defaults** for remaining fields from [`config/profile.example.yaml`](config/profile.example.yaml) (`drive.*` including `accounts_folder` / `logs_folder`, `logging.destination`, `workspace.local_path: agents-done-right`), applying the Drive folder and logging choice from step B.
+7. Ensure `{workspace.local_path}/` exists. Ensure `{drive.root_path}/{drive.accounts_folder}` and `{drive.root_path}/{drive.logs_folder}` exist on Drive (create if missing).
+8. Write `config/profile.yaml`.
+9. **Verify Quick start**: public checkout; `origin`/`repo.url` is `{github.public_skills_repo_url}`; `rules/` and `skills/` present; Drive, Sheets, and Gmail succeed for `{google_account}`. In plain language, say skill customizations are not saved to their own GitHub until they later choose **Customizable** (do not pitch Customizable as a setup-mode menu here).
+
+#### E. Done + optional demo (buttons)
+
+1. Show a **short, plain** summary (name, company, Drive folder, Google account) and confirm Quick start is ready.
+2. **Ask once** whether they want a short **bookkeeping demonstration** with sample data (three guided steps; no live bank CSV; Gmail not used; creates a November 2024 practice spreadsheet on Drive). Buttons:
+
+   - **Yes, show me the demo** (Recommended for first-time users)
+   - **Skip for now**
+
+   - If **Skip**: acknowledge; mention they can later paste the three test prompts from the README (**Reconcile Bank Statement Test** → **Find Unpaid Invoices Test** → **Update Bank Statement Test**); **stop** (do not nag).
+   - If **Yes**: read and follow [`skills/bookkeeping-test/guided-demo.md`](skills/bookkeeping-test/guided-demo.md) immediately in the same chat.
+   - If they already asked to run a skill next (and did not ask for the demo), run that skill instead of offering the demo.
+
+The demo ask happens only at the end of a successful initiation, not on every later chat.
 
 ## Running a skill
 

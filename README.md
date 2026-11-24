@@ -22,10 +22,17 @@ Paste this into a new Grok Bot chat:
 
 > Follow the public skills repo bootstrap: read `AGENTS.md` from `https://github.com/agentsdoneright/grokbot-agents-done-right-skills`, then lead me through Quick start setup. Do not invent profile values.
 
-Per `AGENTS.md`, this repo is **not** standing bookkeeping identity for every chat. Skills and the company profile load only when you ask for Quick start or to run/customize a skill. The agent must **summarize** Quick start side effects (clone, profile write, `agents-done-right/`, Google Drive / Sheets / Gmail connector checks) and **wait for your explicit yes** before doing any of them. The profile is a local config file skills need later. Asking for company name / Drive root is fine before that yes; cloning, writing files, and probing Google are not.
+What happens next (the agent should explain this in plain language and use **buttons** for choices):
 
+1. It asks your **company name** (and first name if needed).
+2. It offers **recommended settings** in one click (Drive folder `/Agents Done Right`, a simple activity log, local scratch folder). You can change something only if you want to.
+3. It asks **Yes, set this up** / **Not now** before doing anything lasting.
+4. Only after **Yes**: it downloads the skills pack if needed, saves a small settings file, creates a scratch folder, checks Google Drive / Sheets / Gmail, and creates Accounts and Logs folders on Drive.
+5. When setup is done, it offers an optional **sample bookkeeping demo** (buttons: show me / skip).
 
-Later if you decide that you want to customize a skill for your own purposes, the agent can run the **Customizable** upgrade via the `private-repo-copy` skill: either **automatically** (if you grant GitHub `repo` + `workflow` permissions through `gh`) or **manually** using the GitHub account setup docs URL in `config/product.yaml` (`docs.github_account_setup`). That creates a private GitHub copy so changes are versioned and saved. Public repo identity also lives in `config/product.yaml` (`github.public_skills_repo_*`).
+This repo is **not** standing bookkeeping identity for every chat — skills and your company settings load only when you ask for Quick start or to run/customize a skill. The bootstrap paste alone is **not** permission to change files or probe Google.
+
+Later if you want to customize a skill, the agent can run the **Customizable** upgrade via the `private-repo-copy` skill: either **automatically** (if you grant GitHub `repo` + `workflow` permissions through `gh`) or **manually** using the GitHub account setup docs URL in `config/product.yaml` (`docs.github_account_setup`). That creates a private GitHub copy so changes are versioned and saved. Public repo identity also lives in `config/product.yaml` (`github.public_skills_repo_*`).
 
 ## Live bookkeeping prompts
 
