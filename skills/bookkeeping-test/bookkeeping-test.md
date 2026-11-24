@@ -13,7 +13,7 @@ description: >-
 ---
 # Bookkeeping test (phased setup)
 
-**Preferred:** run the orchestrator skills instead of this file alone:
+**Preferred:** run the orchestrator skills instead of this file alone. After Quick start, [`guided-demo.md`](guided-demo.md) coaches the three bundles one paste at a time.
 
 | Bundle | Stages | Then runs |
 | --- | --- | --- |

@@ -37,7 +37,7 @@ After Quick start, paste one of these when you want a real month (not fixtures):
 
 ## Try with test data
 
-After Quick start, paste these **in order** (each stages sample data then runs the matching live skills). Do not use your live inbox CSV for these.
+After Quick start finishes, the agent **offers to guide** you through a short bookkeeping demonstration using these three prompts. You can also paste them yourself **in order** (each stages sample data then runs the matching live skills). Do not use your live inbox CSV for these.
 
 > Run Reconcile Bank Statement Test
 

@@ -60,9 +60,13 @@ Run **only** when the operator asks for Quick start / bootstrap, or when they as
 9. Ensure `{workspace.local_path}/` exists — after yes. Ensure `{drive.root_path}/{drive.accounts_folder}` and `{drive.root_path}/{drive.logs_folder}` exist on Drive (create if missing) — after yes.
 10. Write `config/profile.yaml` — after yes.
 11. **Verify Quick start** before any skill runs: public checkout; `origin`/`repo.url` is `{github.public_skills_repo_url}`; `rules/` and `skills/` present; Drive, Sheets, and Gmail succeed for `{google_account}`. Tell the operator skill edits are not saved upstream until **Customizable**.
-12. Show a short profile summary and confirm, then stop unless they asked to run a skill next.
+12. Show a short profile summary and confirm Quick start is verified.
+13. **Ask once** (new-user tone) whether they want a short **bookkeeping demonstration** using sample data — three paste-and-run steps, no live bank CSV and no Gmail, creating a November 2024 demo reconciliation sheet on Drive.
+    - If **no** / skip: acknowledge; mention they can later paste the three test prompts from the README (**Reconcile Bank Statement Test** → **Find Unpaid Invoices Test** → **Update Bank Statement Test**); **stop** (do not nag).
+    - If **yes**: read and follow [`skills/bookkeeping-test/guided-demo.md`](skills/bookkeeping-test/guided-demo.md) immediately in the same chat.
+    - If they already asked to run a skill next (and did not ask for the demo), run that skill instead of offering the demo.
 
-Do not re-run initiation when Quick start or Customizable is already verified.
+Do not re-run initiation when Quick start or Customizable is already verified. The demo ask in step 13 happens only at the end of a successful initiation, not on every later chat.
 
 ## Running a skill
 
