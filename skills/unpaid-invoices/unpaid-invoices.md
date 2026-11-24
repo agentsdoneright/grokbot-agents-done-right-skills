@@ -1,8 +1,8 @@
 ---
 name: Find Unpaid Invoices
-version: 1.5.1
+version: 1.5.2
 description: >-
-  Version 1.5.1. Use when the user wants to Find Unpaid Invoices — find unpaid
+  Version 1.5.2. Use when the user wants to Find Unpaid Invoices — find unpaid
   expense invoices in their inbox, list invoices received but not yet paid, check
   pending payments awaiting the bank statement, or refresh the Summary Unpaid
   Expense Invoices table. Searches Gmail inbox from the first day of last month,
@@ -12,9 +12,10 @@ description: >-
   Config grace working days or Paid; Date Paid via `TODAY()`). Ensures a Config
   tab (Today, grace working days). Grace also classifies pending in the chat
   report and writes a Note (`Pending as invoice received less than
-  {grace_working_days} working days`). Requires Import bank CSV and Categorise
-  bank data (and usually Match invoices / Reconcile Bank Statement) for the
-  months being read. Expense / inbox only — does not fill Unpaid Revenue
+  {grace_working_days} working days`). Formats Unpaid Expense data as Arial 10
+  and keeps one blank row before Unpaid Revenue. Requires Import bank CSV and
+  Categorise bank data (and usually Match invoices / Reconcile Bank Statement)
+  for the months being read. Expense / inbox only — does not fill Unpaid Revenue
   Invoices. Never deletes Summary table blocks when empty — keeps title/headers
   and clears data only. If `{workspace.local_path}/bookkeeping-test-session.yaml`
   is active, use that session’s today and fixture inbox EMLs instead of Gmail.
@@ -165,7 +166,7 @@ For every row that remains after section 6:
 
 **Keep blocks; clear data when empty** (same pattern as match-invoices Summary): **never delete** the **Unpaid Expense Invoices** block because it has no rows. Always **keep** the title and headers. If it has **at least one** row after section 6, fill the table. If it has **no** rows, **clear** data under the headers so only the titled empty table remains. Do **not** remove the block and recreate it later.
 
-Locate **Unpaid Expense Invoices** by header text. Do **not** restyle the table. Do **not** touch **Missing Expense Invoices**, **Missing Revenue Invoices**, or **Expenses by Category** ([`match-invoices.md`](../bank-reconciliation/match-invoices.md) owns those). **Unpaid Revenue Invoices** is out of scope for data in this skill version — if that block is present, **leave it** (including when it has no data rows); do not fill revenue unpaid rows here and do not delete the empty shell.
+Locate **Unpaid Expense Invoices** by header text. Do **not** redesign the table (titles/headers/layout). **Do** set Unpaid Expense **data** cells to **Arial 10 regular** (not bold) after every write. Do **not** touch **Missing Expense Invoices**, **Missing Revenue Invoices**, or **Expenses by Category** ([`match-invoices.md`](../bank-reconciliation/match-invoices.md) owns those). **Unpaid Revenue Invoices** is out of scope for data in this skill version — if that block is present, **leave it** (including when it has no data rows); do not fill revenue unpaid rows here and do not delete the empty shell.
 
 **Do not write helper / legend text** on the Unpaid Expense title row (or anywhere in the block). No `Sheet Status = …` line, and no `Status = 'pending' when the invoice was only received … working days ago` line. Grace explanation belongs only in **Note** for grace rows. On each run, **clear** any leftover helper/legend cells on the title row (cells to the right of the title that look like Status/Date Paid documentation).
 
@@ -173,10 +174,10 @@ Locate **Unpaid Expense Invoices** by header text. Do **not** restyle the table.
 
 1. Keep or create the title and headers: **Date | Counterparty | Amount | Ref | Invoice | Status | Paid | Date Paid | Note**. Prefer the template’s existing location; create the block only if it is missing entirely.
 2. Place the block in a clear area of Summary without covering Expenses by Category or the Missing invoice blocks. Prefer the template’s existing location when still present.
-3. **Insert sheet rows before writing data.** Count the rows to write (**N**). If fewer than **N** empty rows exist under the header before the next Summary content, **insert** enough rows so lower titles/tables shift down intact. **Never** overwrite another block’s title, headers, or data (same hard rule as match-invoices Summary).
+3. **Insert sheet rows before writing data.** Count the rows to write (**N**). Under the Unpaid Expense header there must be room for **N** data rows **plus exactly one blank gap row** before the next Summary block title (usually **Unpaid Revenue Invoices**). If fewer empty rows exist, **insert** enough so lower titles/tables shift down intact. **Never** overwrite another block’s title, headers, or data, and **never** write into the gap row (same hard rule as match-invoices Summary).
 4. Clear previous data rows under the headers, then write rows for this run (not `FILTER` over Bank — source is inbox + merge).
 5. **Paid** cells must be checkboxes (boolean). Leave Paid unchecked (`FALSE`) for new rows unless preserved from an existing row.
-6. **Date** as a real date; **Amount** as a number. **Note:** for grace-pending rows (section 6 step 3), write exactly `Pending as invoice received less than {grace_working_days} working days`. For other rows, preserve an existing operator Note; clear Note if it only held the grace message and the row is no longer grace-pending.
+6. **Date** as a real date; **Amount** as a number. **Note:** for grace-pending rows (section 6 step 3), write exactly `Pending as invoice received less than {grace_working_days} working days`. For other rows, preserve an existing operator Note; clear Note if it only held the grace message and the row is no longer grace-pending. After writing values (and formulas below), set every Unpaid Expense **data** cell in those rows to **Arial**, **size 10**, **not bold** (do not inherit title/header bold).
 7. **Status** and **Date Paid** — write **formulas** (locate Date / Paid / Status / Date Paid by header; adapt column letters). Never paste static `pending` / `unpaid` or a static date into those columns. For each data row:
 
 ```text
@@ -188,11 +189,11 @@ Example if Date is column A, Paid is column G, and the row is 35: Status `=IF(NE
 
 `NETWORKDAYS` counts Mon–Fri only (no holiday calendar). Subtract `1` so the comparison is working-day **age** (`today − date`), matching calendar-style `today − date < grace`. `TODAY()` on Date Paid recalculates while Paid is true (shows the current calendar day, not a frozen stamp). That is expected.
 
-8. On re-runs, rewrite the same Status / Date Paid formula pattern for every kept row (do not leave stale static values). Re-read Summary and confirm nothing below the unpaid block was corrupted by the write.
+8. On re-runs, rewrite the same Status / Date Paid formula pattern for every kept row (do not leave stale static values). Re-apply **Arial 10 regular** on data rows. Re-read Summary and confirm: nothing below the unpaid block was corrupted, and **exactly one blank row** remains between the last Unpaid Expense data row and the Unpaid Revenue title (or the next Summary title).
 
 ### If there are zero Unpaid Expense rows
 
-**Keep** the Unpaid Expense Invoices title and headers. **Clear** any data rows under the headers and any leftover title-row helper/legend. Do **not** delete the block.
+**Keep** the Unpaid Expense Invoices title and headers. **Clear** any data rows under the headers and any leftover title-row helper/legend. Keep **exactly one blank row** between the Unpaid Expense header and the Unpaid Revenue title. Do **not** delete the block.
 
 Match invoices owns Missing / Expenses-by-Category Summary updates; **this skill owns** Unpaid Expense Invoices data (fill or clear under existing headers). Leave Unpaid Revenue shells untouched.
 

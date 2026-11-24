@@ -1,16 +1,18 @@
 ---
 name: Match invoices
-version: 1.0.0
+version: 1.1.0
 description: >-
-  Version 1.0.0. Use when the user wants to match paid invoices to bank statement
+  Version 1.1.0. Use when the user wants to match paid invoices to bank statement
   rows in their Google Sheets reconciliation workbook: Unfiled Drive folders
   first (Source=Drive), then email (Source=Email), then Manual chat uploads
   (Source=Manual) for expense Debits and revenue Credits. Fill the Summary tab
   with live formulas for Missing Expense Invoices, Missing Revenue Invoices, and
   Expenses by Category (SUMIF Totals against Bank Transactions); never delete a
   Summary table block when empty — keep title and headers, clear data only;
-  insert sheet rows before spills; highlight missing-invoice Bank rows in light
-  red. Requires Import bank CSV and Categorise bank data first. If
+  insert sheet rows before spills; keep exactly one blank row between stacked
+  Summary tables; format Summary data cells Arial 10 (not bold); highlight
+  missing-invoice Bank rows in light red. Requires Import bank CSV and
+  Categorise bank data first. If
   `{workspace.local_path}/bookkeeping-test-session.yaml` is active, use fixture
   inbox/sent EMLs from that session instead of Gmail.
 ---
@@ -126,7 +128,7 @@ Apply that independently to:
 
 ### Read the template layout first
 
-The workbook template is expected to provide a **Summary** tab with table headers and formatting already in place. **Do not restyle or redesign those tables.** At the start of this step, read the Summary tab (and any named ranges) and locate the areas by **header text** and named ranges, **not by fixed cell coordinates**.
+The workbook template is expected to provide a **Summary** tab with table headers and formatting already in place. **Do not redesign those tables** (do not change title/header colours, column layout, or pie styling). **Do** normalize **data** cell text to **Arial 10 regular** after every write (see below). At the start of this step, read the Summary tab (and any named ranges) and locate the areas by **header text** and named ranges, **not by fixed cell coordinates**.
 
 Look for these titles and headers (case-insensitive; close wording is fine):
 
@@ -151,16 +153,21 @@ Write **formulas** (FILTER, QUERY, SUMIF, SUMIFS, ARRAYFORMULA, or equivalent) t
 
 Find Date, Counterparty, Category, Credit, Debit, and Invoice by header name. Transaction data starts on the first row below that header row.
 
+#### Summary data font — Arial 10
+
+After writing any Summary **data** rows (including spilled `FILTER`/`QUERY` output and Expenses by Category category rows), set those data cells to **Arial**, **size 10**, **not bold**. Do **not** leave spill/paste inheritance from title styles (titles are often Arial 14 bold). Leave title and header-row styling as in the template. Apply this every Summary refresh.
+
 #### Insert rows — never overwrite Summary content below
 
-**Hard rule:** when any Summary table receives data (a spilling `FILTER`/`QUERY`, static rows, or growing category rows), **insert new sheet rows** so titles, headers, and tables below shift down. **Never** write or spill into cells that already hold another block’s title, headers, or data.
+**Hard rule:** when any Summary table receives data (a spilling `FILTER`/`QUERY`, static rows, or growing category rows), **insert new sheet rows** so titles, headers, and tables below shift down. **Never** write or spill into cells that already hold another block’s title, headers, or data — and **never** consume the mandatory blank gap row between tables (see below).
 
 Before writing a formula or rows that will occupy **N** data rows under a table’s header:
 
 1. Count **N** (candidate rows, or known spill height for this run).
-2. Look at what currently sits immediately under that header. If fewer than **N** empty rows exist before the next Summary block title/header, **insert** enough blank rows so there are at least **N** empty rows for the data **plus** the required gap to the next block.
+2. Look at what currently sits immediately under that header. If fewer than **N** empty rows exist **before** the required one-blank-row gap and the next Summary block title, **insert** enough blank rows so there are at least **N** empty rows for the data **plus** one empty gap row **plus** the next block intact.
 3. Only then write the live formula or paste/fill the data rows.
-4. **Re-read** the Summary tab. If any lower title is corrupted, truncated, or sharing a cell with spilled data, insert more rows and rewrite — treat overwrite as a failed step.
+4. Apply **Arial 10 regular** to the data range.
+5. **Re-read** the Summary tab. Confirm exactly one blank row before each following block title. If any lower title is corrupted, truncated, sharing a cell with spilled data, or missing its gap, insert more rows and rewrite — treat overwrite as a failed step.
 
 #### Missing invoice blocks (keep; fill or clear)
 
@@ -177,20 +184,26 @@ Then:
 - Same rules for **Missing Revenue Invoices** (Amount = Credit).
 - On a later Summary refresh, refill or clear under the existing headers — do not delete and recreate the block. Keep the two missing-invoice blocks stacked with exactly one blank row between them (see below).
 
-#### One blank row between the two missing-invoice tables
+#### Exactly one blank row between stacked Summary tables
 
-Keep **both** Missing Expense Invoices and Missing Revenue Invoices blocks (even when one or both have no data rows). Stack them vertically with **exactly one blank row** between them: after the last occupied row of the expense table (the last spilled data row, or the header row when there are no data rows) leave one empty row, then the Missing Revenue Invoices title.
+Keep **both** Missing Expense Invoices and Missing Revenue Invoices blocks (even when one or both have no data rows). Leave Unpaid Expense / Unpaid Revenue shells in place. In the vertical Summary stack, after the **last occupied row** of each table (last data row when filled, or the **header** row when empty) leave **exactly one** completely empty horizontal row, then the next block’s **title**.
+
+Required gaps (in order):
+
+1. After Missing Expense (last data or header) → one blank → Missing Revenue title  
+2. After Missing Revenue (last data or header) → one blank → Unpaid Expense title  
+3. After Unpaid Expense (last data or header) → one blank → Unpaid Revenue title  
+
+Do **not** write data into the gap row. Do **not** leave a multi-row empty buffer — the gap must be **exactly one** blank row.
 
 **Required order** (row inserts first):
 
 1. Count missing-expense candidates **Ne** and missing-revenue candidates **Nr** (either may be 0).
-2. **Before** writing the expense `FILTER`/`QUERY` (when **Ne** ≥ 1), insert sheet rows under the Missing Expense header so there is room for **Ne** spilled rows **and** one blank row **and** the full Missing Revenue block without colliding with anything below.
-3. When **Ne** ≥ 1, write the expense live formula; when **Ne** = 0, clear data under the expense headers. Re-read and confirm the revenue title has exactly one blank above it.
-4. **Before** writing the revenue formula (when **Nr** ≥ 1), ensure **Nr** empty rows exist under the Missing Revenue header; insert rows if needed.
-5. When **Nr** ≥ 1, write the revenue live formula; when **Nr** = 0, clear data under the revenue headers. Re-read again.
-6. On a later Summary refresh, repeat if candidate counts grew. When a block has zero rows, clear its data but keep title/headers and the one-blank-row gap.
-
-Do **not** leave a large multi-row empty buffer — the gap must be **exactly one** blank row.
+2. **Before** writing the expense `FILTER`/`QUERY` (when **Ne** ≥ 1), insert sheet rows under the Missing Expense header so there is room for **Ne** spilled rows **and** one blank row **and** the full Missing Revenue (and lower) blocks without colliding.
+3. When **Ne** ≥ 1, write the expense live formula and set data cells to **Arial 10 regular**; when **Ne** = 0, clear data under the expense headers. Re-read and confirm Missing Revenue title has exactly one blank above it.
+4. **Before** writing the revenue formula (when **Nr** ≥ 1), ensure **Nr** empty rows exist under the Missing Revenue header **plus** one blank before Unpaid Expense; insert rows if needed.
+5. When **Nr** ≥ 1, write the revenue live formula and set data cells to **Arial 10 regular**; when **Nr** = 0, clear data under the revenue headers. Re-read and confirm Unpaid Expense title still has exactly one blank above it.
+6. On a later Summary refresh, repeat if candidate counts grew. When a block has zero rows, clear its data but keep title/headers and every one-blank-row gap in the stack.
 
 #### Highlight missing-invoice rows on Bank Transactions
 
@@ -234,7 +247,7 @@ Keep **one** embedded pie chart on the Summary tab titled **Expenses by Category
 
 ### Report (Summary)
 
-Include: locations used; for **each** Summary block whether **filled** or left **empty** (headers only — never deleted); empty unpaid shells left intact; row **inserts** used; exactly one blank row between missing-invoice blocks; Bank light-red highlights match Summary missing data rows; Expenses by Category Totals are `SUMIF`-style formulas when filled; missing expense/revenue rows; Type mismatches; pie created or updated in place.
+Include: locations used; for **each** Summary block whether **filled** or left **empty** (headers only — never deleted); empty unpaid shells left intact; row **inserts** used; exactly one blank row between each stacked Summary table (Missing Expense → Missing Revenue → Unpaid Expense → Unpaid Revenue); Summary data cells Arial 10 regular; Bank light-red highlights match Summary missing data rows; Expenses by Category Totals are `SUMIF`-style formulas when filled; missing expense/revenue rows; Type mismatches; pie created or updated in place.
 
 ## 5. Final step: hand back to the user
 
@@ -251,4 +264,4 @@ If there are **no** missing invoices, say so and skip the supply/re-run ask.
 
 ### Sheet edits
 
-Tell the operator: they may update Category names, Category Type, or Counterparty names on the spreadsheet; when finished, run **Categorise bank data** remapping ([`categorise-bank.md`](categorise-bank.md) section 5), then re-run this skill (or ask for a Summary-only refresh) so formulas, the one-blank-row gap, highlights, and pie stay correct.
+Tell the operator: they may update Category names, Category Type, or Counterparty names on the spreadsheet; when finished, run **Categorise bank data** remapping ([`categorise-bank.md`](categorise-bank.md) section 5), then re-run this skill (or ask for a Summary-only refresh) so formulas, one-blank-row gaps, Arial 10 data, highlights, and pie stay correct.
