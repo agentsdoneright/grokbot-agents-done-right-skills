@@ -53,7 +53,7 @@ If no active session file, resolve the statement month from the operator (or las
 
 ## 3. Paste the CSV only
 
-- Paste the CSV into the tab starting at the first empty column to the right of the reconciliation columns (column K after the ten headers above; adjust if the layout changed). If the header row already has raw CSV headers there (as in the skill template), keep them and write data on the first empty row beneath. Otherwise put headers in the header row and data on the next row. Write numbers as numbers and dates as real dates.
+- Paste the CSV into the tab starting at the first empty column to the right of the reconciliation columns (column K after the ten headers above; adjust if the layout changed). If the header row already has raw CSV headers there (as in the skill template), keep them and write data on the first empty row beneath. Otherwise put headers in the header row and data on the next row. Write numbers as numbers and dates as real dates with number format **`d-mmm`** (e.g. 10-Nov).
 - **Do not** fill Date, Counterparty, Category, Credit, Debit, VAT, Ref, Invoice, Notes, or Source in this skill. Leave those for [`categorise-bank.md`](categorise-bank.md) and [`match-invoices.md`](match-invoices.md).
 - Clear any leftover raw-CSV junk in rows below the last imported data row.
 

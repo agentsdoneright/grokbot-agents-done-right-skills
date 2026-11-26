@@ -38,7 +38,7 @@ If `{workspace.local_path}/bookkeeping-test-session.yaml` exists and `active` is
 
 ## 2. Fill the reconciliation columns, one row per CSV row
 
-- **Date**: the transaction date as a real date, number format `d-mmm` (displays 5-Nov, no leading zero).
+- **Date**: the transaction date as a real date, number format `d-mmm` (displays e.g. 10-Nov). Apply `d-mmm` to every date cell written on this tab.
 - **Counterparty**: take the raw name from Merchant, else Payee Name, else Payer Name, else Description. Look it up in `Counterparty-Match` (A = formatted `Counterparty`, B = `Match` raw bank name) with a loose match (contains or key words, since raw strings change monthly) and write the formatted name. If there's no match, write your best clean, properly cased name for the entity. For credit rows this is the **paying client** from the bank string, not `{company.name}`.
 - **Category**: first look up the formatted counterparty in `Counterparty-Category` and use its category. With no match, pick from the `Categories` tab. If `Categories` and `Counterparty-Category` have no data rows yet (typical first month), invent a short consistent category for the Bank row — do not leave Category blank. Keep spellings consistent across rows and with earlier months when those tabs already have data.
 - **Credit**: the absolute amount if money came in, else blank.

@@ -37,7 +37,7 @@ Substitute `{grace_working_days_expense}` / `{grace_working_days_revenue}` every
 
 | Cell | Label (column A) | Value (column B) |
 | --- | --- | --- |
-| `Config!B1` | Today | Run/session today (real date value, not a formula, when a test session fixes today; otherwise `=TODAY()` or the run date) |
+| `Config!B1` | Today | Run/session today (real date value with number format `d-mmm` e.g. 10-Nov, not a formula, when a test session fixes today; otherwise `=TODAY()` or the run date, still displayed `d-mmm`) |
 | `Config!B2` | Expense Invoice grace period (working days) | `{grace_working_days_expense}` |
 | `Config!B3` | Revenue Invoice grace period (working days) | `{grace_working_days_revenue}` |
 
@@ -58,7 +58,7 @@ At the start, check `{workspace.local_path}/bookkeeping-test-session.yaml`. If i
 - When `company_addressee_override` is set (e.g. **Demo Company Ltd**), use it for addressee checks instead of flagging a mismatch vs `{company.name}` alone.
 - Do **not** import a payment CSV, append bank Debits/Credits, or otherwise change the transactions tab — Import / Categorise own Bank rows (after Test Phase 3, the operator re-runs those skills first).
 - When extracting a PDF from an EML before Drive upload, stage under `{workspace.local_path}/`.
-- Write that fixed today into `Config!B1` (static date) so Status grace formulas and Apps Script stamps match the fixture.
+- Write that fixed today into `Config!B1` (static date, number format `d-mmm`) so Status grace formulas and Apps Script stamps match the fixture.
 
 Session setup is owned by [`skills/bookkeeping-test/bookkeeping-test.md`](../bookkeeping-test/bookkeeping-test.md).
 
@@ -251,8 +251,8 @@ Locate blocks by header text. Do **not** redesign title/header colours. **Do** s
 2. **Insert sheet rows before writing data.** Count **N** expense rows. Under the Unpaid Expense header there must be room for **N** data rows **plus exactly one blank gap row** before **Unpaid Revenue Invoices**. Insert if needed. **Never** overwrite another block or the gap row.
 3. Clear previous data rows under the headers, then write rows for this run.
 4. **Paid** cells must be checkboxes (boolean). Leave Paid unchecked (`FALSE`) for new rows unless preserved.
-5. **Date** as a real date; **Amount** as a number. **Note:** when Paid is true, **clear Note**. Else grace-pending expense rows get the expense grace Note text; otherwise preserve operator Note / clear stale grace text.
-6. **Date Paid:** write a **static date** when Paid is true and Date Paid is already set (preserve). When Paid is true and Date Paid is empty, write `Config!B1` as a static date (**safety backstop**). When Paid is false, leave Date Paid blank. **Never** write `=IF(Paid,TODAY(),"")` or any Date Paid formula.
+5. **Date** as a real date with number format **`d-mmm`** (e.g. 10-Nov, same as Bank Transactions); **Amount** as a number. **Note:** when Paid is true, **clear Note**. Else grace-pending expense rows get the expense grace Note text; otherwise preserve operator Note / clear stale grace text.
+6. **Date Paid:** write a **static date** with number format **`d-mmm`** when Paid is true and Date Paid is already set (preserve). When Paid is true and Date Paid is empty, write `Config!B1` (or run today) as a static date with **`d-mmm`** (**safety backstop**). When Paid is false, leave Date Paid blank. **Never** write `=IF(Paid,TODAY(),"")` or any Date Paid formula.
 7. **Status** — formula only (locate columns by header). Paid wins over grace:
 
 ```text
@@ -273,7 +273,7 @@ Status: =IF(<PaidCell>,"paid",IF(NETWORKDAYS(<DateCell>,IF(OR(Config!$B$1="",Con
 2. Insert sheet rows under the Unpaid Revenue header for **Nr** data rows as needed (no required block below; still do not spill into unrelated content).
 3. Clear previous data; write this run’s rows.
 4. **Reminder Sent** cells must be checkboxes. Unchecked for new rows unless preserved.
-5. **Date Reminder Sent:** static date when Reminder Sent is true (preserve existing; backstop with `Config!B1` if empty). Blank when Reminder Sent is false. **Never** a formula.
+5. **Date** as a real date with number format **`d-mmm`**. **Date Reminder Sent:** static date with **`d-mmm`** when Reminder Sent is true (preserve existing; backstop with `Config!B1` / today if empty). Blank when Reminder Sent is false. **Never** a formula.
 6. **Note:** revenue grace-pending rows get the revenue grace Note text; otherwise preserve / clear stale grace text.
 7. **Status** — formula only:
 
