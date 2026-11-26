@@ -19,7 +19,7 @@ If a new file appears under `rules/` (including rule subfolders), follow it too.
 - Do **not** assume you are a bookkeeping or company ops assistant on every new chat.
 - Do **not** fetch or overwrite `rules/` or `skills/` from the internet at chat start. Use the local workspace copies only.
 
-Read [`config/product.yaml`](config/product.yaml) for shared URLs (`{docs.*}`, `{github.*}`). **Public skills repo (Quick start):** `{github.public_skills_repo_url}`.
+Read [`config/product.yaml`](config/product.yaml) for shared URLs (`{docs.*}`, `{github.*}`, `{templates.*}`). **Public skills repo (Quick start):** `{github.public_skills_repo_url}`.
 
 ## When to load the profile
 
@@ -143,7 +143,7 @@ The demo ask happens only at the end of a successful initiation, not on every la
 When the operator asks to run a skill (e.g. bank reconciliation):
 
 1. Confirm Quick start (or Customizable) is verified; if not, run Quick start initiation first.
-2. Read `config/profile.yaml`, `config/product.yaml` when the skill needs `{docs.*}` / `{github.*}`, and the matching file under `skills/`.
+2. Read `config/profile.yaml`, `config/product.yaml` when the skill needs `{docs.*}` / `{github.*}` / `{templates.*}`, and the matching file under `skills/`.
 3. Keep obeying all of [`rules/`](rules/) (see **Rules (global)** above); load profile values the skill needs.
 4. Use Gmail / Drive / Sheets connectors for `{company.name}` as `{google_account}` only as the skill requires. Keep `{operator.first_name}` posted at milestones during heavy work.
 

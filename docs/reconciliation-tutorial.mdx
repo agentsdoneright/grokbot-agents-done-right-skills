@@ -72,7 +72,7 @@ Ask for **Reconcile Bank Statement** to run Import → Categorise → Match in o
 
     On the copy only, clear last month's transaction rows and the raw CSV area on the transactions tab. Keep the header row and all reference tabs. Never edit last month's sheet in place.
 
-    If no previous sheet exists (first month), upload a copy of the scrubbed template `skills/bank-reconciliation/Y[date]_[company]_Reconciliation.xlsx` into this month's folder, rename it from the sheet title pattern, and convert it to a native Google Sheet. Keep the template's tab visibility. Do not create a blank spreadsheet from scratch or edit the repo template in place.
+    If no previous sheet exists (first month), Drive-copy the shared Google Sheet template (`templates.reconciliation_sheet_id` / `templates.reconciliation_sheet_url` in `config/product.yaml`) into this month's folder and rename it from the sheet title pattern. The template is already a native Google Sheet (no `.xlsx` upload). Keep the template's tab visibility. Do not create a blank spreadsheet from scratch or edit the source template.
   </Step>
 </Steps>
 

@@ -27,7 +27,7 @@ drive:
   # {company_name} inside sheet_title_pattern comes from company.name.
   # Accounts CSV: {root_path}/{accounts_folder}/{year_folder_pattern}/{extracts_folder}/{month_folder_pattern}/
   # Accounts month: {root_path}/{accounts_folder}/{year_folder_pattern}/{month_folder_pattern}/
-  # First month: skill uploads skills/bank-reconciliation/Y[date]_[company]_Reconciliation.xlsx and converts it to a Google Sheet.
+  # First month: skill Drive-copies {templates.reconciliation_sheet_id} from config/product.yaml into the month folder.
   year_folder_pattern: "{YYYY}"
   month_folder_pattern: "Y{YYYYMM}"
   extracts_folder: Extracts

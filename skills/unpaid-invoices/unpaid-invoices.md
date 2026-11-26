@@ -74,10 +74,12 @@ Paid / Reminder Sent must stamp **Date Paid** / **Date Reminder Sent** as **stat
 
 [`skills/bank-reconciliation/scripts/unpaid-checkbox-dates.gs`](../bank-reconciliation/scripts/unpaid-checkbox-dates.gs)
 
+Workbooks created via Import’s first-month path (Drive copy of `{templates.reconciliation_sheet_id}` from [`config/product.yaml`](../../config/product.yaml)) normally already include this **container-bound** script. Prior-month copies usually keep it too.
+
 On every unpaid run against the target workbook (after it is a **native Google Sheet**):
 
 1. Read that `.gs` file from the repo.
-2. Ensure a container-bound Apps Script project on the spreadsheet contains that `onEdit` implementation (create or replace via Apps Script API, `clasp`, or the best available connector). The script stamps from **`Config!B1`** when set (so test sessions use the fixture today); if Today is blank/unset, it uses the current calendar date.
+2. If the bound project already has the current `onEdit` / checkbox behavior (Paid → Date Paid + clear Note + Status `paid`; Reminder Sent → Date Reminder Sent; `d-mmm` stamps from Config Today / sheet today), **leave it**. Otherwise create or replace the script via Apps Script API, `clasp`, or the best available connector so it matches the `.gs` file. The script stamps from **`Config!B1`** when set (so test sessions use the fixture today); if Today is blank/unset, it uses the current calendar date.
 3. If install/update fails, say so in the final report and rely on the **safety backstop** in section 8 (stamp empty date cells when the checkbox is already true). Do not invent a `TODAY()` formula as a substitute.
 
 ## 1. Resolve months, sheets, and email window

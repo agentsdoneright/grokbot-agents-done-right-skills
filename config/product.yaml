@@ -1,5 +1,5 @@
 # Shared product URLs and repo identity (committed; not tenant secrets).
-# Skills and AGENTS.md read this file and substitute {docs.*} / {github.*}.
+# Skills and AGENTS.md read this file and substitute {docs.*} / {github.*} / {templates.*}.
 # Operator-specific values stay in config/profile.yaml.
 
 version: 1.0.0
@@ -12,3 +12,8 @@ github:
   public_skills_repo_url: https://github.com/agentsdoneright/grokbot-agents-done-right-skills
   public_skills_repo_owner: agentsdoneright
   public_skills_repo_name: grokbot-agents-done-right-skills
+
+# Shared Drive templates (not tenant-specific). First-month reconciliation workbook.
+templates:
+  reconciliation_sheet_id: 1c95fvD2o2WbnvbUmOfSRNqle1iSFLq6Nv7o2lZwUoS8
+  reconciliation_sheet_url: https://docs.google.com/spreadsheets/d/1c95fvD2o2WbnvbUmOfSRNqle1iSFLq6Nv7o2lZwUoS8/edit

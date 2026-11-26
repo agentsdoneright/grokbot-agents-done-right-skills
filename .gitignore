@@ -233,8 +233,8 @@ tutorial-workspace/
 # Action recording local JSONL (also under local_path; keep explicit if local_path changes)
 **/action-logs/
 
-# Ignore local reconciliation .xlsx copies (may contain private data), but keep the scrubbed skill template
+# Ignore local reconciliation .xlsx copies (may contain private data).
+# First-month template is the shared Google Sheet in config/product.yaml ({templates.reconciliation_sheet_id}).
 skills/bank-reconciliation/*.xlsx
-!skills/bank-reconciliation/Y\[date\]_\[company\]_Reconciliation.xlsx
 
 .cursor/
