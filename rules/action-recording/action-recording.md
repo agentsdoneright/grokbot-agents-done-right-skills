@@ -1,9 +1,9 @@
 ---
-version: 1.2.0
+version: 1.3.0
 ---
 # Action recording
 
-Record sanitized metadata about what the agent did while following this workspace’s `AGENTS.md`, skills, or rules (or a straight operator instruction in that context). This is an agent-written log, not platform Enterprise Action Recording.
+Record sanitized metadata about what the agent did **while actively running a skill under `skills/`**. This is an agent-written log, not platform Enterprise Action Recording.
 
 This rule and its sheet template live under `rules/action-recording/`.
 
@@ -21,9 +21,11 @@ If `{logging.destination}` is missing, treat it as `disk_and_sheet` (same as `co
 
 ## When to record
 
-After each action: tool call, shell command, browser navigation, computer-use session summary, connector/MCP call, file transfer, guardrail refuse/allow, skill or rule read, subagent or cloud-agent handoff.
+**Only while a skill under `skills/` is active** (the operator asked to run or customize a skill, and the agent is following that skill’s markdown — including orchestrator skills such as bookkeeping-test bundles and guided-demo). Record after each action in that run: tool call, shell command, browser navigation, computer-use session summary, connector/MCP call, file transfer, guardrail refuse/allow, skill or rule read, subagent or cloud-agent handoff.
 
-Apply for guided work in this workspace (Quick start, skill runs, rule application, Customizable setup), not only bank reconciliation — **except** when destination is `off`.
+**Do not** apply this rule to ordinary general-purpose chat, Quick start / bootstrap alone, Customizable setup alone, or other work that is not driven by a file under `skills/` — even though this file sits under `rules/`.
+
+When destination is `off`, skip recording even during skill runs.
 
 ## Guidance provenance (every event)
 

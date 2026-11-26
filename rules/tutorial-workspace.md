@@ -7,7 +7,7 @@ Resolve `{workspace.local_path}` from `config/profile.yaml` (default `agents-don
 
 For work related to the reconciliation tutorial or the bank-reconciliation skill, any **local workspace save** — download, export, scratch file, temp CSV, PDF pending Drive upload, screenshot, or debug dump — must be written under `{workspace.local_path}/` (subfolders allowed).
 
-**Action logs** (when `{logging.destination}` is not `off`) live under `{workspace.local_path}/action-logs/` (daily JSONL in monthly folders). Those paths are gitignored and must not be committed. See [`rules/action-recording/action-recording.md`](action-recording/action-recording.md).
+**Action logs** (when `{logging.destination}` is not `off`, and only while a skill under `skills/` is active) live under `{workspace.local_path}/action-logs/` (daily JSONL in monthly folders). Those paths are gitignored and must not be committed. See [`rules/action-recording/action-recording.md`](action-recording/action-recording.md).
 
 Do **not** scatter those temps in the repo root, under `skills/`, under `docs/`, or only in a system temp path without also keeping a copy under `{workspace.local_path}/`.
 

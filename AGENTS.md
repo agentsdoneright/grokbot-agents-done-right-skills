@@ -6,12 +6,12 @@ This repo holds **optional** bookkeeping skills (bank reconciliation, Drive / Sh
 
 **All agents must follow every file under [`rules/`](rules/).** These are standing requirements for this workspace, not optional and not limited to skill runs. Read and obey them whenever this `AGENTS.md` applies:
 
-- [`rules/action-recording/action-recording.md`](rules/action-recording/action-recording.md) — record sanitized action metadata unless `{logging.destination}` is `off` (`disk` = local JSONL; `disk_and_sheet` = local + Drive Logs Sheet from `rules/action-recording/Action_Log.xlsx`)
+- [`rules/action-recording/action-recording.md`](rules/action-recording/action-recording.md) — while a skill under `skills/` is active, record sanitized action metadata unless `{logging.destination}` is `off` (`disk` = local JSONL; `disk_and_sheet` = local + Drive Logs Sheet from `rules/action-recording/Action_Log.xlsx`). Does **not** apply to ordinary chat or Quick start alone.
 - [`rules/sync-to-repo.md`](rules/sync-to-repo.md) — when and how to save skill/rule/config changes
 - [`rules/tutorial-workspace.md`](rules/tutorial-workspace.md) — local staging under `{workspace.local_path}/` and Drive Accounts/Logs layout
 - [`rules/generalise-skills.md`](rules/generalise-skills.md) — keep tenant values in profile/product config; version skills and rules
 
-If a new file appears under `rules/` (including rule subfolders), follow it too. Do **not** skip `action-recording` or any other rule because the operator did not ask for a skill.
+If a new file appears under `rules/` (including rule subfolders), follow it too. **Exception:** action-recording applies only during `skills/` runs (see that rule) — do not log every chat just because this workspace has rules.
 
 ## Standing behavior
 
@@ -84,7 +84,7 @@ Show the defaults as a simple package (not raw config keys):
 | What | Recommended default | Plain meaning |
 | --- | --- | --- |
 | Google Drive folder | `/Agents Done Right` | A folder on their Drive where Accounts and Logs will live |
-| Activity log | Keep a simple log (local + a Sheet under Logs) | Helps see what the agent did; can turn off later |
+| Activity log | Keep a simple log (local + a Sheet under Logs) | Only while running bookkeeping skills — not every chat; can turn off later |
 | Scratch folder | `agents-done-right` | Temporary files on this computer; safe to delete later |
 
 Present **buttons** (recommended first):
