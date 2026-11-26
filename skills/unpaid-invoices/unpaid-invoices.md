@@ -1,16 +1,17 @@
 ---
 name: Find Unpaid Invoices
-version: 1.6.0
+version: 1.6.1
 description: >-
-  Version 1.6.0. Use when the user wants to Find Unpaid Invoices — find unpaid
+  Version 1.6.1. Use when the user wants to Find Unpaid Invoices — find unpaid
   expense invoices in their inbox and unpaid revenue invoices in Sent, list
   invoices not yet settled by bank Debit/Credit on the current or previous month
   sheets, refresh Summary Unpaid Expense Invoices and Unpaid Revenue Invoices,
   or check pending payments awaiting the bank statement. Ensures Config (Today,
-  Expense Invoice grace period, Revenue Invoice grace period). Expense Status/
-  grace via formulas; revenue Status via Reminder Sent then grace pending then
-  unpaid. Paid / Reminder Sent checkboxes stamp Date Paid / Date Reminder Sent
-  as static dates via Apps Script (Config!B1) — never TODAY() formulas. Formats
+  Expense Invoice grace period, Revenue Invoice grace period). Expense Status:
+  Status `paid` when checkbox true, else grace pending, else unpaid; ticking Paid
+  clears Note. Revenue Status via Reminder Sent then grace pending then unpaid. Paid /
+  Reminder Sent stamp Date Paid / Date Reminder Sent as static dates via Apps
+  Script — never TODAY() formulas. Formats
   unpaid data as Arial 10 with white / none background and keeps one blank row
   between Unpaid Expense and Unpaid Revenue. Requires Import bank CSV and
   Categorise bank data (and usually Match invoices / Reconcile Bank Statement)
@@ -76,7 +77,7 @@ Paid / Reminder Sent must stamp **Date Paid** / **Date Reminder Sent** as **stat
 On every unpaid run against the target workbook (after it is a **native Google Sheet**):
 
 1. Read that `.gs` file from the repo.
-2. Ensure a container-bound Apps Script project on the spreadsheet contains that `onEdit` implementation (create or replace via Apps Script API, `clasp`, or the best available connector). The script stamps from **`Config!B1`** so test sessions use the fixture today.
+2. Ensure a container-bound Apps Script project on the spreadsheet contains that `onEdit` implementation (create or replace via Apps Script API, `clasp`, or the best available connector). The script stamps from **`Config!B1`** when set (so test sessions use the fixture today); if Today is blank/unset, it uses the current calendar date.
 3. If install/update fails, say so in the final report and rely on the **safety backstop** in section 8 (stamp empty date cells when the checkbox is already true). Do not invent a `TODAY()` formula as a substitute.
 
 ## 1. Resolve months, sheets, and email window
@@ -181,11 +182,11 @@ Identity key: **Ref + Counterparty + Amount**. When merging, **preserve** operat
 **Expense report classification** (apply in order):
 
 1. Bank Debit match (section 5) → **drop** the row (settled).
-2. Else if **Paid** is true → report as **pending** (awaiting statement). Do **not** set the grace Note for Paid-awaiting-bank alone.
+2. Else if **Paid** is true → report as **`paid`** (awaiting bank Debit). Clear **Note** (no grace Note while Paid).
 3. Else if the **email received** date is within the last `{grace_working_days_expense}` **working days** (Mon–Fri only, counting backward from today) → report as **pending** (grace) and set **Note** to the expense grace Note text.
 4. Else → report as **unpaid**. Clear the grace Note text from **Note** if it was previously set for this row (leave other operator Notes alone).
 
-**Expense sheet Status** is owned by formula (section 8): `pending` when the invoice Date is still inside Config expense grace **or** when Paid is checked; otherwise `unpaid`.
+**Expense sheet Status** is owned by formula (section 8): **`paid`** when the Paid checkbox is true; else `pending` when still inside Config expense grace; else `unpaid`.
 
 ### Revenue
 
@@ -215,7 +216,7 @@ Preserve: **Reminder Sent**, **Date Reminder Sent** (static), **Note**, **Invoic
 
 1. During grace, Status already shows `pending` (and Note carries the grace text) even if Paid is unchecked. Outside grace with Paid unchecked, Status shows `unpaid`.
 2. Operator pays the vendor, then ticks **Paid**.
-3. Apps Script sets **Date Paid** to `Config!B1` (static). Status stays or becomes `pending` via formula. The row stays until a matching Debit appears; then the skill drops the row on a later run.
+3. Apps Script sets **Date Paid** (static from Config Today / sheet today) and **clears Note**. Status becomes **`paid`** via formula. The row stays until a matching Debit appears; then the skill drops the row on a later run.
 
 **Revenue — Reminder Sent**
 
@@ -250,13 +251,15 @@ Locate blocks by header text. Do **not** redesign title/header colours. **Do** s
 2. **Insert sheet rows before writing data.** Count **N** expense rows. Under the Unpaid Expense header there must be room for **N** data rows **plus exactly one blank gap row** before **Unpaid Revenue Invoices**. Insert if needed. **Never** overwrite another block or the gap row.
 3. Clear previous data rows under the headers, then write rows for this run.
 4. **Paid** cells must be checkboxes (boolean). Leave Paid unchecked (`FALSE`) for new rows unless preserved.
-5. **Date** as a real date; **Amount** as a number. **Note:** grace-pending expense rows get the expense grace Note text; otherwise preserve operator Note / clear stale grace text.
+5. **Date** as a real date; **Amount** as a number. **Note:** when Paid is true, **clear Note**. Else grace-pending expense rows get the expense grace Note text; otherwise preserve operator Note / clear stale grace text.
 6. **Date Paid:** write a **static date** when Paid is true and Date Paid is already set (preserve). When Paid is true and Date Paid is empty, write `Config!B1` as a static date (**safety backstop**). When Paid is false, leave Date Paid blank. **Never** write `=IF(Paid,TODAY(),"")` or any Date Paid formula.
-7. **Status** — formula only (locate columns by header):
+7. **Status** — formula only (locate columns by header). Paid wins over grace:
 
 ```text
-Status: =IF(NETWORKDAYS(<DateCell>,Config!$B$1)-1<Config!$B$2,"pending",IF(<PaidCell>,"pending","unpaid"))
+Status: =IF(<PaidCell>,"paid",IF(NETWORKDAYS(<DateCell>,IF(OR(Config!$B$1="",Config!$B$1=0),TODAY(),Config!$B$1))-1<Config!$B$2,"pending","unpaid"))
 ```
+
+`Config!$B$1` is the as-of Today when set (tests / fixed date); if blank or 0, grace uses `TODAY()`.
 
 8. After writing, set every Unpaid Expense **data** cell to **Arial 10 regular**, background **white / none**. Re-read and confirm **exactly one blank row** before the Unpaid Revenue title.
 
@@ -275,11 +278,11 @@ Status: =IF(NETWORKDAYS(<DateCell>,Config!$B$1)-1<Config!$B$2,"pending",IF(<Paid
 7. **Status** — formula only:
 
 ```text
-Status: =IF(<ReminderSentCell>,"Reminder Sent",IF(NETWORKDAYS(<DateCell>,Config!$B$1)-1<Config!$B$3,"pending","unpaid"))
+Status: =IF(<ReminderSentCell>,"Reminder Sent",IF(NETWORKDAYS(<DateCell>,IF(OR(Config!$B$1="",Config!$B$1=0),TODAY(),Config!$B$1))-1<Config!$B$3,"pending","unpaid"))
 ```
 
 Example if Date is A, Reminder Sent is F, Status is H, row 40:  
-`=IF(F40,"Reminder Sent",IF(NETWORKDAYS(A40,Config!$B$1)-1<Config!$B$3,"pending","unpaid"))`
+`=IF(F40,"Reminder Sent",IF(NETWORKDAYS(A40,IF(OR(Config!$B$1="",Config!$B$1=0),TODAY(),Config!$B$1))-1<Config!$B$3,"pending","unpaid"))`
 
 8. Arial 10 regular, white / none on data cells.
 
@@ -296,10 +299,10 @@ Include:
 - Target sheet link and which month sheets were read; note any missing month.
 - Email window (`email_after` → today); expense grace `{grace_working_days_expense}` and revenue grace `{grace_working_days_revenue}`; confirm Config `B1`/`B2`/`B3` were set.
 - Whether the checkbox date-stamp Apps Script was installed/updated or failed (with backstop used if needed).
-- Expense counts: **settled**, **pending** (grace), **pending** (Paid awaiting bank), **unpaid**.
+- Expense counts: **settled**, **pending** (grace), **`paid`** (checkbox, awaiting bank), **unpaid**.
 - Revenue counts: **settled**, **pending** (grace), **Reminder Sent**, **unpaid**.
-- Lists for unpaid vs pending / Reminder Sent: Date, Counterparty, Amount, Ref, Paid or Reminder Sent, and sheet Status / date columns (formula results / static dates).
-- That expense **Status** uses Config B2 grace then Paid; revenue **Status** uses Reminder Sent then Config B3 grace then unpaid; **Date Paid** / **Date Reminder Sent** are static (Apps Script + backstop), never `TODAY()` formulas.
+- Lists for unpaid vs pending / paid / Reminder Sent: Date, Counterparty, Amount, Ref, Paid or Reminder Sent, and sheet Status / date columns (formula results / static dates).
+- That expense **Status** is `paid` when the checkbox is true, else Config B2 grace → `pending`, else `unpaid`; revenue **Status** uses Reminder Sent then Config B3 grace then unpaid; **Date Paid** / **Date Reminder Sent** are static (Apps Script + backstop), never `TODAY()` formulas. Ticking Paid clears Note.
 - Month `{drive.expenses_folder}` / `{drive.revenue_folder}` links and filename-labeled Invoice links.
-- Reminder: after paying a vendor, tick **Paid**; after chasing a client, tick **Reminder Sent**. Rows drop when the matching Debit/Credit appears on a recon sheet and this skill is re-run.
+- Reminder: after paying a vendor, tick **Paid** (Status → `paid`, Note cleared); after chasing a client, tick **Reminder Sent**. Rows drop when the matching Debit/Credit appears on a recon sheet and this skill is re-run.
 - When a test session is active, confirm Gmail was not used and the transactions tab was not modified by this skill.
