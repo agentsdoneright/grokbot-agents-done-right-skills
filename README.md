@@ -52,6 +52,8 @@ After Quick start finishes, the agent **offers to guide** you through a short bo
 
 > Run Update Bank Statement Test
 
+After the first test, the guided demo can optionally walk you through downloading sample **missing** invoices (Staples, City Rides, Acme) from `skills/bank-reconciliation/test-data/manual-invoices/` on this repo and dropping them into chat to practice a manual attach.
+
 Compare results to `skills/bookkeeping-test/expected-results.md`.
 
 ## Clean up the workspace

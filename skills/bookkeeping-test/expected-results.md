@@ -44,6 +44,18 @@ Fixed month: **November 2024** (`202411`). Fixed today for unpaid windows: **202
 - [ ] **Expenses by Category** Totals are live `SUMIF`-style formulas; pie chart present/updated
 - [ ] Operator handback lists remaining missing invoices and points to Summary
 
+### After optional manual attach (guided demo Step 1b)
+
+Operator downloaded the three PDFs from `skills/bank-reconciliation/test-data/manual-invoices/` on the public repo, dropped them into chat, and re-ran Match invoices (Manual path).
+
+- [ ] Staples Debit matched with **Source = `Manual`**; Invoice filename-labeled under `{drive.expenses_folder}`
+- [ ] City Rides Debit matched with **Source = `Manual`**; Invoice under Expenses
+- [ ] Acme client Credit matched with **Source = `Manual`**; Invoice under `{drive.revenue_folder}` (DC-2404)
+- [ ] **Summary — Missing Expense Invoices** no longer lists Staples or City Rides (clear data or empty under headers)
+- [ ] **Summary — Missing Revenue Invoices** no longer lists the Acme client credit
+- [ ] Light-red highlights cleared on those three Bank rows
+- [ ] Gmail still unused; files were not taken from fixture inbox/sent EMLs
+
 ---
 
 ## After Phase 2 live skill (Find Unpaid Invoices Test)
