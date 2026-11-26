@@ -74,13 +74,14 @@ Paid / Reminder Sent must stamp **Date Paid** / **Date Reminder Sent** as **stat
 
 [`skills/bank-reconciliation/scripts/unpaid-checkbox-dates.gs`](../bank-reconciliation/scripts/unpaid-checkbox-dates.gs)
 
-Workbooks created via Import’s first-month path (Drive copy of `{templates.reconciliation_sheet_id}` from [`config/product.yaml`](../../config/product.yaml)) normally already include this **container-bound** script. Prior-month copies usually keep it too.
+Drive copies of `{templates.reconciliation_sheet_id}` only mirror the template’s bound project. A file named `unpaid-checkbox-dates.gs` that contains only `function myFunction() {}` is **broken** — replace it. Import **section 1b** should already have installed the repo script; verify again here. See [`scripts/README.md`](../bank-reconciliation/scripts/README.md).
 
 On every unpaid run against the target workbook (after it is a **native Google Sheet**):
 
 1. Read that `.gs` file from the repo.
-2. If the bound project already has the current `onEdit` / checkbox behavior (Paid → Date Paid + clear Note + Status `paid`; Reminder Sent → Date Reminder Sent; `d-mmm` stamps from Config Today / sheet today), **leave it**. Otherwise create or replace the script via Apps Script API, `clasp`, or the best available connector so it matches the `.gs` file. The script stamps from **`Config!B1`** when set (so test sessions use the fixture today); if Today is blank/unset, it uses the current calendar date.
+2. Treat as missing/outdated if: no bound project, empty file, only `myFunction`, or missing `onEdit` / `setDateDmmm_` / `debugPaidClick`. Then create or **replace** the script (Apps Script API, `clasp`, or tell the operator to paste the full `.gs` and Save) so it matches the repo. Expected behavior: Paid → Date Paid + clear Note + Status `paid`; Reminder Sent → Date Reminder Sent; stamps `d-mmm` from **`Config!B1`** when set, else sheet calendar today.
 3. If install/update fails, say so in the final report and rely on the **safety backstop** in section 8 (stamp empty date cells when the checkbox is already true). Do not invent a `TODAY()` formula as a substitute.
+4. Maintainers: after fixing a month sheet, also paste the same `.gs` into the **shared template** at `{templates.reconciliation_sheet_url}` so the next first-month copy is not blank.
 
 ## 1. Resolve months, sheets, and email window
 

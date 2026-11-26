@@ -1,14 +1,15 @@
 ---
 name: Import bank CSV
-version: 1.1.0
+version: 1.1.1
 description: >-
-  Version 1.1.0. Use when the user wants to import or paste the latest bank
+  Version 1.1.1. Use when the user wants to import or paste the latest bank
   statement CSV into their Google Sheets reconciliation workbook: prepare the
   month Drive folders, create or copy the month sheet from the prior month or
   the shared Google Sheet template (`{templates.reconciliation_sheet_id}`),
-  and paste the CSV into the raw import columns only. Does not fill Date,
-  Counterparty, Category, Credit, Debit, or Invoice columns — run Categorise
-  bank data next (or the one-shot Reconcile Bank Statement wrapper). If
+  ensure the unpaid checkbox Apps Script matches the repo `.gs`, and paste the
+  CSV into the raw import columns only. Does not fill Date, Counterparty,
+  Category, Credit, Debit, or Invoice columns — run Categorise bank data next
+  (or the one-shot Reconcile Bank Statement wrapper). If
   `{workspace.local_path}/bookkeeping-test-session.yaml` is active, use that
   session’s statement month and the CSV already staged in Extracts.
 ---
@@ -18,7 +19,9 @@ Do this Drive work under `{drive.root_path}/{drive.accounts_folder}`. Use the Go
 
 If you must save a CSV or other file **locally** before uploading to Drive (or as a scratch copy), write it under `{workspace.local_path}/` (see `rules/tutorial-workspace.md`). Create that folder if needed. Do not leave tutorial temps in the repo root or under `skills/`.
 
-**First-month workbook template:** shared Google Sheet `{templates.reconciliation_sheet_url}` (file id `{templates.reconciliation_sheet_id}` in `config/product.yaml`). For the initial month only, **Drive `copy_file`** that id into the month folder and rename to `{drive.sheet_title_pattern}`. Never edit the source template; only the month copy. A Drive copy normally includes the container-bound Apps Script (checkbox date stamps).
+**First-month workbook template:** shared Google Sheet `{templates.reconciliation_sheet_url}` (file id `{templates.reconciliation_sheet_id}` in `config/product.yaml`). For the initial month only, **Drive `copy_file`** that id into the month folder and rename to `{drive.sheet_title_pattern}`. Never edit the source template; only the month copy.
+
+**Apps Script:** Drive copy only mirrors whatever is on the template. An empty stub (`myFunction` only) means the template was never filled — treat that as missing. After creating or opening this month’s native sheet, follow **section 1b** so the bound project matches [`scripts/unpaid-checkbox-dates.gs`](scripts/unpaid-checkbox-dates.gs). See [`scripts/README.md`](scripts/README.md).
 
 **Next skill:** after a successful import, tell the operator to run [`categorise-bank.md`](categorise-bank.md). For Import → Categorise → Match in one go, use [`reconcile-bank-statement.md`](reconcile-bank-statement.md).
 
@@ -41,9 +44,20 @@ If no active session file, resolve the statement month from the operator (or las
   - **If this month's sheet already exists** (re-import, e.g. after Test Phase 3 staged a new CSV): open it; clear the raw CSV data area (and any prior reconciliation column data that would be stale relative to a full CSV replace) on the transactions tab before pasting the new CSV; keep headers and reference tabs. Do not create a second sheet for the same month unless the operator asks.
   - **If no previous month's sheet exists (initial run):** use Drive **`copy_file`** on `{templates.reconciliation_sheet_id}` into this month's folder under `{drive.root_path}/{drive.accounts_folder}/{drive.year_folder_pattern}/{drive.month_folder_pattern}/`. Set the copy’s name to `{drive.sheet_title_pattern}` (fill `{YYYYMM}` with the statement month and `{company_name}` with `{company.name}`). The template is already a **native Google Sheet** — do **not** upload or convert an `.xlsx`. Do **not** edit the source template at `{templates.reconciliation_sheet_url}` / `{templates.reconciliation_sheet_id}`; only the month copy.
     - If `copy_file` fails (permission, not found, or access denied): **stop**. Tell the operator to open `{templates.reconciliation_sheet_url}`, ensure they can view the file (request access if needed), then retry Import. Do not invent a blank workbook.
-    - The template already has the required tabs, header rows, and layout: the transactions tab named `{drive.sheet_tab}` (template / profile default: `Bank Transactions`), `Counterparties`, `Categories` (including a **Type** column), `Counterparty-Match`, `Counterparty-Category`, `Email matching`, `Config`, and `Summary` (including unpaid tables). A Drive copy normally brings the **container-bound Apps Script** for Paid / Reminder Sent date stamps. Do not change the template's formatting on the source file.
+    - The template already has the required tabs, header rows, and layout: the transactions tab named `{drive.sheet_tab}` (template / profile default: `Bank Transactions`), `Counterparties`, `Categories` (including a **Type** column), `Counterparty-Match`, `Counterparty-Category`, `Email matching`, `Config`, and `Summary` (including unpaid tables). Do not change the template's formatting on the source file.
     - If a copy of an older workbook is missing the `Summary` tab or the Categories `Type` column, add a minimal unstyled tab or column with the expected headers so later skills can run. Do not invent decorative formatting.
     - On the transactions tab, the raw CSV header row is already present to the right of the reconciliation columns (typically K–N: `Date` | `Merchant` | `Amount` | `Description`). When importing (section 3), write CSV **data** under those headers on the first empty row beneath them; do not duplicate that header row unless the layout differs.
+  - After the month sheet exists (any of the branches above), run **section 1b**.
+
+## 1b. Ensure unpaid checkbox Apps Script
+
+Bound Apps Script is **not** guaranteed correct after a Drive copy. Source of truth: [`scripts/unpaid-checkbox-dates.gs`](scripts/unpaid-checkbox-dates.gs) (see [`scripts/README.md`](scripts/README.md)).
+
+1. Read that `.gs` file from the repo.
+2. Open the month workbook → **Extensions → Apps Script** (or use Apps Script API / `clasp` if available).
+3. If the project is missing, empty, only has `myFunction`, or lacks `onEdit` / `debugPaidClick` / `setDateDmmm_`, **replace** the script file contents with the full repo `.gs` and Save. Prefer a single file named `unpaid-checkbox-dates.gs` (rename or replace the stub).
+4. If you cannot write Apps Script programmatically: give the operator the path to the repo file and ask them to paste + Save (and, for maintainers, paste the same into `{templates.reconciliation_sheet_url}` so future first-month copies are correct).
+5. Continue Import even if install is deferred — note it in the final report. Find Unpaid Invoices also checks this (section 0).
 
 ## 2. Inspect the layout before writing
 
@@ -62,4 +76,5 @@ If no active session file, resolve the statement month from the operator (or las
 
 - Report the sheet link, the Extracts CSV used, and the imported row count.
 - Confirm reconciliation columns were left untouched.
+- Note whether the unpaid checkbox Apps Script was installed/updated, deferred to the operator, or already correct (section 1b).
 - Tell the operator to run **Categorise bank data** next ([`categorise-bank.md`](categorise-bank.md)).
