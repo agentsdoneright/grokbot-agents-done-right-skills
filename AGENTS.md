@@ -132,7 +132,17 @@ Keep progress updates short and friendly (“Checking Google Drive…”, “Sav
    - **Yes, show me the demo** (Recommended for first-time users)
    - **Skip for now**
 
-   - If **Skip**: acknowledge; mention they can later paste the three test prompts from the README (**Reconcile Bank Statement Test** → **Find Unpaid Invoices Test** → **Update Bank Statement Test**); **stop** (do not nag).
+   - If **Skip**: acknowledge briefly (use `{operator.first_name}` if known). Then list **what they can run next** in plain language — live skills with one example phrase each (everyday month names; no skill file paths). Shape:
+
+     **What you can run next** — just ask in chat, for example:
+
+     - **Reconcile Bank Statement** (import CSV → categorise → match invoices): `Reconcile my bank statement for November`
+     - **Find Unpaid Invoices** (unpaid expense + revenue tables on Summary): `Find my unpaid invoices`
+     - **Import bank CSV** only: `Import my bank statement CSV for November`
+     - **Categorise bank data** only: `Categorise this month’s bank transactions`
+     - **Match invoices** only: `Match invoices on my November reconciliation`
+
+     End with one short line: they can still try the sample demo later by asking to **show the bookkeeping demo**, or paste the three test prompts from the README when they want practice data. Then **stop** (do not nag).
    - If **Yes**: read and follow [`skills/bookkeeping-test/guided-demo.md`](skills/bookkeeping-test/guided-demo.md) immediately in the same chat.
    - If they already asked to run a skill next (and did not ask for the demo), run that skill instead of offering the demo.
 

@@ -28,7 +28,7 @@ What happens next (the agent should explain this in plain language and use **but
 2. It offers **recommended settings** in one click (Drive folder `/Agents Done Right`, a simple activity log, local scratch folder). You can change something only if you want to.
 3. It asks **Yes, set this up** / **Not now** before doing anything lasting.
 4. Only after **Yes**: it downloads the skills pack if needed, saves a small settings file, creates a scratch folder, checks Google Drive / Sheets / Gmail, and creates Accounts and Logs folders on Drive.
-5. When setup is done, it offers an optional **sample bookkeeping demo** (buttons: show me / skip).
+5. When setup is done, it offers an optional **sample bookkeeping demo** (buttons: show me / skip). If you **skip**, the agent lists the live skills with example prompts (below) so you know what to ask next.
 
 This repo is **not** standing bookkeeping identity for every chat — skills and your company settings load only when you ask for Quick start or to run/customize a skill. The bootstrap paste alone is **not** permission to change files or probe Google.
 
@@ -36,11 +36,17 @@ Later if you want to customize a skill, the agent can run the **Customizable** u
 
 ## Live bookkeeping prompts
 
-After Quick start, paste one of these when you want a real month (not fixtures):
+After Quick start (including when you skip the sample demo), ask in chat — for example:
 
-> Run Reconcile Bank Statement
+> Reconcile my bank statement for November
 
-> Run Find Unpaid Invoices
+> Find my unpaid invoices
+
+> Import my bank statement CSV for November
+
+> Categorise this month’s bank transactions
+
+> Match invoices on my November reconciliation
 
 ## Try with test data
 
