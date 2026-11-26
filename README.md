@@ -58,6 +58,9 @@ Compare results to `skills/bookkeeping-test/expected-results.md`.
 
 ## Clean up the workspace
 
+> [!WARNING]
+> This permanently deletes the workspace checkout and all associated skills and rules. You will lose local copies of those files (including any unsaved customizations). Only use it if you intend to remove everything.
+
 To remove the Quick start checkout and associated skills/rules from the Grok Bot workspace, paste:
 
 > Delete the workspace `/workspace/grokbot-agents-done-right-skills` and all associated skills and rules
