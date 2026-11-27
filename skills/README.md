@@ -5,7 +5,7 @@ Ask these in chat after Quick start. Main entry points are also listed in the ro
 ## Main skills
 
 - **[Reconcile Bank Statement](bank-reconciliation/reconcile-bank-statement.md)** — one-shot Import → Categorise → Match → Find Unpaid. Example: `Reconcile my bank statement for November` or `Run Reconcile Bank Statement`.
-- **[Sync spreadsheet mappings](bank-reconciliation/sync-spreadsheet-mappings.md)** — after you edit Categories / counterparties on the sheet. Example: `I have updated the categories` or `I have updated the spreadsheet`.
+- **[Apply spreadsheet updates](bank-reconciliation/apply-spreadsheet-updates.md)** — after you edit Categories / counterparties or tick Summary No Invoice Needed / Personal Expense. Example: `I have updated the categories` or `I have updated the spreadsheet`.
 
 ## Sub-skills of Reconcile
 

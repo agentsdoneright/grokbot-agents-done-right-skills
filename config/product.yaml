@@ -16,11 +16,12 @@ github:
 # Shared Drive templates (not tenant-specific). Every new month workbook is a
 # Drive copy of the Sheet inside the version-named folder below (then Import
 # overlays lookup tabs from the prior month when one exists). Keep the bound
-# Apps Script on that Sheet in sync with all four files under
-# skills/bank-reconciliation/scripts/ (summary-on-edit.gs, unpaid-checkbox-dates.gs,
-# personal-expense-checkbox.gs, no-invoice-needed-checkbox.gs). Drive copy mirrors
-# the template; a blank myFunction stub propagates to every new month workbook.
-# New layout → new version folder named for the semver + update these keys.
+# Apps Script on that Sheet in sync with both files under
+# skills/bank-reconciliation/scripts/ (summary-on-edit.gs, unpaid-checkbox-dates.gs).
+# Missing Expense/Revenue checkboxes are passive — no personal/no-invoice .gs.
+# Drive copy mirrors the template; a blank myFunction stub propagates to every
+# new month workbook. New layout → new version folder named for the semver +
+# update these keys.
 templates:
   reconciliation_sheet_version: "1.0.0"
   reconciliation_version_folder_id: 1FhN_SD7znfMGUJapmRG3gJXDwzGshs8X

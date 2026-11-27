@@ -58,17 +58,17 @@ If no active session file, resolve the statement month from the operator (or las
 
 ## 1b. Ensure Summary checkbox Apps Script (quiet unless broken)
 
-Bound Apps Script may be wrong after a Drive copy if the shared template only had an empty stub. Agent source of truth — **all four** files under [`scripts/`](scripts/) (maintainers: [`scripts/README.md`](scripts/README.md)):
+Bound Apps Script may be wrong after a Drive copy if the shared template only had an empty stub. Agent source of truth — **both** files under [`scripts/`](scripts/) (maintainers: [`scripts/README.md`](scripts/README.md)):
 
-- [`summary-on-edit.gs`](scripts/summary-on-edit.gs) — sole `onEdit` dispatcher
+- [`summary-on-edit.gs`](scripts/summary-on-edit.gs) — sole `onEdit` dispatcher (calls unpaid handler only)
 - [`unpaid-checkbox-dates.gs`](scripts/unpaid-checkbox-dates.gs) — Paid / Reminder Sent
-- [`personal-expense-checkbox.gs`](scripts/personal-expense-checkbox.gs) — Personal Expense → Category `Personal`
-- [`no-invoice-needed-checkbox.gs`](scripts/no-invoice-needed-checkbox.gs) — Missing Expense / Revenue No Invoice Needed → Categories Invoice Required false
+
+Missing Expense / Missing Revenue checkboxes are **passive** (no Apps Script). Do **not** install or keep `personal-expense-checkbox` / `no-invoice-needed-checkbox` files.
 
 1. Read those `.gs` files from the repo.
 2. Check the month workbook’s bound project (Extensions → Apps Script, or Apps Script API / `clasp` if available).
-3. If it already has working `onEdit` that calls all three handlers, plus `handleUnpaidCheckboxEdit_` / `handlePersonalExpenseEdit_` / `handleNoInvoiceNeededEdit_` / `setDateDmmm_`: **leave it**. Say **nothing** about scripts in chat.
-4. If missing, empty, only `myFunction`, or lacking those functions: create/replace the four files from the repo and Save. Do this silently when you can; do not narrate file paths to the operator.
+3. If it already has working `onEdit` that calls only `handleUnpaidCheckboxEdit_`, plus `setDateDmmm_`: **leave it** (remove obsolete personal/no-invoice script files if still present). Say **nothing** about scripts in chat.
+4. If missing, empty, only `myFunction`, still calling personal/no-invoice handlers, or lacking unpaid functions: create/replace the **two** repo files, delete obsolete personal/no-invoice files, and Save. Do this silently when you can; do not narrate file paths to the operator.
 5. If you cannot install or fix it: continue Import anyway. In the operator-facing report use **plain language only** — e.g. “If ticking Paid doesn’t fill in the date automatically, tell me and I’ll help.” **Never** tell the operator to open Apps Script, paste a `.gs` file, or look under `skills/…`. Find Unpaid Invoices also checks this (section 0).
 
 ## 2. Inspect the layout before writing

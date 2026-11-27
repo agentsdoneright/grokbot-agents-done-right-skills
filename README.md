@@ -41,7 +41,7 @@ After Quick start (including when you skip the sample demo), ask in chat — two
 
 > Reconcile my bank statement for November
 
-**After manual sheet edits** (Sync spreadsheet mappings):
+**After manual sheet edits** (Apply spreadsheet updates):
 
 > I have updated the categories
 

@@ -1,13 +1,13 @@
 ---
 name: Categorise bank data
-version: 1.0.1
+version: 1.0.2
 description: >-
-  Version 1.0.1. Use when the user wants to categorise bank transactions already
+  Version 1.0.2. Use when the user wants to categorise bank transactions already
   imported into their Google Sheets reconciliation workbook: fill Date,
   Counterparty, Category, Credit, and Debit from the raw CSV columns, seed
   Categories (including Type and Invoice Required default true) and Counterparty
-  reference tabs, and verify totals. After the operator edits names, point them
-  to Sync spreadsheet mappings.
+  reference tabs, and verify totals. After the operator edits names or Summary
+  checkbox marks, point them to Apply spreadsheet updates.
   Requires Import bank CSV first. Does not paste the CSV, match invoices, or
   update Summary — run Match invoices after categorising when invoice matching
   is needed (or use Reconcile Bank Statement for the full chain).
@@ -52,7 +52,7 @@ If `{workspace.local_path}/bookkeeping-test-session.yaml` exists and `active` is
 
 In the **same run**, after section 2 and before the verify report, seed (or extend) the reference tabs from the filled transactions rows and the raw bank string used for each row (Merchant / Payee Name / Payer Name / Description):
 
-- **`Categories`**: unique Category values from the transactions tab; no duplicates; no blank categories. Also seed **Type** when the column exists (add a `Type` header if the template is older and the column is missing): use `Expense` for a category that appears only on Debit rows, and `Revenue` for a category that appears only on Credit rows. If a category appears on both, leave Type blank and flag it for the operator rather than guessing. Do **not** overwrite a Type the operator (or a previous month) already set. Allowed Type values are `Expense` and `Revenue` (match them case-insensitively later; `Debit` / `Credit` also count as expense / revenue if the operator used those words). Ensure an **Invoice Required** checkbox column exists (add the header if missing). For **newly added** category rows only: set Invoice Required to **`TRUE`** by default (checkbox checked). Do **not** overwrite an existing Invoice Required value. Exception for **new** rows only: if the category name is `Personal`, `Personal expense`, or clearly a bank-fee / service-fee label, set Invoice Required to **`FALSE`**.
+- **`Categories`**: unique Category values from the transactions tab; no duplicates; no blank categories. Also seed **Type** when the column exists (add a `Type` header if the template is older and the column is missing): use `Expense` for a category that appears only on Debit rows, and `Revenue` for a category that appears only on Credit rows. If a category appears on both, leave Type blank and flag it for the operator rather than guessing. Do **not** overwrite a Type the operator (or a previous month) already set. Allowed Type values are `Expense` and `Revenue` (match them case-insensitively later; `Debit` / `Credit` also count as expense / revenue if the operator used those words). Ensure an **Invoice Required** checkbox column exists (add the header if missing). For **newly added** category rows only: set Invoice Required to **`TRUE`** by default (checkbox checked). Do **not** overwrite an existing Invoice Required value. Exception for **new** rows only: if the category name is `Personal`, `Personal expense`, `Personal Expense`, or clearly a bank-fee / service-fee label, set Invoice Required to **`FALSE`**. Invoice Required on existing rows is always operator-owned (never flipped from Summary checkboxes).
 - **`Counterparty-Match`**: one row per unique formatted `Counterparty`, with `Match` = the raw bank string for that counterparty; no duplicates.
 - **`Counterparties`**: unique formatted `Counterparty` values in column A (include credit counterparties / clients). Leave Email / Phone / Registration / Address blank until an invoice match supplies them.
 - **`Counterparty-Category`**: one row per unique formatted name with the Category used on Bank for that name.
@@ -68,4 +68,4 @@ Skip writing a row when the same key already exists (month-2 copies already have
 
 ## 5. After the user reviews
 
-When the operator says they have finished editing Category or Counterparty names (or other manual sheet changes), run **Sync spreadsheet mappings** ([`sync-spreadsheet-mappings.md`](sync-spreadsheet-mappings.md)) — do not duplicate that workflow here. That skill clarifies rename vs new, syncs reference tabs, and refreshes Summary.
+When the operator says they have finished editing Category or Counterparty names (or other manual sheet changes, including Summary **No Invoice Needed** / **Personal Expense** marks), run **Apply spreadsheet updates** ([`apply-spreadsheet-updates.md`](apply-spreadsheet-updates.md)) — do not duplicate that workflow here. That skill applies checkbox marks to Bank Notes / Personal Expense category, clarifies rename vs new, syncs reference tabs, and refreshes Summary.
