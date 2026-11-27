@@ -6,8 +6,8 @@ Four files in the bound project (separation of concerns). Google allows **one** 
 | --- | --- |
 | [`summary-on-edit.gs`](summary-on-edit.gs) | Thin `onEdit` — calls all handlers |
 | [`unpaid-checkbox-dates.gs`](unpaid-checkbox-dates.gs) | Paid / Reminder Sent date stamps + Status formulas (`handleUnpaidCheckboxEdit_`) |
-| [`personal-expense-checkbox.gs`](personal-expense-checkbox.gs) | Missing Expense **Personal Expense** → Bank Category `Personal` + Categories Invoice Required false |
-| [`no-invoice-needed-checkbox.gs`](no-invoice-needed-checkbox.gs) | Missing Revenue **No Invoice Needed** → Categories Invoice Required false for that Credit’s Category |
+| [`personal-expense-checkbox.gs`](personal-expense-checkbox.gs) | Missing Expense **Personal Expense** → Bank Category `Personal`, then ticks **No Invoice Needed** and runs its handler |
+| [`no-invoice-needed-checkbox.gs`](no-invoice-needed-checkbox.gs) | Missing Expense / Missing Revenue **No Invoice Needed** → Categories Invoice Required false for that Debit/Credit’s Category |
 
 ## Why a copy can look blank
 

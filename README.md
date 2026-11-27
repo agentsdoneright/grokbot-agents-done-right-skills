@@ -48,6 +48,10 @@ After Quick start (including when you skip the sample demo), ask in chat — for
 
 > Match invoices on my November reconciliation
 
+> I’ve finished editing the spreadsheet
+
+> Sync my spreadsheet mappings
+
 ## Try with test data
 
 After Quick start finishes, the agent **offers to guide** you through a short bookkeeping demonstration using these three prompts. You can also paste them yourself **in order** (each stages sample data then runs the matching live skills). Do not use your live inbox CSV for these.

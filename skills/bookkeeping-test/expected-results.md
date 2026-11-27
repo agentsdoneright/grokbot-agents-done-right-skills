@@ -36,6 +36,7 @@ Fixed month: **November 2024** (`202411`). Fixed today for unpaid windows: **202
 - [ ] Unmatched revenue Credit remains for Client Payment / Acme (no sent EML)
 - [ ] Gmail was not used
 - [ ] **Summary — Missing Expense Invoices** lists Staples + City Rides (formula-driven; Invoice Required false / bank fee / Personal excluded)
+- [ ] **Summary — Missing Expense Invoices** has No Invoice Needed + Personal Expense checkbox columns (formulas do not spill into them)
 - [ ] **Summary — Missing Revenue Invoices** lists the unmatched credit (No Invoice Needed checkbox column present; not spilled into)
 - [ ] Exactly one blank row between each stacked Summary table (Missing Expense → Missing Revenue → Unpaid Expense → Unpaid Revenue); spills did not overwrite lower titles or consume gap rows
 - [ ] Summary table **data** cells are Arial 10 regular (not bold / not title-sized) with white / none background (not header blue)

@@ -3,8 +3,10 @@
  * Invoked from summary-on-edit.gs → onEdit (do not define onEdit in this file).
  *
  * When Personal Expense is checked: set the matching Bank Transactions Debit
- * Category to "Personal", seed Categories if needed, clear light-red highlight.
- * When unchecked: leave Bank Category unchanged.
+ * Category to "Personal", seed Categories if needed, clear light-red highlight,
+ * set same-row No Invoice Needed to true, then call handleNoInvoiceNeededEdit_
+ * (programmatic setValue does not re-fire onEdit).
+ * When unchecked: leave Bank Category / No Invoice Needed / Invoice Required unchanged.
  *
  * Reuses isTruthy_ from unpaid-checkbox-dates.gs (same bound project).
  */
@@ -63,6 +65,25 @@ function handlePersonalExpenseEdit_(e) {
   bank.sheet.getRange(bank.row, bank.categoryCol).setValue(PERSONAL_CATEGORY_);
   ensurePersonalCategoryRow_();
   clearMissingHighlight_(bank.sheet, bank.row, bank.lastReconCol);
+
+  if (headerMap['category']) {
+    sheet.getRange(row, headerMap['category']).setValue(PERSONAL_CATEGORY_);
+  }
+
+  // Chain: tick No Invoice Needed on this row and run its handler explicitly
+  if (headerMap['no invoice needed']) {
+    var ninCell = sheet.getRange(row, headerMap['no invoice needed']);
+    var ninOld = ninCell.getValue();
+    ninCell.insertCheckboxes();
+    ninCell.setValue(true);
+    handleNoInvoiceNeededEdit_({
+      range: ninCell,
+      value: true,
+      oldValue: ninOld,
+      source: SpreadsheetApp.getActiveSpreadsheet(),
+      user: Session.getActiveUser()
+    });
+  }
 }
 
 /** Walk up to the Missing Expense Invoices header row. */

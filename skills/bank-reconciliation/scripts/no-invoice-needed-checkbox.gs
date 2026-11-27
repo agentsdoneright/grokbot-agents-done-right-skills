@@ -1,9 +1,11 @@
 /**
- * Missing Revenue Invoices → No Invoice Needed checkbox handler.
+ * Missing Expense / Missing Revenue → No Invoice Needed checkbox handler.
  * Invoked from summary-on-edit.gs → onEdit (do not define onEdit in this file).
  *
- * When No Invoice Needed is checked: find the matching Bank Transactions Credit,
- * then set that Category's Invoice Required = FALSE on the Categories tab.
+ * When No Invoice Needed is checked: find the matching Bank Transactions Debit
+ * (expense table) or Credit (revenue table), then set that Category's
+ * Invoice Required = FALSE on the Categories tab.
+ * Prefer Summary Category column when present; else Bank Category.
  * When unchecked: leave Invoice Required unchanged.
  *
  * Reuses isTruthy_ from unpaid-checkbox-dates.gs (same bound project).
@@ -21,8 +23,10 @@ function handleNoInvoiceNeededEdit_(e) {
   var col = e.range.getColumn();
   if (row < 2) return;
 
-  var headerRow = findMissingRevenueHeaderRow_(sheet, row);
-  if (!headerRow) return;
+  var found = findMissingNoInvoiceHeader_(sheet, row);
+  if (!found) return;
+  var headerRow = found.headerRow;
+  var side = found.side; // 'expense' | 'revenue'
 
   var lastCol = Math.max(sheet.getLastColumn(), 1);
   var headers = sheet.getRange(headerRow, 1, 1, lastCol).getDisplayValues()[0];
@@ -35,7 +39,7 @@ function handleNoInvoiceNeededEdit_(e) {
   var editedHeader = String(headers[col - 1] || '').trim().toLowerCase();
   if (editedHeader !== 'no invoice needed') return;
   if (!headerMap['date'] || !headerMap['counterparty'] || !headerMap['amount']) {
-    Logger.log('handleNoInvoiceNeededEdit_: Missing Revenue headers incomplete');
+    Logger.log('handleNoInvoiceNeededEdit_: Missing ' + side + ' headers incomplete');
     return;
   }
 
@@ -50,49 +54,67 @@ function handleNoInvoiceNeededEdit_(e) {
     return;
   }
 
-  var bank = findBankCreditMatch_(dateVal, counterparty, amount);
+  var summaryCategory = '';
+  if (headerMap['category']) {
+    summaryCategory = String(sheet.getRange(row, headerMap['category']).getDisplayValue() || '').trim();
+  }
+
+  var bank = findBankSideMatchNin_(dateVal, counterparty, amount, side === 'expense' ? 'debit' : 'credit');
   if (!bank) {
     Logger.log(
-      'handleNoInvoiceNeededEdit_: no unique Bank Credit match for ' +
-      counterparty + ' / ' + amount + ' on row ' + row
+      'handleNoInvoiceNeededEdit_: no unique Bank ' +
+      (side === 'expense' ? 'Debit' : 'Credit') +
+      ' match for ' + counterparty + ' / ' + amount + ' on row ' + row
     );
     return;
   }
 
-  var categoryName = String(
-    bank.sheet.getRange(bank.row, bank.categoryCol).getDisplayValue() || ''
-  ).trim();
+  var categoryName = summaryCategory;
   if (!categoryName) {
-    Logger.log('handleNoInvoiceNeededEdit_: Bank Credit has blank Category at row ' + bank.row);
+    categoryName = String(
+      bank.sheet.getRange(bank.row, bank.categoryCol).getDisplayValue() || ''
+    ).trim();
+  }
+  if (!categoryName) {
+    Logger.log('handleNoInvoiceNeededEdit_: blank Category for row ' + row);
     return;
   }
 
-  setCategoryInvoiceRequiredFalse_(categoryName);
+  var defaultType = side === 'expense' ? 'Expense' : 'Revenue';
+  setCategoryInvoiceRequiredFalse_(categoryName, defaultType);
   clearMissingHighlightNin_(bank.sheet, bank.row, bank.lastReconCol);
 }
 
-/** Walk up to the Missing Revenue Invoices header row. */
-function findMissingRevenueHeaderRow_(sheet, editedRow) {
+/**
+ * Walk up to Missing Expense or Missing Revenue header that includes No Invoice Needed.
+ * @return {{headerRow: number, side: 'expense'|'revenue'}|null}
+ */
+function findMissingNoInvoiceHeader_(sheet, editedRow) {
   var maxLook = Math.min(editedRow - 1, 80);
   for (var r = editedRow - 1; r >= Math.max(1, editedRow - maxLook); r--) {
-    var rowVals = sheet.getRange(r, 1, 1, Math.max(6, sheet.getLastColumn())).getDisplayValues()[0];
+    var rowVals = sheet.getRange(r, 1, 1, Math.max(8, sheet.getLastColumn())).getDisplayValues()[0];
     var hasDate = rowVals.some(function (v) { return String(v || '').trim().toLowerCase() === 'date'; });
     var hasNoInv = rowVals.some(function (v) {
       return String(v || '').trim().toLowerCase() === 'no invoice needed';
     });
+    if (!hasDate || !hasNoInv) continue;
     var titleAbove = r > 1 ? String(sheet.getRange(r - 1, 1).getDisplayValue() || '').toLowerCase() : '';
-    if (hasDate && hasNoInv && titleAbove.indexOf('missing revenue') !== -1) {
-      return r;
+    if (titleAbove.indexOf('missing expense') !== -1) {
+      return { headerRow: r, side: 'expense' };
+    }
+    if (titleAbove.indexOf('missing revenue') !== -1) {
+      return { headerRow: r, side: 'revenue' };
     }
   }
   return null;
 }
 
 /**
- * Find Bank Transactions Credit matching date + counterparty + amount.
+ * Find Bank Transactions Debit or Credit matching date + counterparty + amount.
+ * @param {'debit'|'credit'} amountSide
  * @return {{sheet: GoogleAppsScript.Spreadsheet.Sheet, row: number, categoryCol: number, lastReconCol: number}|null}
  */
-function findBankCreditMatch_(dateVal, counterparty, amount) {
+function findBankSideMatchNin_(dateVal, counterparty, amount, amountSide) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName('Bank Transactions');
   if (!sheet) {
@@ -102,7 +124,7 @@ function findBankCreditMatch_(dateVal, counterparty, amount) {
       var flat = probe.map(function (row) {
         return row.map(function (c) { return String(c || '').trim().toLowerCase(); }).join('|');
       }).join('||');
-      if (flat.indexOf('counterparty') !== -1 && flat.indexOf('credit') !== -1) {
+      if (flat.indexOf('counterparty') !== -1 && flat.indexOf(amountSide) !== -1) {
         sheet = sheets[s];
         break;
       }
@@ -127,7 +149,7 @@ function findBankCreditMatch_(dateVal, counterparty, amount) {
       var key = String(headers[c] || '').trim().toLowerCase();
       if (key) trial[key] = c + 1;
     }
-    if (trial['date'] && trial['counterparty'] && trial['category'] && trial['credit']) {
+    if (trial['date'] && trial['counterparty'] && trial['category'] && trial[amountSide]) {
       headerRow = hr;
       map = trial;
       break;
@@ -137,9 +159,9 @@ function findBankCreditMatch_(dateVal, counterparty, amount) {
 
   var matches = [];
   for (var r = headerRow + 1; r <= lastRow; r++) {
-    var credit = Number(sheet.getRange(r, map['credit']).getValue());
-    if (!isFinite(credit) || credit === 0) continue;
-    if (Math.abs(credit - amount) > 0.01) continue;
+    var amt = Number(sheet.getRange(r, map[amountSide]).getValue());
+    if (!isFinite(amt) || amt === 0) continue;
+    if (Math.abs(amt - amount) > 0.01) continue;
     var cp = String(sheet.getRange(r, map['counterparty']).getDisplayValue() || '').trim();
     if (cp.toLowerCase() !== counterparty.toLowerCase()) continue;
     var ymd = dateToYmdNin_(sheet.getRange(r, map['date']).getValue(), tz);
@@ -175,8 +197,11 @@ function dateToYmdNin_(value, tz) {
   return null;
 }
 
-/** Set Invoice Required = FALSE for categoryName; create row if missing (Type Revenue). */
-function setCategoryInvoiceRequiredFalse_(categoryName) {
+/**
+ * Set Invoice Required = FALSE for categoryName; create row if missing.
+ * @param {string} defaultType 'Expense' or 'Revenue' when creating a new Categories row
+ */
+function setCategoryInvoiceRequiredFalse_(categoryName, defaultType) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var cat = ss.getSheetByName('Categories');
   if (!cat) {
@@ -215,7 +240,7 @@ function setCategoryInvoiceRequiredFalse_(categoryName) {
   var newRow = Math.max(lastRow + 1, startRow);
   cat.getRange(newRow, catCol).setValue(categoryName);
   if (typeCol) {
-    cat.getRange(newRow, typeCol).setValue('Revenue');
+    cat.getRange(newRow, typeCol).setValue(defaultType || 'Expense');
   }
   cat.getRange(newRow, invReqCol).insertCheckboxes();
   cat.getRange(newRow, invReqCol).setValue(false);
@@ -238,7 +263,7 @@ function clearMissingHighlightNin_(sheet, row, lastReconCol) {
 }
 
 /**
- * Debugger entry: simulate ticking No Invoice Needed on the first Missing Revenue data row.
+ * Debugger entry: first Missing Expense or Missing Revenue No Invoice Needed checkbox.
  */
 function debugNoInvoiceNeededClick() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -247,10 +272,11 @@ function debugNoInvoiceNeededClick() {
     throw new Error('Summary sheet not found');
   }
 
-  var found = findNoInvoiceNeededCheckboxCell_(sheet);
+  var found = findNoInvoiceNeededCheckboxCell_(sheet, 'missing expense') ||
+    findNoInvoiceNeededCheckboxCell_(sheet, 'missing revenue');
   if (!found) {
     throw new Error(
-      'No No Invoice Needed checkbox found under Missing Revenue Invoices. ' +
+      'No No Invoice Needed checkbox found under Missing Expense or Missing Revenue. ' +
       'Add at least one data row, then Debug again.'
     );
   }
@@ -269,13 +295,13 @@ function debugNoInvoiceNeededClick() {
   handleNoInvoiceNeededEdit_(e);
 }
 
-function findNoInvoiceNeededCheckboxCell_(sheet) {
+function findNoInvoiceNeededCheckboxCell_(sheet, titleNeedle) {
   var lastRow = Math.max(sheet.getLastRow(), 1);
   var lastCol = Math.max(sheet.getLastColumn(), 1);
   var titleRow = null;
   for (var r = 1; r <= lastRow; r++) {
     var a1 = String(sheet.getRange(r, 1).getDisplayValue() || '').trim().toLowerCase();
-    if (a1.indexOf('missing revenue') !== -1) {
+    if (a1.indexOf(titleNeedle) !== -1) {
       titleRow = r;
       break;
     }

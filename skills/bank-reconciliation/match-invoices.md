@@ -141,8 +141,8 @@ The workbook template is expected to provide a **Summary** tab with table header
 
 Look for these titles and headers (case-insensitive; close wording is fine):
 
-- **Missing Expense Invoices** — columns: Date, Counterparty, Amount, Category (when present), **Personal Expense** (checkbox), Note. Live formulas fill Date / Counterparty / Amount (and Category / Note if formula-driven) **without** spilling into the Personal Expense column; after writing candidates, ensure **Personal Expense** cells on data rows are checkboxes. Ticking Personal Expense sets the matching Bank Debit **Category** to `Personal` (and Categories.Invoice Required false for Personal), which drops the row from missing on the next refresh / Match run.
-- **Missing Revenue Invoices** — columns: Date, Counterparty, Amount, **No Invoice Needed** (checkbox), Note. Live formulas fill Date / Counterparty / Amount (and Note if needed) **without** spilling into No Invoice Needed; ensure checkboxes on that column for data rows. Ticking No Invoice Needed (Apps Script `handleNoInvoiceNeededEdit_`) sets the matched Credit’s Category **Invoice Required** = false on `Categories`, so that category is excluded from missing on the next Match run.
+- **Missing Expense Invoices** — columns: Date, Counterparty, Amount, Category, **No Invoice Needed** (checkbox), **Personal Expense** (checkbox), Note. Live formulas fill Date / Counterparty / Amount (and Category / Note if formula-driven) **without** spilling into **No Invoice Needed** or **Personal Expense**; after writing candidates, ensure both checkbox columns have checkboxes on data rows. Ticking **No Invoice Needed** sets the matched Debit’s Category **Invoice Required** = false. Ticking **Personal Expense** sets Bank (and Summary) Category to `Personal`, then also ticks No Invoice Needed and runs the same Invoice Required=false path.
+- **Missing Revenue Invoices** — columns: Date, Counterparty, Amount, Category, **No Invoice Needed** (checkbox), Note. Live formulas fill Date / Counterparty / Amount (and Category / Note if needed) **without** spilling into No Invoice Needed; ensure checkboxes on that column for data rows. Ticking No Invoice Needed sets the matched Credit’s Category **Invoice Required** = false on `Categories`.
 - **Expenses by Category** — columns such as Category, Total, and Percentage.
 - **Unpaid Expense Invoices** / **Unpaid Revenue Invoices** — owned by Find Unpaid Invoices for **data** (both blocks); leave empty shells in place when that skill has not run yet.
 
@@ -193,7 +193,7 @@ Evaluate which rows would appear before writing:
 Then:
 
 - **Always keep** the **Missing Expense Invoices** title and headers (create them only if the Summary tab is missing that block entirely).
-- If there is **at least one** missing expense candidate: fill with live `FILTER`/`QUERY` (or equivalent) formulas for Date, Counterparty, and Amount (Debit) — and Category / Note when those columns are formula-driven. **Do not** spill into **Personal Expense**; insert/ensure checkbox data validation on that column for each candidate data row. Exclude no-invoice-needed Categories (Invoice Required false + legacy fallbacks) from the formula.
+- If there is **at least one** missing expense candidate: fill with live `FILTER`/`QUERY` (or equivalent) formulas for Date, Counterparty, and Amount (Debit) — and Category / Note when those columns are formula-driven. **Do not** spill into **No Invoice Needed** or **Personal Expense**; insert/ensure checkbox data validation on both checkbox columns for each candidate data row. Exclude no-invoice-needed Categories (Invoice Required false + legacy fallbacks) from the formula.
 - If there are **no** missing expense candidates: **clear** any data or formula rows under the headers, but **keep** the title and headers.
 - Same rules for **Missing Revenue Invoices** (Amount = Credit): do **not** spill into **No Invoice Needed**; ensure checkboxes on that column for data rows; exclude no-invoice-needed Categories.
 - On a later Summary refresh, refill or clear under the existing headers — do not delete and recreate the block. Keep the two missing-invoice blocks stacked with exactly one blank row between them (see below).
@@ -278,4 +278,4 @@ If there are **no** missing invoices, say so and skip the supply/re-run ask.
 
 ### Sheet edits
 
-Tell the operator: they may update Category names, Category Type, or Counterparty names on the spreadsheet; when finished, run **Categorise bank data** remapping ([`categorise-bank.md`](categorise-bank.md) section 5), then re-run this skill (or ask for a Summary-only refresh) so formulas, one-blank-row gaps, Arial 10 white-background data, highlights, and pie stay correct.
+Tell the operator: they may update Category names, Category Type, or Counterparty names on the spreadsheet; when finished, say so in chat (or ask to **Sync spreadsheet mappings** — [`sync-spreadsheet-mappings.md`](sync-spreadsheet-mappings.md)) so mappings stay consistent and Summary formulas / highlights refresh. Re-run **Match invoices** when they have new invoice files to attach.

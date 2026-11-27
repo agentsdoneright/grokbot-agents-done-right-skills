@@ -56,7 +56,7 @@ Bound Apps Script may be wrong after a Drive copy if the shared template only ha
 - [`summary-on-edit.gs`](scripts/summary-on-edit.gs) — sole `onEdit` dispatcher
 - [`unpaid-checkbox-dates.gs`](scripts/unpaid-checkbox-dates.gs) — Paid / Reminder Sent
 - [`personal-expense-checkbox.gs`](scripts/personal-expense-checkbox.gs) — Personal Expense → Category `Personal`
-- [`no-invoice-needed-checkbox.gs`](scripts/no-invoice-needed-checkbox.gs) — No Invoice Needed → Categories Invoice Required false
+- [`no-invoice-needed-checkbox.gs`](scripts/no-invoice-needed-checkbox.gs) — Missing Expense / Revenue No Invoice Needed → Categories Invoice Required false
 
 1. Read those `.gs` files from the repo.
 2. Check the month workbook’s bound project (Extensions → Apps Script, or Apps Script API / `clasp` if available).

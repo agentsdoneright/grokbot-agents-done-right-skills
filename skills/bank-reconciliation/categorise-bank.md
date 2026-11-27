@@ -6,7 +6,8 @@ description: >-
   imported into their Google Sheets reconciliation workbook: fill Date,
   Counterparty, Category, Credit, and Debit from the raw CSV columns, seed
   Categories (including Type and Invoice Required default true) and Counterparty
-  reference tabs, verify totals, and remapping after the operator edits names.
+  reference tabs, and verify totals. After the operator edits names, point them
+  to Sync spreadsheet mappings.
   Requires Import bank CSV first. Does not paste the CSV, match invoices, or
   update Summary — run Match invoices after categorising when invoice matching
   is needed (or use Reconcile Bank Statement for the full chain).
@@ -67,11 +68,4 @@ Skip writing a row when the same key already exists (month-2 copies already have
 
 ## 5. After the user reviews
 
-When the operator says they have finished editing Category or Counterparty names (or other manual sheet changes), re-read the transactions tab against the reference tabs and **update mappings so everything stays linked**:
-
-- Sync `Counterparty-Match` (formatted name ↔ raw Match string) without duplicates.
-- Sync unique formatted names into `Counterparties` (preserve existing Email / Phone / Registration / Address when only the name key is syncing).
-- Sync `Counterparty-Category` and unique spellings into `Categories`. Preserve existing Type and Invoice Required values; seed Type and Invoice Required only for newly added categories (same rules as section 3).
-- If a counterparty was renamed, update the matching `Counterparty` in `Email matching` so invoice rules still line up.
-
-After remapping, if Summary / missing-invoice highlights need refresh, tell the operator to re-run Match invoices (or ask only for a Summary refresh via that skill).
+When the operator says they have finished editing Category or Counterparty names (or other manual sheet changes), run **Sync spreadsheet mappings** ([`sync-spreadsheet-mappings.md`](sync-spreadsheet-mappings.md)) — do not duplicate that workflow here. That skill clarifies rename vs new, syncs reference tabs, and refreshes Summary.

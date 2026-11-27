@@ -141,6 +141,7 @@ Keep progress updates short and friendly (“Checking Google Drive…”, “Sav
      - **Import bank CSV** only: `Import my bank statement CSV for November`
      - **Categorise bank data** only: `Categorise this month’s bank transactions`
      - **Match invoices** only: `Match invoices on my November reconciliation`
+     - **Sync spreadsheet mappings** (after manual sheet edits): `I’ve finished editing the spreadsheet`
 
      End with one short line: they can still try the sample demo later by asking to **show the bookkeeping demo**, or paste the three test prompts from the README when they want practice data. Then **stop** (do not nag).
    - If **Yes**: read and follow [`skills/bookkeeping-test/guided-demo.md`](skills/bookkeeping-test/guided-demo.md) immediately in the same chat.
