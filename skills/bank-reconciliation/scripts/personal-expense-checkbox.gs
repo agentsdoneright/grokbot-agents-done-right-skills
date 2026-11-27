@@ -175,25 +175,37 @@ function ensurePersonalCategoryRow_() {
   var cat = ss.getSheetByName('Categories');
   if (!cat) return;
   var lastRow = Math.max(cat.getLastRow(), 1);
-  var lastCol = Math.max(cat.getLastColumn(), 2);
+  var lastCol = Math.max(cat.getLastColumn(), 3);
   var headers = cat.getRange(1, 1, 1, lastCol).getDisplayValues()[0];
   var catCol = 1;
   var typeCol = 0;
+  var invReqCol = 0;
   for (var c = 0; c < headers.length; c++) {
     var h = String(headers[c] || '').trim().toLowerCase();
     if (h === 'category') catCol = c + 1;
     if (h === 'type') typeCol = c + 1;
+    if (h === 'invoice required') invReqCol = c + 1;
+  }
+  if (!invReqCol) {
+    invReqCol = lastCol + 1;
+    cat.getRange(1, invReqCol).setValue('Invoice Required');
   }
   var startRow = String(headers[catCol - 1] || '').trim().toLowerCase() === 'category' ? 2 : 1;
   for (var r = startRow; r <= lastRow; r++) {
     var name = String(cat.getRange(r, catCol).getDisplayValue() || '').trim();
-    if (name.toLowerCase() === PERSONAL_CATEGORY_.toLowerCase()) return;
+    if (name.toLowerCase() === PERSONAL_CATEGORY_.toLowerCase()) {
+      cat.getRange(r, invReqCol).insertCheckboxes();
+      cat.getRange(r, invReqCol).setValue(false);
+      return;
+    }
   }
   var newRow = Math.max(lastRow + 1, startRow);
   cat.getRange(newRow, catCol).setValue(PERSONAL_CATEGORY_);
   if (typeCol) {
     cat.getRange(newRow, typeCol).setValue('Expense');
   }
+  cat.getRange(newRow, invReqCol).insertCheckboxes();
+  cat.getRange(newRow, invReqCol).setValue(false);
 }
 
 function clearMissingHighlight_(sheet, row, lastReconCol) {

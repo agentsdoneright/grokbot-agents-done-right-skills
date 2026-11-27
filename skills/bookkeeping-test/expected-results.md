@@ -32,15 +32,16 @@ Fixed month: **November 2024** (`202411`). Fixed today for unpaid windows: **202
 
 - [ ] Four expense matches from recon inbox EMLs (Acme, Northwind, Brightline, Harbor) with **Source = `Email`**, Invoice hyperlinks (filename labels), PDFs under `{drive.expenses_folder}`
 - [ ] Two revenue matches from sent EMLs (Riverstone, Pixelforge) with **Source = `Email`**, PDFs under `{drive.revenue_folder}`
-- [ ] Unmatched expense Debits remain for Staples + City Rides (bank fee / Personal / Personal expense have no invoice requirement)
+- [ ] Unmatched expense Debits remain for Staples + City Rides (Invoice Required false / bank fee / Personal have no invoice requirement)
 - [ ] Unmatched revenue Credit remains for Client Payment / Acme (no sent EML)
 - [ ] Gmail was not used
-- [ ] **Summary — Missing Expense Invoices** lists Staples + City Rides (formula-driven; bank fee and Personal / Personal expense excluded)
-- [ ] **Summary — Missing Revenue Invoices** lists the unmatched credit
+- [ ] **Summary — Missing Expense Invoices** lists Staples + City Rides (formula-driven; Invoice Required false / bank fee / Personal excluded)
+- [ ] **Summary — Missing Revenue Invoices** lists the unmatched credit (No Invoice Needed checkbox column present; not spilled into)
 - [ ] Exactly one blank row between each stacked Summary table (Missing Expense → Missing Revenue → Unpaid Expense → Unpaid Revenue); spills did not overwrite lower titles or consume gap rows
 - [ ] Summary table **data** cells are Arial 10 regular (not bold / not title-sized) with white / none background (not header blue)
 - [ ] Summary table blocks are **kept** even when empty (title + headers); empty unpaid shells left intact
-- [ ] Matching Bank rows highlighted light red; bank fee and Personal / Personal expense not highlighted for missing invoices
+- [ ] Matching Bank rows highlighted light red; Invoice Required false / bank fee / Personal not highlighted for missing invoices
+- [ ] **Categories** includes Invoice Required (new categories default checked / true)
 - [ ] **Expenses by Category** Totals are live `SUMIF`-style formulas; pie chart present/updated
 - [ ] Operator handback lists remaining missing invoices and points to Summary
 

@@ -6,7 +6,7 @@ description: >-
   statement CSV into their Google Sheets reconciliation workbook: prepare the
   month Drive folders, create or copy the month sheet from the prior month or
   the shared Google Sheet template (`{templates.reconciliation_sheet_id}`),
-  ensure the Summary checkbox Apps Script trio matches the repo `.gs` files, and
+  ensure the Summary checkbox Apps Script files match the repo `.gs` set, and
   paste the CSV into the raw import columns only. Does not fill Date, Counterparty,
   Category, Credit, Debit, or Invoice columns — run Categorise bank data next
   (or the one-shot Reconcile Bank Statement wrapper). If
@@ -51,16 +51,17 @@ If no active session file, resolve the statement month from the operator (or las
 
 ## 1b. Ensure Summary checkbox Apps Script (quiet unless broken)
 
-Bound Apps Script may be wrong after a Drive copy if the shared template only had an empty stub. Agent source of truth — **all three** files under [`scripts/`](scripts/) (maintainers: [`scripts/README.md`](scripts/README.md)):
+Bound Apps Script may be wrong after a Drive copy if the shared template only had an empty stub. Agent source of truth — **all four** files under [`scripts/`](scripts/) (maintainers: [`scripts/README.md`](scripts/README.md)):
 
 - [`summary-on-edit.gs`](scripts/summary-on-edit.gs) — sole `onEdit` dispatcher
 - [`unpaid-checkbox-dates.gs`](scripts/unpaid-checkbox-dates.gs) — Paid / Reminder Sent
 - [`personal-expense-checkbox.gs`](scripts/personal-expense-checkbox.gs) — Personal Expense → Category `Personal`
+- [`no-invoice-needed-checkbox.gs`](scripts/no-invoice-needed-checkbox.gs) — No Invoice Needed → Categories Invoice Required false
 
 1. Read those `.gs` files from the repo.
 2. Check the month workbook’s bound project (Extensions → Apps Script, or Apps Script API / `clasp` if available).
-3. If it already has working `onEdit` that calls both handlers, plus `handleUnpaidCheckboxEdit_` / `handlePersonalExpenseEdit_` / `setDateDmmm_`: **leave it**. Say **nothing** about scripts in chat.
-4. If missing, empty, only `myFunction`, or lacking those functions: create/replace the three files from the repo and Save. Do this silently when you can; do not narrate file paths to the operator.
+3. If it already has working `onEdit` that calls all three handlers, plus `handleUnpaidCheckboxEdit_` / `handlePersonalExpenseEdit_` / `handleNoInvoiceNeededEdit_` / `setDateDmmm_`: **leave it**. Say **nothing** about scripts in chat.
+4. If missing, empty, only `myFunction`, or lacking those functions: create/replace the four files from the repo and Save. Do this silently when you can; do not narrate file paths to the operator.
 5. If you cannot install or fix it: continue Import anyway. In the operator-facing report use **plain language only** — e.g. “If ticking Paid doesn’t fill in the date automatically, tell me and I’ll help.” **Never** tell the operator to open Apps Script, paste a `.gs` file, or look under `skills/…`. Find Unpaid Invoices also checks this (section 0).
 
 ## 2. Inspect the layout before writing

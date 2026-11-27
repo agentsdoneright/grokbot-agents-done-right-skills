@@ -1,15 +1,15 @@
 ---
 name: Categorise bank data
-version: 1.0.0
+version: 1.0.1
 description: >-
-  Version 1.0.0. Use when the user wants to categorise bank transactions already
+  Version 1.0.1. Use when the user wants to categorise bank transactions already
   imported into their Google Sheets reconciliation workbook: fill Date,
   Counterparty, Category, Credit, and Debit from the raw CSV columns, seed
-  Categories (including Type) and Counterparty reference tabs, verify totals,
-  and remapping after the operator edits names. Requires Import bank CSV first.
-  Does not paste the CSV, match invoices, or update Summary — run Match invoices
-  after categorising when invoice matching is needed (or use Reconcile Bank
-  Statement for the full chain).
+  Categories (including Type and Invoice Required default true) and Counterparty
+  reference tabs, verify totals, and remapping after the operator edits names.
+  Requires Import bank CSV first. Does not paste the CSV, match invoices, or
+  update Summary — run Match invoices after categorising when invoice matching
+  is needed (or use Reconcile Bank Statement for the full chain).
 ---
 # Categorise bank data
 
@@ -30,7 +30,7 @@ If `{workspace.local_path}/bookkeeping-test-session.yaml` exists and `active` is
 ## 1. Locate the sheet and layout
 
 - Open the month sheet named from `{drive.sheet_title_pattern}` under `{drive.root_path}/{drive.accounts_folder}/{drive.year_folder_pattern}/{drive.month_folder_pattern}/`.
-- Tabs used: the transactions tab, `Categories` (including **Type**), `Counterparty-Match`, `Counterparties`, `Counterparty-Category`, `Email matching`, and `Summary` (read-only here). Tab names can change, so check them each time.
+- Tabs used: the transactions tab, `Categories` (including **Type** and **Invoice Required**), `Counterparty-Match`, `Counterparties`, `Counterparty-Category`, `Email matching`, and `Summary` (read-only here). Tab names can change, so check them each time.
 - **Transactions tab.** Start from `{drive.sheet_tab}` (template name: **`Bank Transactions`**). If missing, find the tab with Date, Counterparty, Category, Credit, Debit, Invoice. Older sheets may be named `Bank`.
 - Locate the **header row by column names**. Expected headers: Date | Counterparty | Category | Credit | Debit | VAT | Ref | Invoice | Notes | Source, then the raw CSV area to the right (typically K onward). Notes and Source may be swapped. If an older sheet has `Recipient / Payer`, treat it as Counterparty. Do **not** rename `Ref` to `Invoice`.
 - Category spellings come from the `Categories` tab.
@@ -51,7 +51,7 @@ If `{workspace.local_path}/bookkeeping-test-session.yaml` exists and `active` is
 
 In the **same run**, after section 2 and before the verify report, seed (or extend) the reference tabs from the filled transactions rows and the raw bank string used for each row (Merchant / Payee Name / Payer Name / Description):
 
-- **`Categories`**: unique Category values from the transactions tab; no duplicates; no blank categories. Also seed **Type** when the column exists (add a `Type` header if the template is older and the column is missing): use `Expense` for a category that appears only on Debit rows, and `Revenue` for a category that appears only on Credit rows. If a category appears on both, leave Type blank and flag it for the operator rather than guessing. Do **not** overwrite a Type the operator (or a previous month) already set. Allowed Type values are `Expense` and `Revenue` (match them case-insensitively later; `Debit` / `Credit` also count as expense / revenue if the operator used those words).
+- **`Categories`**: unique Category values from the transactions tab; no duplicates; no blank categories. Also seed **Type** when the column exists (add a `Type` header if the template is older and the column is missing): use `Expense` for a category that appears only on Debit rows, and `Revenue` for a category that appears only on Credit rows. If a category appears on both, leave Type blank and flag it for the operator rather than guessing. Do **not** overwrite a Type the operator (or a previous month) already set. Allowed Type values are `Expense` and `Revenue` (match them case-insensitively later; `Debit` / `Credit` also count as expense / revenue if the operator used those words). Ensure an **Invoice Required** checkbox column exists (add the header if missing). For **newly added** category rows only: set Invoice Required to **`TRUE`** by default (checkbox checked). Do **not** overwrite an existing Invoice Required value. Exception for **new** rows only: if the category name is `Personal`, `Personal expense`, or clearly a bank-fee / service-fee label, set Invoice Required to **`FALSE`**.
 - **`Counterparty-Match`**: one row per unique formatted `Counterparty`, with `Match` = the raw bank string for that counterparty; no duplicates.
 - **`Counterparties`**: unique formatted `Counterparty` values in column A (include credit counterparties / clients). Leave Email / Phone / Registration / Address blank until an invoice match supplies them.
 - **`Counterparty-Category`**: one row per unique formatted name with the Category used on Bank for that name.
@@ -71,7 +71,7 @@ When the operator says they have finished editing Category or Counterparty names
 
 - Sync `Counterparty-Match` (formatted name ↔ raw Match string) without duplicates.
 - Sync unique formatted names into `Counterparties` (preserve existing Email / Phone / Registration / Address when only the name key is syncing).
-- Sync `Counterparty-Category` and unique spellings into `Categories`. Preserve existing Type values; seed Type only for newly added categories (same rules as section 3).
+- Sync `Counterparty-Category` and unique spellings into `Categories`. Preserve existing Type and Invoice Required values; seed Type and Invoice Required only for newly added categories (same rules as section 3).
 - If a counterparty was renamed, update the matching `Counterparty` in `Email matching` so invoice rules still line up.
 
 After remapping, if Summary / missing-invoice highlights need refresh, tell the operator to re-run Match invoices (or ask only for a Summary refresh via that skill).

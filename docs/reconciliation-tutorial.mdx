@@ -179,7 +179,7 @@ Unfiled expense invoices live at `Drive root / Accounts / Unfiled / Expense Invo
 
     Update `Counterparties` Email, Phone, Registration, and Address from the invoice. Prefer a finance / billing / accounts email when several appear. If those values changed versus what was already on the sheet, overwrite them and tell the operator what changed.
 
-    Immediately save or update the working Gmail rule in `Email matching`. Skip bank-fee rows and Personal / Personal expense Debits (no invoice needed) unless an invoice is already linked. Never send, reply to, or change emails.
+    Immediately save or update the working Gmail rule in `Email matching`. Skip rows that need no invoice: Categories with Invoice Required unchecked, plus bank-fee and Personal / Personal expense fallbacks — unless an invoice is already linked. Never send, reply to, or change emails.
   </Step>
 </Steps>
 
@@ -213,7 +213,7 @@ Report the revenue folder link, credit matches (with Source counts), and credit 
 After invoice matching, fill **Summary** (Match invoices skill):
 
 - **Keep blocks; clear data when empty** for every Summary table: never delete title/headers (or the Expenses by Category pie) when there are no data rows — clear data under the headers only. Leave empty Unpaid shells intact for Find Unpaid Invoices.
-- **Missing Expense Invoices** / **Missing Revenue Invoices** — live formulas over the transactions tab (Debit/Credit with blank Invoice). **Insert sheet rows** under a table header before writing a spill so lower titles (for example Missing Revenue under Missing Expense) are never overwritten. On **Bank Transactions**, highlight those same missing-invoice rows in light red so they match the Summary tables (bank-fee and Personal / Personal expense Debits are excluded from Missing Expense and stay unhighlighted for this purpose).
+- **Missing Expense Invoices** / **Missing Revenue Invoices** — live formulas over the transactions tab (Debit/Credit with blank Invoice). **Insert sheet rows** under a table header before writing a spill so lower titles (for example Missing Revenue under Missing Expense) are never overwritten. On **Bank Transactions**, highlight those same missing-invoice rows in light red so they match the Summary tables. Exclude Categories with **Invoice Required** unchecked (and bank-fee / Personal fallbacks); those rows stay unhighlighted. Missing Expense may include a Personal Expense checkbox; Missing Revenue may include No Invoice Needed (sets Invoice Required false for that Credit’s Category).
 - **Expenses by Category** — Category labels from expense-typed rows on `Categories` (**Type** = Expense). **Total** cells use formulas that sum **Debit** on the transactions tab by Category (for example `SUMIF`), so changing a bank row’s Category updates the table and the linked pie chart. **Percentage** is formula-driven over those Totals (`0%` display).
 - Create or update **one** pie chart bound to Category + Total (spare rows under the table; no duplicate charts on reruns; do not delete the pie when the category table is empty).
 

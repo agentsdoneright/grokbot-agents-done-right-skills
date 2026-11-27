@@ -14,10 +14,10 @@ github:
   public_skills_repo_name: grokbot-agents-done-right-skills
 
 # Shared Drive templates (not tenant-specific). First-month reconciliation workbook.
-# Keep the bound Apps Script on this Sheet in sync with all three files under
+# Keep the bound Apps Script on this Sheet in sync with all four files under
 # skills/bank-reconciliation/scripts/ (summary-on-edit.gs, unpaid-checkbox-dates.gs,
-# personal-expense-checkbox.gs). Drive copy mirrors the template; a blank myFunction
-# stub propagates to every new month workbook.
+# personal-expense-checkbox.gs, no-invoice-needed-checkbox.gs). Drive copy mirrors
+# the template; a blank myFunction stub propagates to every new month workbook.
 templates:
   reconciliation_sheet_id: 1c95fvD2o2WbnvbUmOfSRNqle1iSFLq6Nv7o2lZwUoS8
   reconciliation_sheet_url: https://docs.google.com/spreadsheets/d/1c95fvD2o2WbnvbUmOfSRNqle1iSFLq6Nv7o2lZwUoS8/edit
