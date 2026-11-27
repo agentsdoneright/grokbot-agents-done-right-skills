@@ -62,12 +62,12 @@ The operator may be **completely new to agents**. For this whole initiation:
 
 #### A. Welcome (no side effects)
 
-In plain language, say you will help them set up bookkeeping helpers that work with their Google Drive, Sheets, and Gmail. Setup will:
+In plain language, say you will help them set up bookkeeping helpers that work with their Google Drive and Sheets. Gmail is requested later only if they run a live skill that searches email (the sample demo does not need Gmail). Setup will:
 
 1. Save a few preferences (their name, company, where files should live on Google Drive).
 2. Download the shared skills pack into this workspace (if it is not already here).
 3. Create a small local settings file and a scratch folder for temporary files.
-4. Check that Google Drive, Sheets, and Gmail are connected (read-only checks).
+4. Check that Google Drive and Sheets are connected (read-only checks).
 5. Create two folders on their Google Drive for Accounts and Logs (under the Drive folder they accept).
 
 Then collect the only free-text you need before defaults:
@@ -101,7 +101,7 @@ Then continue. Do not open a long form.
 
 #### C. Permission gate (required — buttons)
 
-Summarize again in one short paragraph what will happen next (download skills if needed, write the settings file, create the scratch folder, check Google access, create Accounts and Logs on Drive). Then **wait** for a button choice:
+Summarize again in one short paragraph what will happen next (download skills if needed, write the settings file, create the scratch folder, check Google Drive and Sheets access, create Accounts and Logs on Drive). Do **not** imply Gmail will be granted during setup. Then **wait** for a button choice:
 
 - **Yes, set this up** (Recommended)
 - **Not now**
@@ -115,14 +115,14 @@ Do **not** treat the bootstrap paste alone as permission. Asking for name / comp
 Keep progress updates short and friendly (“Checking Google Drive…”, “Saving your settings…”). Behind the scenes:
 
 1. Ensure the workspace is a checkout of `{github.public_skills_repo_url}` (clone if needed).
-2. **Ensure Google connectors**: harmless reads against Drive, Sheets, and Gmail. If any fail, say which one in plain language, tell them how to grant access, and do not mark verified until all three work.
+2. **Ensure Google connectors**: harmless reads against Drive and Sheets only. Do **not** probe Gmail during Quick start. If Drive or Sheets fail, say which one in plain language, tell them how to grant access, and do not mark verified until both work.
 3. **Derive `google_account`** from the connected account; ask once only if needed.
 4. **Derive `repo.url` / `repo.branch`** from git remote / branch (fallback `main`).
 5. Set `repo.setup: quick_start`.
 6. **Write defaults** for remaining fields from [`config/profile.example.yaml`](config/profile.example.yaml) (`drive.*` including `accounts_folder` / `logs_folder`, `logging.destination`, `workspace.local_path: agents-done-right`), applying the Drive folder and logging choice from step B.
 7. Ensure `{workspace.local_path}/` exists. Ensure `{drive.root_path}/{drive.accounts_folder}` and `{drive.root_path}/{drive.logs_folder}` exist on Drive (create if missing).
 8. Write `config/profile.yaml`.
-9. **Verify Quick start**: public checkout; `origin`/`repo.url` is `{github.public_skills_repo_url}`; `rules/` and `skills/` present; Drive, Sheets, and Gmail succeed for `{google_account}`. In plain language, say skill customizations are not saved to their own GitHub until they later choose **Customizable** (do not pitch Customizable as a setup-mode menu here).
+9. **Verify Quick start**: public checkout; `origin`/`repo.url` is `{github.public_skills_repo_url}`; `rules/` and `skills/` present; Drive and Sheets succeed for `{google_account}`. Gmail is **not** required for verification. In plain language, say skill customizations are not saved to their own GitHub until they later choose **Customizable** (do not pitch Customizable as a setup-mode menu here).
 
 #### E. Done + optional demo (buttons)
 
@@ -152,7 +152,7 @@ When the operator asks to run a skill (e.g. bank reconciliation):
 1. Confirm Quick start (or Customizable) is verified; if not, run Quick start initiation first.
 2. Read `config/profile.yaml`, `config/product.yaml` when the skill needs `{docs.*}` / `{github.*}` / `{templates.*}`, and the matching file under `skills/`.
 3. Keep obeying all of [`rules/`](rules/) (see **Rules (global)** above); load profile values the skill needs.
-4. Use Gmail / Drive / Sheets connectors for `{company.name}` as `{google_account}` only as the skill requires. Keep `{operator.first_name}` posted at milestones during heavy work.
+4. Use Drive / Sheets connectors for `{company.name}` as `{google_account}` as the skill requires. Use Gmail only when the skill needs **live** email search and no bookkeeping test session is active — before the first Gmail call, probe the connector; if it fails, explain how to grant access in plain language and **stop that email path** (do not invent matches). Keep `{operator.first_name}` posted at milestones during heavy work.
 
 ## Customizable upgrade (only when editing a skill)
 

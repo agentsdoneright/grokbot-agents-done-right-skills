@@ -16,13 +16,14 @@ This tutorial walks through a monthly bank reconciliation using a Grok Bot agent
 ## Prerequisites
 
 <Callout color="#FFC107">
-  Before you start, complete **Quick start** with Grok Bot: paste the bootstrap prompt from the skills repo README so the agent reads `AGENTS.md` from `https://github.com/agentsdoneright/grokbot-agents-done-right-skills`, walks you through a plain-language setup with recommended defaults (clickable choices), then downloads the skills pack, creates your profile, and verifies Google Drive / Sheets / Gmail.
+  Before you start, complete **Quick start** with Grok Bot: paste the bootstrap prompt from the skills repo README so the agent reads `AGENTS.md` from `https://github.com/agentsdoneright/grokbot-agents-done-right-skills`, walks you through a plain-language setup with recommended defaults (clickable choices), then downloads the skills pack, creates your profile, and verifies Google Drive / Sheets. Gmail is requested later only when you run a live skill that searches email (not required for the sample demo).
 
   Prerequisites after Quick start:
 
   - Workspace checkout of the public skills repo `agentsdoneright/grokbot-agents-done-right-skills`
   - Synced Grok Bot with the skills it needs
-  - Grok Bot access to Google Drive, Sheets, and Gmail verified during Quick start (grant connectors if the agent reports any missing)
+  - Grok Bot access to Google Drive and Sheets verified during Quick start (grant connectors if the agent reports any missing)
+  - Gmail access when you first run live **Match invoices** or **Find Unpaid Invoices** (the agent will ask then; not needed for the sample demo)
 
   Optional later: if you customize a skill and want changes versioned on your own GitHub, the agent will suggest the **Customizable** upgrade and run the `private-repo-copy` skill (automatic via `gh` if you grant permissions, or manual via the GitHub account setup URL in `config/product.yaml`).
 </Callout>

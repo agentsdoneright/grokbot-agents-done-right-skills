@@ -10,11 +10,10 @@ Public repo: https://github.com/agentsdoneright/grokbot-agents-done-right-skills
 
 > [!NOTE]
 > If you feel unsure about running the following bootstrap process, ask your agent the following to verify what will happen (do not run bootstrap yet):
->
 
 > Advise me what will happen if you follow the public skills repo bootstrap: `AGENTS.md` from `https://github.com/agentsdoneright/grokbot-agents-done-right-skills`. DO NOT RUN the bootstrap. Only advise me what the side effects will be.
 
-If you are still unsure or uncertain about the effects of this tutorial, the safest approach is to use a **new Google account** (Drive, Sheets, and Gmail) dedicated to the tutorial, instead of your primary work or personal account. Optionally create a **new GitHub account** as well if you plan to customize skills (Customizable / private copy) so that work stays separate from your main GitHub identity.
+If you are still unsure or uncertain about the effects of this tutorial, the safest approach is to use a **new Google account** (Drive and Sheets for setup; Gmail only later if you run live invoice/email skills — the sample demo does not need Gmail) dedicated to the tutorial, instead of your primary work or personal account. Optionally create a **new GitHub account** as well if you plan to customize skills (Customizable / private copy) so that work stays separate from your main GitHub identity.
 
 ## Bootstrap
 
@@ -27,12 +26,10 @@ What happens next (the agent should explain this in plain language and use **but
 1. It asks your **company name** (and first name if needed).
 2. It offers **recommended settings** in one click (Drive folder `/Agents Done Right`, a simple activity log, local scratch folder). You can change something only if you want to.
 3. It asks **Yes, set this up** / **Not now** before doing anything lasting.
-4. Only after **Yes**: it downloads the skills pack if needed, saves a small settings file, creates a scratch folder, checks Google Drive / Sheets / Gmail, and creates Accounts and Logs folders on Drive.
+4. Only after **Yes**: it downloads the skills pack if needed, saves a small settings file, creates a scratch folder, checks Google Drive / Sheets, and creates Accounts and Logs folders on Drive. Gmail is requested later only if you run a live skill that searches email.
 5. When setup is done, it offers an optional **sample bookkeeping demo** (buttons: show me / skip). If you **skip**, the agent lists the two main live prompts (below) and points you at [`skills/README.md`](skills/README.md) for the full skill list.
 
-This repo is **not** standing bookkeeping identity for every chat — skills and your company settings load only when you ask for Quick start or to run/customize a skill. The bootstrap paste alone is **not** permission to change files or probe Google.
-
-Later if you want to customize a skill, the agent can run the **Customizable** upgrade via the `private-repo-copy` skill: either **automatically** (if you grant GitHub `repo` + `workflow` permissions through `gh`) or **manually** using the GitHub account setup docs URL in `config/product.yaml` (`docs.github_account_setup`). That creates a private GitHub copy so changes are versioned and saved. Public repo identity also lives in `config/product.yaml` (`github.public_skills_repo_*`).
+Later if you want to customize a skill, the agent can run the **Customizable** upgrade. That creates a private GitHub copy so changes are versioned and saved. Public repo identity also lives in `config/product.yaml` (`github.public_skills_repo_`*).
 
 ## Live bookkeeping prompts
 

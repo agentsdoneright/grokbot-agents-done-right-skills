@@ -10,7 +10,7 @@ description: >-
 ---
 # Reconcile Bank Statement Test
 
-Orchestrator for the first test segment (includes unpaid fixtures). Read profile; load Drive / Sheets / Gmail skills as the child steps require (Gmail unused while the session is active).
+Orchestrator for the first test segment (includes unpaid fixtures). Read profile; load Drive / Sheets as the child steps require. Gmail is unused while the session is active — do not load or probe it.
 
 ## Steps
 

@@ -19,7 +19,7 @@ description: >-
 ---
 # Match invoices to bank transactions
 
-Do this Drive work under `{drive.root_path}/{drive.accounts_folder}`. Use the Google Drive, Google Sheets, and Gmail connectors (load their skills first). When a test session is active, do **not** search or change Gmail — use fixture EMLs from the session file.
+Do this Drive work under `{drive.root_path}/{drive.accounts_folder}`. Load the Google Drive and Google Sheets connectors (and their skills) first. When a test session is active, do **not** search or change Gmail — use fixture EMLs from the session file; do **not** load or probe Gmail. For **live** email search (no active test session): before the first Gmail call, load and probe the Gmail connector for `{google_account}`; if it fails, explain how to grant access in plain language and **stop that email path** (do not invent matches). Drive / Unfiled / Manual matching already done in the same run can remain.
 
 If you must save a PDF or scratch file **locally**, write it under `{workspace.local_path}/`. Create that folder if needed.
 

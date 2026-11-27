@@ -43,7 +43,7 @@ Substitute `{grace_working_days_expense}` / `{grace_working_days_revenue}` every
 
 On every unpaid run against the target workbook: ensure a sheet named **Config** exists with those labels; set `B1` / `B2` / `B3` from today and the grace defaults before writing Status formulas. If an older sheet still has label **Invoice grace period (working days)** on A2, rename it to **Expense Invoice grace period (working days)** and ensure A3/B3 exist.
 
-Read [`config/profile.yaml`](../../config/profile.yaml) for `{google_account}`, `{company.name}`, `{drive.*}`, `{workspace.local_path}`. Load the Google Drive, Google Sheets, and Gmail connectors (and their skills) before Drive / Sheets / Gmail work — skip Gmail when a test session is active. Never invent amounts, refs, or Drive links. Never send, reply to, or change any emails.
+Read [`config/profile.yaml`](../../config/profile.yaml) for `{google_account}`, `{company.name}`, `{drive.*}`, `{workspace.local_path}`. Load the Google Drive and Google Sheets connectors (and their skills) before Drive / Sheets work. When a test session is active, skip Gmail entirely (use fixtures). For **live** inbox/Sent search: before the first Gmail call, load and probe the Gmail connector for `{google_account}`; if it fails, explain how to grant access in plain language and **stop that email path** (do not invent unpaid rows from mail). Drive / Sheets work already done in the same run can remain. Never invent amounts, refs, or Drive links. Never send, reply to, or change any emails.
 
 Do this Drive work under the same Accounts tree as bank reconciliation. If you must save a PDF or scratch file **locally**, write it under `{workspace.local_path}/`. Create that folder if needed.
 
