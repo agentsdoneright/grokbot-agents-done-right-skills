@@ -6,7 +6,7 @@ description: >-
   bookkeeping-test Phase 3 (stage bank-statement-with-payment.csv into Extracts),
   then Import bank CSV, Categorise bank data, Match invoices, and Find Unpaid
   Invoices. Does not run Reconcile Bank Statement as a single wrapper. Requires
-  Find Unpaid Invoices Test (or Phase 2) first.
+  Reconcile Bank Statement Test (or Phase 2) first.
 ---
 # Update Bank Statement Test
 
@@ -14,7 +14,7 @@ Orchestrator for the payment-CSV segment (settle Cobalt Debit + Northpeak Credit
 
 ## Prerequisite
 
-Session file `{workspace.local_path}/bookkeeping-test-session.yaml` must be `active` with `phase` ≥ 2. If missing, **stop** and tell the operator to run **Find Unpaid Invoices Test** first.
+Session file `{workspace.local_path}/bookkeeping-test-session.yaml` must be `active` with `phase` ≥ 2. If missing, **stop** and tell the operator to run **Reconcile Bank Statement Test** (or Phase 2) first.
 
 ## Steps
 

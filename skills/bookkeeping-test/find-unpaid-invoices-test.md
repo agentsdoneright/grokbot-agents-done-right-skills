@@ -2,10 +2,11 @@
 name: Find Unpaid Invoices Test
 version: 1.3.0
 description: >-
-  Version 1.3.0. Use when the user wants Find Unpaid Invoices Test. Runs
-  bookkeeping-test Phase 2 (add Cobalt Mail unpaid + Lumen Analytics grace-pending
-  inbox EMLs and Northpeak overdue revenue sent EML), then Find Unpaid Invoices.
-  Requires Reconcile Bank Statement Test (or Phase 1) first.
+  Version 1.3.0. Use when the user wants Find Unpaid Invoices Test alone (Phase 2
+  staging + Find Unpaid). The default demo path uses Reconcile Bank Statement
+  Test instead (it already stages Phase 2 and runs Find Unpaid). Requires
+  Reconcile Bank Statement Test Phase 1 (or Phase 1 staging) first if unpaid
+  fixtures are not yet in the session.
 ---
 # Find Unpaid Invoices Test
 

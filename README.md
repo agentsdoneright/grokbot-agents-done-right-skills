@@ -54,11 +54,9 @@ After Quick start (including when you skip the sample demo), ask in chat — for
 
 ## Try with test data
 
-After Quick start finishes, the agent **offers to guide** you through a short bookkeeping demonstration using these three prompts. You can also paste them yourself **in order** (each stages sample data then runs the matching live skills). Do not use your live inbox CSV for these.
+After Quick start finishes, the agent **offers to guide** you through a short bookkeeping demonstration using these **two** prompts. You can also paste them yourself **in order** (each stages sample data then runs the matching live skills). Do not use your live inbox CSV for these. Reconcile Bank Statement Test includes Find Unpaid Invoices (and the unpaid sample emails).
 
 > Run Reconcile Bank Statement Test
-
-> Run Find Unpaid Invoices Test
 
 > Run Update Bank Statement Test
 

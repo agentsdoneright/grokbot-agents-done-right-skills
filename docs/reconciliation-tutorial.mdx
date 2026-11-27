@@ -2,14 +2,15 @@
 title: "Reconciliation tutorial"
 description: "Reconcile a month of bank transactions with invoices"
 ---
-This tutorial walks through a monthly bank reconciliation using a Grok Bot agent. Prefer **Reconcile Bank Statement** (Import → Categorise → Match invoices in one go). You can still run **Import bank CSV**, **Categorise bank data**, and **Match invoices** separately. Use **Find Unpaid Invoices** for unpaid vendor bills (inbox) and unpaid revenue invoices (Sent).
+This tutorial walks through a monthly bank reconciliation using a Grok Bot agent. Prefer **Reconcile Bank Statement** (Import → Categorise → Match invoices → Find Unpaid Invoices in one go). You can still run **Import bank CSV**, **Categorise bank data**, **Match invoices**, and **Find Unpaid Invoices** separately.
 
 <Info>
- The agent will (via Reconcile Bank Statement or the three steps):
+ The agent will (via Reconcile Bank Statement or the steps below):
 
 1. **Import** — prepare the month's Google Drive folder and Google Sheet, paste the bank CSV into the raw import columns only
 2. **Categorise** — fill Date, Counterparty, Category, Credit, and Debit; seed Categories and Counterparty reference tabs; verify totals
 3. **Match invoices** — match expense invoices (received) and revenue invoices (sent) — Unfiled Drive folders first, then email, then manual chat uploads; set each Bank row's **Source** (`Drive`, `Email`, or `Manual`); fill Summary; save links in the month Expenses and Revenue folders
+4. **Find Unpaid Invoices** — fill Summary Unpaid Expense / Unpaid Revenue tables from inbox and Sent (or test fixtures)
 </Info>
 
 ## Prerequisites
@@ -30,13 +31,12 @@ This tutorial walks through a monthly bank reconciliation using a Grok Bot agent
 
 After Quick start finishes, the agent **offers to guide** you through a short bookkeeping demonstration with sample data. You can also exercise the skills yourself **without** a live bank CSV or Gmail. Run these **in order** (each stages fixtures then runs the live skills):
 
-1. **Reconcile Bank Statement Test** — Phase 1 + Reconcile Bank Statement  
-2. **Find Unpaid Invoices Test** — Phase 2 + Find Unpaid Invoices  
-3. **Update Bank Statement Test** — Phase 3 + Import → Categorise → Find Unpaid Invoices  
+1. **Reconcile Bank Statement Test** — Phase 1 + Phase 2 + Reconcile Bank Statement (includes Find Unpaid Invoices)  
+2. **Update Bank Statement Test** — Phase 3 + Import → Categorise → Match → Find Unpaid Invoices  
 
 While the session is active, live skills use November 2024 and local EMLs instead of Gmail. Compare results to `skills/bookkeeping-test/expected-results.md`.
 
-When you are ready for a real month, deactivate the test session (or delete the session file) and continue with the live CSV export steps below. For a live month, ask for **Reconcile Bank Statement** or **Find Unpaid Invoices**.
+When you are ready for a real month, deactivate the test session (or delete the session file) and continue with the live CSV export steps below. For a live month, ask for **Reconcile Bank Statement** (unpaid included) or **Find Unpaid Invoices** alone for an unpaid-only refresh.
 
 ## Export your monthly bank statement
 
@@ -56,7 +56,7 @@ The skill maps common bank CSV layouts, so the agent can import statements even 
 
 ## Run Reconcile Bank Statement (or Import alone)
 
-Ask for **Reconcile Bank Statement** to run Import → Categorise → Match in one go. Or run **Import bank CSV** alone, then the later sections.
+Ask for **Reconcile Bank Statement** to run Import → Categorise → Match → Find Unpaid in one go. Or run **Import bank CSV** alone, then the later sections.
 
 ## Prepare the month's folder and sheet
 

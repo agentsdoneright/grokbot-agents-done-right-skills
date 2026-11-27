@@ -4,15 +4,17 @@ Use after each **test bundle** (or after the live skills that follow a staged ph
 
 | Bundle | Checklist section |
 | --- | --- |
-| **Reconcile Bank Statement Test** | After Phase 1 |
-| **Find Unpaid Invoices Test** | After Phase 2 |
+| **Reconcile Bank Statement Test** | After Phase 1 **and** After Phase 2 (bundle stages both) |
+| **Find Unpaid Invoices Test** | After Phase 2 (standalone only) |
 | **Update Bank Statement Test** | After Phase 3 |
 
 Fixed month: **November 2024** (`202411`). Fixed today for unpaid windows: **2024-11-25**.
 
 ---
 
-## After Phase 1 live skills (Reconcile Bank Statement Test)
+## After Phase 1 live skills (Bank / Match portion of Reconcile Bank Statement Test)
+
+Reconcile Bank Statement Test also stages Phase 2 and runs Find Unpaid — use **After Phase 2** for unpaid table checks after that same bundle.
 
 ### Import
 
@@ -60,7 +62,7 @@ Operator downloaded the three PDFs from `skills/bank-reconciliation/test-data/ma
 
 ---
 
-## After Phase 2 live skill (Find Unpaid Invoices Test)
+## After Phase 2 live skill (Find Unpaid — via Reconcile Bank Statement Test or Find Unpaid Invoices Test)
 
 Session inbox includes recon expense EMLs **plus**:
 

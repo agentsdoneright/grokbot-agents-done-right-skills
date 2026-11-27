@@ -127,7 +127,7 @@ Keep progress updates short and friendly (“Checking Google Drive…”, “Sav
 #### E. Done + optional demo (buttons)
 
 1. Show a **short, plain** summary (name, company, Drive folder, Google account) and confirm Quick start is ready.
-2. **Ask once** whether they want a short **bookkeeping demonstration** with sample data (three guided steps; no live bank CSV; Gmail not used; creates a November 2024 practice spreadsheet on Drive). Buttons:
+2. **Ask once** whether they want a short **bookkeeping demonstration** with sample data (two guided steps; no live bank CSV; Gmail not used; creates a November 2024 practice spreadsheet on Drive). Buttons:
 
    - **Yes, show me the demo** (Recommended for first-time users)
    - **Skip for now**
@@ -136,14 +136,14 @@ Keep progress updates short and friendly (“Checking Google Drive…”, “Sav
 
      **What you can run next** — just ask in chat, for example:
 
-     - **Reconcile Bank Statement** (import CSV → categorise → match invoices): `Reconcile my bank statement for November`
-     - **Find Unpaid Invoices** (unpaid expense + revenue tables on Summary): `Find my unpaid invoices`
+     - **Reconcile Bank Statement** (import CSV → categorise → match → find unpaid): `Reconcile my bank statement for November`
+     - **Find Unpaid Invoices** (unpaid-only refresh on Summary): `Find my unpaid invoices`
      - **Import bank CSV** only: `Import my bank statement CSV for November`
      - **Categorise bank data** only: `Categorise this month’s bank transactions`
      - **Match invoices** only: `Match invoices on my November reconciliation`
      - **Sync spreadsheet mappings** (after manual sheet edits): `I’ve finished editing the spreadsheet`
 
-     End with one short line: they can still try the sample demo later by asking to **show the bookkeeping demo**, or paste the three test prompts from the README when they want practice data. Then **stop** (do not nag).
+     End with one short line: they can still try the sample demo later by asking to **show the bookkeeping demo**, or paste the two test prompts from the README when they want practice data. Then **stop** (do not nag).
    - If **Yes**: read and follow [`skills/bookkeeping-test/guided-demo.md`](skills/bookkeeping-test/guided-demo.md) immediately in the same chat.
    - If they already asked to run a skill next (and did not ask for the demo), run that skill instead of offering the demo.
 
