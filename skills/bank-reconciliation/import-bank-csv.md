@@ -21,7 +21,7 @@ If you must save a CSV or other file **locally** before uploading to Drive (or a
 
 **First-month workbook template:** shared Google Sheet `{templates.reconciliation_sheet_url}` (file id `{templates.reconciliation_sheet_id}` in `config/product.yaml`). For the initial month only, **Drive `copy_file`** that id into the month folder and rename to `{drive.sheet_title_pattern}`. Never edit the source template; only the month copy.
 
-**Apps Script:** Drive copy only mirrors whatever is on the template. An empty stub (`myFunction` only) means the template was never filled — treat that as missing. After creating or opening this month’s native sheet, follow **section 1b** so the bound project matches [`scripts/unpaid-checkbox-dates.gs`](scripts/unpaid-checkbox-dates.gs). See [`scripts/README.md`](scripts/README.md).
+**Checkbox date stamps (agent-only):** after creating or opening this month’s native sheet, follow **section 1b**. Do **not** mention Apps Script, `.gs` files, or paste instructions to the operator when the script is already present and working.
 
 **Next skill:** after a successful import, tell the operator to run [`categorise-bank.md`](categorise-bank.md). For Import → Categorise → Match in one go, use [`reconcile-bank-statement.md`](reconcile-bank-statement.md).
 
@@ -49,15 +49,15 @@ If no active session file, resolve the statement month from the operator (or las
     - On the transactions tab, the raw CSV header row is already present to the right of the reconciliation columns (typically K–N: `Date` | `Merchant` | `Amount` | `Description`). When importing (section 3), write CSV **data** under those headers on the first empty row beneath them; do not duplicate that header row unless the layout differs.
   - After the month sheet exists (any of the branches above), run **section 1b**.
 
-## 1b. Ensure unpaid checkbox Apps Script
+## 1b. Ensure unpaid checkbox Apps Script (quiet unless broken)
 
-Bound Apps Script is **not** guaranteed correct after a Drive copy. Source of truth: [`scripts/unpaid-checkbox-dates.gs`](scripts/unpaid-checkbox-dates.gs) (see [`scripts/README.md`](scripts/README.md)).
+Bound Apps Script may be wrong after a Drive copy if the shared template only had an empty stub. Source of truth for the agent: [`scripts/unpaid-checkbox-dates.gs`](scripts/unpaid-checkbox-dates.gs) (maintainers: [`scripts/README.md`](scripts/README.md)).
 
 1. Read that `.gs` file from the repo.
-2. Open the month workbook → **Extensions → Apps Script** (or use Apps Script API / `clasp` if available).
-3. If the project is missing, empty, only has `myFunction`, or lacks `onEdit` / `debugPaidClick` / `setDateDmmm_`, **replace** the script file contents with the full repo `.gs` and Save. Prefer a single file named `unpaid-checkbox-dates.gs` (rename or replace the stub).
-4. If you cannot write Apps Script programmatically: give the operator the path to the repo file and ask them to paste + Save (and, for maintainers, paste the same into `{templates.reconciliation_sheet_url}` so future first-month copies are correct).
-5. Continue Import even if install is deferred — note it in the final report. Find Unpaid Invoices also checks this (section 0).
+2. Check the month workbook’s bound project (Extensions → Apps Script, or Apps Script API / `clasp` if available).
+3. If it already has working `onEdit` / `setDateDmmm_` / Paid and Reminder Sent behavior: **leave it**. Say **nothing** about scripts in chat.
+4. If missing, empty, only `myFunction`, or lacking those functions: **replace** the file contents with the full repo `.gs` and Save (prefer filename `unpaid-checkbox-dates.gs`). Do this silently when you can; do not narrate file paths to the operator.
+5. If you cannot install or fix it: continue Import anyway. In the operator-facing report use **plain language only** — e.g. “If ticking Paid doesn’t fill in the date automatically, tell me and I’ll help.” **Never** tell the operator to open Apps Script, paste a `.gs` file, or look under `skills/…`. Find Unpaid Invoices also checks this (section 0).
 
 ## 2. Inspect the layout before writing
 
@@ -76,5 +76,5 @@ Bound Apps Script is **not** guaranteed correct after a Drive copy. Source of tr
 
 - Report the sheet link, the Extracts CSV used, and the imported row count.
 - Confirm reconciliation columns were left untouched.
-- Note whether the unpaid checkbox Apps Script was installed/updated, deferred to the operator, or already correct (section 1b).
+- **Do not** mention Apps Script, checkbox scripts, or `.gs` files when section 1b found them already correct (or you fixed them silently). Only if install failed: one plain-language line that Paid dates may not auto-fill and they can ask for help — no technical paths.
 - Tell the operator to run **Categorise bank data** next ([`categorise-bank.md`](categorise-bank.md)).

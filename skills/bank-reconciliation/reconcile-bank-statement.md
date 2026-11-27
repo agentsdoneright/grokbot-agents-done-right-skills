@@ -19,6 +19,8 @@ Thin wrapper: run the three bank-reconciliation skills **in order** on the same 
 
 Post a short milestone in chat after each step (sheet link, row counts / matches as that skill requires). Do not invent amounts or invoices.
 
+**Operator tone:** keep the final handback non-technical. Do **not** mention Apps Script, `.gs` files, or paste-into-Extensions instructions when Import section 1b found the checkbox script already present (or fixed it silently).
+
 If `{workspace.local_path}/bookkeeping-test-session.yaml` is already `active`, leave it for the child skills; do not rewrite phases here.
 
 **Not this skill:** Find Unpaid Invoices ([`../unpaid-invoices/unpaid-invoices.md`](../unpaid-invoices/unpaid-invoices.md)) — run separately when looking for unpaid vendor bills.

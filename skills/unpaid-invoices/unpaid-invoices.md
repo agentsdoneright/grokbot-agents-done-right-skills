@@ -68,20 +68,21 @@ Session setup is owned by [`skills/bookkeeping-test/bookkeeping-test.md`](../boo
 2. At least one of **current calendar month** or **previous calendar month** reconciliation sheets exists on Drive (named from `{drive.sheet_title_pattern}`), with categorised Debit/Credit rows. If **neither** exists, **stop** and tell the operator to run Import bank CSV and Categorise bank data first. When a test session is active, that means the Nov 2024 sheet from those skills after Test Phase 1 (and after Phase 3 re-import when settling Cobalt / Northpeak).
 3. Scope is **expense (inbox) and revenue (Sent)**. Fill both unpaid Summary blocks as described below.
 
-## 0. Ensure checkbox date-stamp Apps Script
+## 0. Ensure checkbox date-stamp Apps Script (quiet unless broken)
 
-Paid / Reminder Sent must stamp **Date Paid** / **Date Reminder Sent** as **static** dates on click (not `TODAY()` formulas). Source of truth:
+Paid / Reminder Sent must stamp **Date Paid** / **Date Reminder Sent** as **static** dates on click (not `TODAY()` formulas). Agent source of truth:
 
 [`skills/bank-reconciliation/scripts/unpaid-checkbox-dates.gs`](../bank-reconciliation/scripts/unpaid-checkbox-dates.gs)
 
-Drive copies of `{templates.reconciliation_sheet_id}` only mirror the template’s bound project. A file named `unpaid-checkbox-dates.gs` that contains only `function myFunction() {}` is **broken** — replace it. Import **section 1b** should already have installed the repo script; verify again here. See [`scripts/README.md`](../bank-reconciliation/scripts/README.md).
+Drive copies of `{templates.reconciliation_sheet_id}` only mirror the template’s bound project. A file that only has `function myFunction() {}` is **broken** — replace it. Import **section 1b** should already have checked this; verify again here. Maintainers: [`scripts/README.md`](../bank-reconciliation/scripts/README.md).
 
 On every unpaid run against the target workbook (after it is a **native Google Sheet**):
 
 1. Read that `.gs` file from the repo.
-2. Treat as missing/outdated if: no bound project, empty file, only `myFunction`, or missing `onEdit` / `setDateDmmm_` / `debugPaidClick`. Then create or **replace** the script (Apps Script API, `clasp`, or tell the operator to paste the full `.gs` and Save) so it matches the repo. Expected behavior: Paid → Date Paid + clear Note + Status `paid`; Reminder Sent → Date Reminder Sent; stamps `d-mmm` from **`Config!B1`** when set, else sheet calendar today.
-3. If install/update fails, say so in the final report and rely on the **safety backstop** in section 8 (stamp empty date cells when the checkbox is already true). Do not invent a `TODAY()` formula as a substitute.
-4. Maintainers: after fixing a month sheet, also paste the same `.gs` into the **shared template** at `{templates.reconciliation_sheet_url}` so the next first-month copy is not blank.
+2. If the bound project already has working `onEdit` / `setDateDmmm_` / Paid and Reminder Sent behavior: **leave it**. Say **nothing** about scripts in chat.
+3. If missing/outdated (no project, empty, only `myFunction`, or missing those functions): create or **replace** via Apps Script API / `clasp` / editor write so it matches the repo. Do this silently when you can. Expected behavior: Paid → Date Paid + clear Note + Status `paid`; Reminder Sent → Date Reminder Sent; stamps `d-mmm` from **`Config!B1`** when set, else sheet calendar today.
+4. If install/update fails: rely on the **safety backstop** in section 8. In the operator report use **plain language only** (e.g. “If ticking Paid doesn’t fill in the date, tell me and I’ll help”). **Never** tell the operator to open Apps Script, paste a `.gs` file, or look under `skills/…`. Do not invent a `TODAY()` formula as a substitute.
+5. Maintainers (not operator chat): after fixing a month sheet, also update the shared template at `{templates.reconciliation_sheet_url}` so the next first-month copy is not blank.
 
 ## 1. Resolve months, sheets, and email window
 
@@ -301,11 +302,9 @@ Include:
 
 - Target sheet link and which month sheets were read; note any missing month.
 - Email window (`email_after` → today); expense grace `{grace_working_days_expense}` and revenue grace `{grace_working_days_revenue}`; confirm Config `B1`/`B2`/`B3` were set.
-- Whether the checkbox date-stamp Apps Script was installed/updated or failed (with backstop used if needed).
 - Expense counts: **settled**, **pending** (grace), **`paid`** (checkbox, awaiting bank), **unpaid**.
 - Revenue counts: **settled**, **pending** (grace), **Reminder Sent**, **unpaid**.
 - Lists for unpaid vs pending / paid / Reminder Sent: Date, Counterparty, Amount, Ref, Paid or Reminder Sent, and sheet Status / date columns (formula results / static dates).
-- That expense **Status** is `paid` when the checkbox is true, else Config B2 grace → `pending`, else `unpaid`; revenue **Status** uses Reminder Sent then Config B3 grace then unpaid; **Date Paid** / **Date Reminder Sent** are static (Apps Script + backstop), never `TODAY()` formulas. Ticking Paid clears Note.
+- In plain language: after paying a vendor, tick **Paid**; after chasing a client, tick **Reminder Sent**. Rows drop when the matching bank line appears and this skill is re-run. Do **not** mention Apps Script or `.gs` files when section 0 found them already correct (or you fixed them silently). Only if install failed: one plain line that dates may not auto-fill on tick and they can ask for help — no technical paths.
 - Month `{drive.expenses_folder}` / `{drive.revenue_folder}` links and filename-labeled Invoice links.
-- Reminder: after paying a vendor, tick **Paid** (Status → `paid`, Note cleared); after chasing a client, tick **Reminder Sent**. Rows drop when the matching Debit/Credit appears on a recon sheet and this skill is re-run.
 - When a test session is active, confirm Gmail was not used and the transactions tab was not modified by this skill.
