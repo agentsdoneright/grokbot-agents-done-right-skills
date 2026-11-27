@@ -28,7 +28,7 @@ What happens next (the agent should explain this in plain language and use **but
 2. It offers **recommended settings** in one click (Drive folder `/Agents Done Right`, a simple activity log, local scratch folder). You can change something only if you want to.
 3. It asks **Yes, set this up** / **Not now** before doing anything lasting.
 4. Only after **Yes**: it downloads the skills pack if needed, saves a small settings file, creates a scratch folder, checks Google Drive / Sheets / Gmail, and creates Accounts and Logs folders on Drive.
-5. When setup is done, it offers an optional **sample bookkeeping demo** (buttons: show me / skip). If you **skip**, the agent lists the live skills with example prompts (below) so you know what to ask next.
+5. When setup is done, it offers an optional **sample bookkeeping demo** (buttons: show me / skip). If you **skip**, the agent lists the two main live prompts (below) and points you at [`skills/README.md`](skills/README.md) for the full skill list.
 
 This repo is **not** standing bookkeeping identity for every chat — skills and your company settings load only when you ask for Quick start or to run/customize a skill. The bootstrap paste alone is **not** permission to change files or probe Google.
 
@@ -36,21 +36,21 @@ Later if you want to customize a skill, the agent can run the **Customizable** u
 
 ## Live bookkeeping prompts
 
-After Quick start (including when you skip the sample demo), ask in chat — for example:
+After Quick start (including when you skip the sample demo), ask in chat — two main entry points:
+
+**Reconcile** (Import → Categorise → Match → Find Unpaid):
+
+> Run Reconcile Bank Statement
 
 > Reconcile my bank statement for November
 
-> Find my unpaid invoices
+**After manual sheet edits** (Sync spreadsheet mappings):
 
-> Import my bank statement CSV for November
+> I have updated the categories
 
-> Categorise this month’s bank transactions
+> I have updated the spreadsheet
 
-> Match invoices on my November reconciliation
-
-> I’ve finished editing the spreadsheet
-
-> Sync my spreadsheet mappings
+Full skill list (including sub-skills) → [`skills/README.md`](skills/README.md). Standing rules → [`rules/README.md`](rules/README.md).
 
 ## Try with test data
 

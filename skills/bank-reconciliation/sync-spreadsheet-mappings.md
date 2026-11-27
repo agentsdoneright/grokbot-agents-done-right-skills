@@ -2,20 +2,21 @@
 name: Sync spreadsheet mappings
 version: 1.0.0
 description: >-
-  Version 1.0.0. Use when the user says they have finished editing the
-  reconciliation spreadsheet, wants to sync mappings, or update mappings after
-  manual sheet changes: snapshot Bank Transactions and reference tabs, detect
-  new or renamed categories and counterparties, clarify rename vs new one at a
-  time, sync Categories / Counterparty-* / Email matching, then refresh Summary
-  missing-invoice and Expenses by Category formulas and light-red highlights.
-  Does not import CSV or search email. Requires an existing month sheet
-  (Import + Categorise at least once).
+  Version 1.0.0. Use when the user says they have updated the categories or
+  spreadsheet, finished editing the reconciliation spreadsheet, wants to sync
+  mappings, or update mappings after manual sheet changes: snapshot Bank
+  Transactions and reference tabs, detect new or renamed categories and
+  counterparties, clarify rename vs new one at a time, sync Categories /
+  Counterparty-* / Email matching, then refresh Summary missing-invoice and
+  Expenses by Category formulas and light-red highlights. Does not import CSV
+  or search email. Requires an existing month sheet (Import + Categorise at
+  least once).
 ---
 # Sync spreadsheet mappings
 
 Do this Drive work under `{drive.root_path}/{drive.accounts_folder}`. Use the Google Drive and Google Sheets connectors (load their skills first). Read [`config/profile.yaml`](../../config/profile.yaml).
 
-**Triggers (examples):** “I’ve finished updating the spreadsheet”, “I’ve finished editing the sheet”, “Sync my mappings”, “Sync spreadsheet mappings”, “Update mappings after my edits”.
+**Triggers (examples):** “I have updated the categories”, “I have updated the spreadsheet”, “I’ve finished updating the spreadsheet”, “I’ve finished editing the sheet”, “Sync my mappings”, “Sync spreadsheet mappings”, “Update mappings after my edits”.
 
 **Prerequisites:** a month reconciliation workbook already exists (Import bank CSV and Categorise bank data have run at least once). If no sheet is found, stop and tell the operator to import/categorise first.
 
