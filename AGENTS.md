@@ -18,6 +18,7 @@ If a new file appears under `rules/` (including rule subfolders), follow it too.
 - Stay a normal general-purpose assistant unless the operator asks to run Quick start, Customizable setup, or a skill in `skills/`.
 - Do **not** assume you are a bookkeeping or company ops assistant on every new chat.
 - Do **not** fetch or overwrite `rules/` or `skills/` from the internet at chat start. Use the local workspace copies only.
+- **Repo updates:** the daily schedule is owned by a **Grok Bot routine** created at Quick start (see step D.10). Do **not** also nag on every chat open. If the operator asks to check for repo / source updates (or the routine fires), read and follow [`skills/repo-update-check/repo-update-check.md`](skills/repo-update-check/repo-update-check.md). Edit / Pause / Test / Delete routines via the Bot’s Routines UI or by asking the Bot — see [xAI Skills and routines](https://docs.x.ai/grok-bot/skills-routines-and-automations#create-a-routine).
 
 Read [`config/product.yaml`](config/product.yaml) for shared URLs (`{docs.*}`, `{github.*}`, `{templates.*}`). **Public skills repo (Quick start):** `{github.public_skills_repo_url}`.
 
@@ -123,10 +124,18 @@ Keep progress updates short and friendly (“Checking Google Drive…”, “Sav
 7. Ensure `{workspace.local_path}/` exists. Ensure `{drive.root_path}/{drive.accounts_folder}` and `{drive.root_path}/{drive.logs_folder}` exist on Drive (create if missing).
 8. Write `config/profile.yaml`.
 9. **Verify Quick start**: public checkout; `origin`/`repo.url` is `{github.public_skills_repo_url}`; `rules/` and `skills/` present; Drive and Sheets succeed for `{google_account}`. Gmail is **not** required for verification. In plain language, say skill customizations are not saved to their own GitHub until they later choose **Customizable** (do not pitch Customizable as a setup-mode menu here).
+10. **Repo update state + daily Grok routine** (only after verify succeeds):
+    1. Ensure `{workspace.local_path}/` exists. Write `{workspace.local_path}/repo-update-state.yaml` from the **local** `CHANGELOG.md` fingerprint (hash and/or latest `## [x.y.z]` heading) and set `last_checked_at` to now so the first routine run does not false-positive.
+    2. **Create a Grok Bot routine** on **this** Bot (xAI [Create a routine](https://docs.x.ai/grok-bot/skills-routines-and-automations#create-a-routine) — not a Cursor Automation or OS cron). Confirm with the operator first (buttons / short choices): owning Bot = this chat’s Bot; schedule default **every day at 9:00 AM** in the Bot Settings timezone (offer change if they want); expected result = changelog check + ask before upgrading the whole repo source; approval boundary = never pull/merge until they say Yes; if public CHANGELOG is unavailable, report failure (do not invent an update).
+    3. Then create the routine in plain language, e.g.:
+
+       > Every day at 9:00 AM, run the **Repo update check** skill for this workspace. Compare the public skills repo `CHANGELOG.md` to the last-seen fingerprint in `{workspace.local_path}/repo-update-state.yaml`. If there is no update, say the repo source is up to date (one short line) and stop. If there is an update, summarize the new CHANGELOG sections in this conversation and ask whether to upgrade the full source tree (skills, rules, docs, shared config — not `config/profile.yaml`) — do **not** pull or merge until the operator approves. If the source is unavailable, report the failure instead of inventing an update.
+
+    4. If a routine with the same purpose already exists, **do not** create a duplicate — pause/edit that one instead. A new routine waits for its next scheduled time; offer **Test** once after creation when the UI supports it. Point them at Bot → Routines for Pause / Edit / Delete later.
 
 #### E. Done + optional demo (buttons)
 
-1. Show a **short, plain** summary (name, company, Drive folder, Google account) and confirm Quick start is ready.
+1. Show a **short, plain** summary (name, company, Drive folder, Google account) and confirm Quick start is ready. Mention briefly that a **daily routine** will check for **repo source** updates (upgrade only if they say yes).
 2. **Ask once** whether they want a short **bookkeeping demonstration** with sample data (two guided steps; no live bank CSV; Gmail not used; creates a November 2024 practice spreadsheet on Drive). Buttons:
 
    - **Yes, show me the demo** (Recommended for first-time users)

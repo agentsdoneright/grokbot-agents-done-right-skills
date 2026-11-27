@@ -68,4 +68,4 @@ Compare results to `skills/bookkeeping-test/expected-results.md`.
 
 To remove the Quick start checkout and associated skills/rules from the Grok Bot workspace, paste:
 
-> Delete the workspace `/workspace/grokbot-agents-done-right-skills` and all associated skills and rules
+> Delete the workspace `/workspace/grokbot-agents-done-right-skills` and all associated skills rules and routines.

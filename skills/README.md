@@ -27,4 +27,5 @@ Expected outcomes: [`bookkeeping-test/expected-results.md`](bookkeeping-test/exp
 
 ## Setup
 
+- **[Repo update check](repo-update-check/repo-update-check.md)** — compare public `CHANGELOG.md`, ask before upgrading the **whole** repo source (skills, rules, docs, shared config), merge ask for customized skills. Quick start creates a **daily Grok Bot routine** that runs this skill ([Create a routine](https://docs.x.ai/grok-bot/skills-routines-and-automations#create-a-routine)). You can also ask: `Check for repo updates`.
 - **[Private repo copy](private-repo-copy/private-repo-copy.md)** — Customizable upgrade: private GitHub copy so skill edits are versioned and saved.

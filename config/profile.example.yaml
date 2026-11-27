@@ -50,4 +50,6 @@ logging:
 workspace:
   # Repo-relative folder for disposable local files from the reconciliation tutorial.
   # Easy cleanup: delete this directory.
+  # Also holds repo-update-state.yaml (daily Grok routine / Repo update check fingerprint).
+  # That state is local only — not written into this profile file.
   local_path: agents-done-right

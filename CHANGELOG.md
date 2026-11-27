@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Project version lives in `config/product.yaml`. Each skill has its own `version`
 in frontmatter (and the same value at the start of its `description`).
 
+## [Unreleased]
+
+### Repo update check (1.0.0)
+
+- New skill: fetch public `CHANGELOG.md`, ask before upgrading the whole repo
+  source tree, and ask how to merge customized skills. Quick start creates a
+  daily Grok Bot routine that runs this skill.
+
 ## [1.0.0] - 2026-11-22
 
 Initial versioned release of the public skills bundle.
