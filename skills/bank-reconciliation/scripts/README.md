@@ -15,12 +15,14 @@ Drive `copy_file` of the shared Google Sheet template copies the **bound Apps Sc
 
 ## Keep the shared template current
 
-After changing any `.gs` in this folder:
+Every **new** month workbook is a Drive copy of the Sheet in the version-named folder for `{templates.reconciliation_sheet_version}` (`{templates.reconciliation_version_folder_id}`). After changing any `.gs` in this folder:
 
-1. Open `{templates.reconciliation_sheet_url}` from [`config/product.yaml`](../../../config/product.yaml).
+1. Open the template Sheet for that version (`{templates.reconciliation_sheet_url}` from [`config/product.yaml`](../../../config/product.yaml) — it must live inside the version folder).
 2. **Extensions → Apps Script**.
 3. Ensure **all four** files exist with the repo contents (create/replace as needed). Remove a lone empty `myFunction` stub if present.
 4. Save. Confirm the function dropdown lists `onEdit`, `debugPaidClick`, `debugReminderSentClick`, `debugPersonalExpenseClick`, and `debugNoInvoiceNeededClick`.
+
+New sheet layout → create a new version-named Drive folder, put the updated template Sheet there, and update `{templates.reconciliation_sheet_version}`, `{templates.reconciliation_version_folder_id}`, and the Sheet id/url in `config/product.yaml`.
 
 ## Fix an already-copied month sheet
 

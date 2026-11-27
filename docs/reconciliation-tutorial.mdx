@@ -68,12 +68,12 @@ Ask for **Reconcile Bank Statement** to run Import → Categorise → Match → 
   <Step title="Locate the bank CSV">
     Look for the CSV under `root / Accounts / year / extracts / month`. If it is missing, obtain it from the operator and save it into that folder before importing.
   </Step>
-  <Step title="Start from last month's sheet (or upload the skill template)">
-    Look for the previous month's reconciliation sheet. If it exists, copy it into this month's folder so reference tabs stay current: `Counterparty-Match`, `Counterparties`, `Counterparty-Category`, `Email matching`, and `Categories`.
+  <Step title="Copy the versioned template, then copy lookups from last month">
+    For a **new** month sheet, Drive-copy the shared Google Sheet from the version-named folder in `config/product.yaml` (`templates.reconciliation_sheet_version` must match the folder name; folder id `templates.reconciliation_version_folder_id`; Sheet pin `templates.reconciliation_sheet_id` / `templates.reconciliation_sheet_url`). Rename the copy from the sheet title pattern. The template is already a native Google Sheet (no `.xlsx` upload). Do not create a blank spreadsheet or edit the source template. Do not copy the entire previous month workbook.
 
-    On the copy only, clear last month's transaction rows and the raw CSV area on the transactions tab. Keep the header row and all reference tabs. Never edit last month's sheet in place.
+    If a previous month's sheet exists, copy **data rows only** into the new workbook for: `Categories`, `Counterparties`, `Counterparty-Match`, `Counterparty-Category`, and `Email matching`. Keep template headers/layout. Do not copy Bank / raw CSV / Summary / Config from last month. Never edit last month's sheet in place.
 
-    If no previous sheet exists (first month), Drive-copy the shared Google Sheet template (`templates.reconciliation_sheet_id` / `templates.reconciliation_sheet_url` in `config/product.yaml`) into this month's folder and rename it from the sheet title pattern. The template is already a native Google Sheet (no `.xlsx` upload). Keep the template's tab visibility. Do not create a blank spreadsheet from scratch or edit the source template.
+    If this month's sheet already exists (re-import), open it and clear/replace the raw CSV area; keep reference tabs.
   </Step>
 </Steps>
 

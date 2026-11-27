@@ -29,7 +29,7 @@ What happens next (the agent should explain this in plain language and use **but
 4. Only after **Yes**: it downloads the skills pack if needed, saves a small settings file, creates a scratch folder, checks Google Drive / Sheets, and creates Accounts and Logs folders on Drive. Gmail is requested later only if you run a live skill that searches email.
 5. When setup is done, it offers an optional **sample bookkeeping demo** (buttons: show me / skip). If you **skip**, the agent lists the two main live prompts (below) and points you at [`skills/README.md`](skills/README.md) for the full skill list.
 
-Later if you want to customize a skill, the agent can run the **Customizable** upgrade. That creates a private GitHub copy so changes are versioned and saved. Public repo identity also lives in `config/product.yaml` (`github.public_skills_repo_`*).
+Later if you want to customize a skill, the agent can run the **Customizable** upgrade. That creates a private GitHub copy so changes are versioned and saved. 
 
 ## Live bookkeeping prompts
 

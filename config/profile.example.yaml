@@ -27,7 +27,9 @@ drive:
   # {company_name} inside sheet_title_pattern comes from company.name.
   # Accounts CSV: {root_path}/{accounts_folder}/{year_folder_pattern}/{extracts_folder}/{month_folder_pattern}/
   # Accounts month: {root_path}/{accounts_folder}/{year_folder_pattern}/{month_folder_pattern}/
-  # First month: skill Drive-copies {templates.reconciliation_sheet_id} from config/product.yaml into the month folder.
+  # New month: skill Drive-copies the versioned template ({templates.reconciliation_sheet_version} /
+  # {templates.reconciliation_version_folder_id} / {templates.reconciliation_sheet_id}) into the month folder,
+  # then copies lookup-tab data from the previous month when present.
   year_folder_pattern: "{YYYY}"
   month_folder_pattern: "Y{YYYYMM}"
   extracts_folder: Extracts

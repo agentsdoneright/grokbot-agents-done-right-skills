@@ -80,7 +80,7 @@ On every unpaid run against the target workbook (after it is a **native Google S
 2. If the bound project already has working `onEdit` (dispatcher) + `handleUnpaidCheckboxEdit_` / `setDateDmmm_` / Paid and Reminder Sent behavior: **leave it**. Say **nothing** about scripts in chat. (Also expect `handlePersonalExpenseEdit_` and `handleNoInvoiceNeededEdit_`.)
 3. If missing/outdated (no project, empty, only `myFunction`, or missing those functions): create or **replace** all four files via Apps Script API / `clasp` / editor write so they match the repo. Do this silently when you can. Expected unpaid behavior: Paid → Date Paid + clear Note + Status `paid`; Reminder Sent → Date Reminder Sent; stamps `d-mmm` from **`Config!B1`** when set, else sheet calendar today.
 4. If install/update fails: rely on the **safety backstop** in section 8. In the operator report use **plain language only** (e.g. “If ticking Paid doesn’t fill in the date, tell me and I’ll help”). **Never** tell the operator to open Apps Script, paste a `.gs` file, or look under `skills/…`. Do not invent a `TODAY()` formula as a substitute.
-5. Maintainers (not operator chat): after fixing a month sheet, also update the shared template at `{templates.reconciliation_sheet_url}` so the next first-month copy is not blank.
+5. Maintainers (not operator chat): after fixing a month sheet, also update the shared template for `{templates.reconciliation_sheet_version}` at `{templates.reconciliation_sheet_url}` (inside `{templates.reconciliation_version_folder_id}`) so the next new-month copy is not blank.
 
 ## 1. Resolve months, sheets, and email window
 

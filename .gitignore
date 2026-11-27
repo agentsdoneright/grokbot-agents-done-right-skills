@@ -234,7 +234,8 @@ tutorial-workspace/
 **/action-logs/
 
 # Ignore local reconciliation .xlsx copies (may contain private data).
-# First-month template is the shared Google Sheet in config/product.yaml ({templates.reconciliation_sheet_id}).
+# New-month template is the versioned shared Google Sheet in config/product.yaml
+# ({templates.reconciliation_sheet_version} / {templates.reconciliation_version_folder_id} / {templates.reconciliation_sheet_id}).
 skills/bank-reconciliation/*.xlsx
 
 .cursor/

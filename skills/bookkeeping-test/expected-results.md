@@ -20,7 +20,7 @@ Reconcile Bank Statement Test also stages Phase 2 and runs Find Unpaid — use *
 
 - [ ] Year / Extracts / `Y202411` (or profile month pattern) folders exist under Accounts
 - [ ] Fixture `bank-statement.csv` is in Extracts for `202411`
-- [ ] Month reconciliation Google Sheet exists (from template or prior-month copy)
+- [ ] Month reconciliation Google Sheet exists (from versioned template; lookup tabs from prior month when present)
 - [ ] Raw CSV data pasted under raw headers; reconciliation Date/Counterparty/Category/Credit/Debit left blank by Import
 
 ### Categorise

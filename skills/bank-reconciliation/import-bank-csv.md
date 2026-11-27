@@ -1,17 +1,18 @@
 ---
 name: Import bank CSV
-version: 1.1.1
+version: 1.2.0
 description: >-
-  Version 1.1.1. Use when the user wants to import or paste the latest bank
+  Version 1.2.0. Use when the user wants to import or paste the latest bank
   statement CSV into their Google Sheets reconciliation workbook: prepare the
-  month Drive folders, create or copy the month sheet from the prior month or
-  the shared Google Sheet template (`{templates.reconciliation_sheet_id}`),
-  ensure the Summary checkbox Apps Script files match the repo `.gs` set, and
-  paste the CSV into the raw import columns only. Does not fill Date, Counterparty,
-  Category, Credit, Debit, or Invoice columns — run Categorise bank data next
-  (or the one-shot Reconcile Bank Statement wrapper). If
-  `{workspace.local_path}/bookkeeping-test-session.yaml` is active, use that
-  session’s statement month and the CSV already staged in Extracts.
+  month Drive folders, create each new month sheet by Drive-copying the
+  version-matched shared template (`{templates.reconciliation_sheet_version}` /
+  `{templates.reconciliation_version_folder_id}`), overlay lookup tabs from the
+  prior month when present, ensure the Summary checkbox Apps Script files match
+  the repo `.gs` set, and paste the CSV into the raw import columns only. Does
+  not fill Date, Counterparty, Category, Credit, Debit, or Invoice columns —
+  run Categorise bank data next (or the one-shot Reconcile Bank Statement
+  wrapper). If `{workspace.local_path}/bookkeeping-test-session.yaml` is active,
+  use that session’s statement month and the CSV already staged in Extracts.
 ---
 # Import bank CSV
 
@@ -19,7 +20,7 @@ Do this Drive work under `{drive.root_path}/{drive.accounts_folder}`. Use the Go
 
 If you must save a CSV or other file **locally** before uploading to Drive (or as a scratch copy), write it under `{workspace.local_path}/` (see `rules/tutorial-workspace.md`). Create that folder if needed. Do not leave tutorial temps in the repo root or under `skills/`.
 
-**First-month workbook template:** shared Google Sheet `{templates.reconciliation_sheet_url}` (file id `{templates.reconciliation_sheet_id}` in `config/product.yaml`). For the initial month only, **Drive `copy_file`** that id into the month folder and rename to `{drive.sheet_title_pattern}`. Never edit the source template; only the month copy.
+**New-month workbook template:** every new month uses the shared Google Sheet for `{templates.reconciliation_sheet_version}` from Drive folder `{templates.reconciliation_version_folder_id}` (Sheet pin `{templates.reconciliation_sheet_id}` / `{templates.reconciliation_sheet_url}` in `config/product.yaml`). **Drive `copy_file`** that Sheet into the month folder and rename to `{drive.sheet_title_pattern}`; then copy lookup-tab **data** from the previous month when it exists. Never edit the source template; only the month copy. Do **not** copy the entire previous month workbook.
 
 **Checkbox date stamps (agent-only):** after creating or opening this month’s native sheet, follow **section 1b**. Do **not** mention Apps Script, `.gs` files, or paste instructions to the operator when the script is already present and working.
 
@@ -39,15 +40,21 @@ If no active session file, resolve the statement month from the operator (or las
 
 - **Year and month folders.** The year folder is `{drive.year_folder_pattern}` under `{drive.root_path}/{drive.accounts_folder}` (`{YYYY}` is the year of the month being reconciled). If that year folder does not exist, create it, and create its `{drive.extracts_folder}` subfolder. Then create the month folder `{drive.month_folder_pattern}` inside the year folder if it does not exist (`{YYYYMM}` is the statement month).
 - **CSV.** Look first for the bank CSV in `{drive.root_path}/{drive.accounts_folder}/{drive.year_folder_pattern}/{drive.extracts_folder}/{drive.month_folder_pattern}/`. If it is not there, ask the user for it. When the user provides it, save it into that Drive folder, creating the folder if needed, before importing. If you stage the file locally first, put it under `{workspace.local_path}/` then upload to Drive. When a test session is active and a CSV is already in that Extracts folder, use it.
-- **Starting sheet.** Look for the previous month's reconciliation sheet in that month's folder (`{drive.month_folder_pattern}` under its own `{drive.year_folder_pattern}`). For January, the previous month's folder is in the previous year's folder.
-  - **If a previous month's sheet exists:** copy it into this month's folder, named from `{drive.sheet_title_pattern}` (fill `{YYYYMM}` with the statement month and `{company_name}` with `{company.name}`). Use it because it has the latest mappings in `Counterparty-Match`, `Counterparties`, `Counterparty-Category`, `Email matching` and `Categories`. On the copy only, clear the previous month's transaction data and the raw CSV area on the `{drive.sheet_tab}` tab, and keep that tab's header row and the reference tabs intact. Never modify the previous month's sheet. If the copy is still an `.xlsx`, convert it to a native Google Sheet so the Sheets tools can edit it.
-  - **If this month's sheet already exists** (re-import, e.g. after Test Phase 3 staged a new CSV): open it; clear the raw CSV data area (and any prior reconciliation column data that would be stale relative to a full CSV replace) on the transactions tab before pasting the new CSV; keep headers and reference tabs. Do not create a second sheet for the same month unless the operator asks.
-  - **If no previous month's sheet exists (initial run):** use Drive **`copy_file`** on `{templates.reconciliation_sheet_id}` into this month's folder under `{drive.root_path}/{drive.accounts_folder}/{drive.year_folder_pattern}/{drive.month_folder_pattern}/`. Set the copy’s name to `{drive.sheet_title_pattern}` (fill `{YYYYMM}` with the statement month and `{company_name}` with `{company.name}`). The template is already a **native Google Sheet** — do **not** upload or convert an `.xlsx`. Do **not** edit the source template at `{templates.reconciliation_sheet_url}` / `{templates.reconciliation_sheet_id}`; only the month copy.
-    - If `copy_file` fails (permission, not found, or access denied): **stop**. Tell the operator to open `{templates.reconciliation_sheet_url}`, ensure they can view the file (request access if needed), then retry Import. Do not invent a blank workbook.
-    - The template already has the required tabs, header rows, and layout: the transactions tab named `{drive.sheet_tab}` (template / profile default: `Bank Transactions`), `Counterparties`, `Categories` (including a **Type** column), `Counterparty-Match`, `Counterparty-Category`, `Email matching`, `Config`, and `Summary` (including unpaid tables). Do not change the template's formatting on the source file.
-    - If a copy of an older workbook is missing the `Summary` tab or the Categories `Type` column, add a minimal unstyled tab or column with the expected headers so later skills can run. Do not invent decorative formatting.
-    - On the transactions tab, the raw CSV header row is already present to the right of the reconciliation columns (typically K–N: `Date` | `Merchant` | `Amount` | `Description`). When importing (section 3), write CSV **data** under those headers on the first empty row beneath them; do not duplicate that header row unless the layout differs.
-  - After the month sheet exists (any of the branches above), run **section 1b**.
+- **Starting sheet.**
+  - **If this month's sheet already exists** (re-import, e.g. after Test Phase 3 staged a new CSV): open it; clear the raw CSV data area (and any prior reconciliation column data that would be stale relative to a full CSV replace) on the transactions tab before pasting the new CSV; keep headers and reference tabs. Do not create a second sheet for the same month unless the operator asks. Then run **section 1b**.
+  - **If this month's sheet does not exist (new month):** create it from the **versioned template**, then overlay lookups from the prior month when present. Never copy the whole previous workbook.
+    1. Read `{templates.reconciliation_sheet_version}` from `config/product.yaml` (e.g. `1.0.0`).
+    2. Open Drive folder `{templates.reconciliation_version_folder_id}`. Confirm the folder’s **name equals** that version string. If the folder is missing, inaccessible, or named differently → **stop**. Tell the operator in plain language that this skills pack needs template version `{templates.reconciliation_sheet_version}`, how to open/request access to that folder, and to retry Import. Do not invent a blank workbook or use a different version folder.
+    3. Resolve the template Google Sheet inside that folder: prefer `{templates.reconciliation_sheet_id}` when that file is in the folder; otherwise list the folder and pick the native Google Spreadsheet. If none → **stop** (same plain-language access / missing-template guidance). Do **not** edit the source template.
+    4. Drive **`copy_file`** that Sheet into this month's folder under `{drive.root_path}/{drive.accounts_folder}/{drive.year_folder_pattern}/{drive.month_folder_pattern}/`. Set the copy’s name to `{drive.sheet_title_pattern}` (fill `{YYYYMM}` with the statement month and `{company_name}` with `{company.name}`). The template is already a **native Google Sheet** — do **not** upload or convert an `.xlsx`.
+       - If `copy_file` fails (permission, not found, or access denied): **stop**. Tell the operator to open `{templates.reconciliation_sheet_url}`, ensure they can view the file (request access if needed), then retry Import.
+    5. **Lookup tabs from previous month (when present).** Look for the previous month's reconciliation sheet in that month's folder (`{drive.month_folder_pattern}` under its own `{drive.year_folder_pattern}`). For January, the previous month's folder is in the previous year's folder.
+       - **If a previous month's sheet exists:** copy **data rows only** (keep the new template’s header row and layout) from these tabs into the new workbook: `Categories` (including Type, Invoice Required), `Counterparties`, `Counterparty-Match`, `Counterparty-Category`, and `Email matching`. Do **not** copy Bank / transactions data, raw CSV, Summary data, unpaid tables, or Config from last month. Never modify the previous month's sheet.
+       - **If no previous month's sheet:** leave the template’s empty/default lookup tabs as copied.
+    6. The template already has the required tabs, header rows, and layout: the transactions tab named `{drive.sheet_tab}` (template / profile default: `Bank Transactions`), `Counterparties`, `Categories` (including a **Type** column), `Counterparty-Match`, `Counterparty-Category`, `Email matching`, `Config`, and `Summary` (including unpaid tables). Do not change the template's formatting on the source file.
+    7. If the new copy is somehow missing the `Summary` tab or the Categories `Type` column, add a minimal unstyled tab or column with the expected headers so later skills can run. Do not invent decorative formatting.
+    8. On the transactions tab, the raw CSV header row is already present to the right of the reconciliation columns (typically K–N: `Date` | `Merchant` | `Amount` | `Description`). When importing (section 3), write CSV **data** under those headers on the first empty row beneath them; do not duplicate that header row unless the layout differs.
+    9. After the month sheet exists, run **section 1b**.
 
 ## 1b. Ensure Summary checkbox Apps Script (quiet unless broken)
 
