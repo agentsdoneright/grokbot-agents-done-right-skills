@@ -1,8 +1,8 @@
 ---
 name: Match invoices
-version: 1.1.2
+version: 1.1.3
 description: >-
-  Version 1.1.2. Use when the user wants to match paid invoices to bank statement
+  Version 1.1.3. Use when the user wants to match paid invoices to bank statement
   rows in their Google Sheets reconciliation workbook: Unfiled Drive folders
   first (Source=Drive), then email (Source=Email), then Manual chat uploads
   (Source=Manual) for expense Debits and revenue Credits. Fill the Summary tab
@@ -11,8 +11,9 @@ description: >-
   Summary table block when empty — keep title and headers, clear data only;
   insert sheet rows before spills; keep exactly one blank row between stacked
   Summary tables; format Summary data cells Arial 10 (not bold) with white /
-  no fill background; highlight missing-invoice Bank rows in light red. Requires
-  Import bank CSV and Categorise bank data first. If
+  no fill background; highlight missing-invoice Bank rows in light red; exclude
+  bank-fee and Personal / Personal expense Debits from missing invoices.
+  Requires Import bank CSV and Categorise bank data first. If
   `{workspace.local_path}/bookkeeping-test-session.yaml` is active, use fixture
   inbox/sent EMLs from that session instead of Gmail.
 ---
@@ -23,6 +24,8 @@ Do this Drive work under `{drive.root_path}/{drive.accounts_folder}`. Use the Go
 If you must save a PDF or scratch file **locally**, write it under `{workspace.local_path}/`. Create that folder if needed.
 
 **Prerequisites:** the month sheet has categorised Bank rows (Date, Counterparty, Category, Credit, Debit filled) — see [`import-bank-csv.md`](import-bank-csv.md) and [`categorise-bank.md`](categorise-bank.md). If Category / Debit columns are empty, stop and tell the operator to categorise first.
+
+**No invoice needed (exclude from missing expense):** treat a Debit row as not needing an invoice when **Category** (trimmed, case-insensitive) is `Personal` or `Personal expense`, or when Category or Counterparty matches `bank fee` or `service fee`. Do **not** search email/Drive for those rows, do **not** list them as missing, do **not** light-red highlight them for missing invoices, and do **not** ask the operator for a file. (If an invoice already exists on the row, leave it.)
 
 **Unpaid Summary data** (**Unpaid Expense Invoices** and **Unpaid Revenue Invoices**) is owned by **Find Unpaid Invoices** ([`skills/unpaid-invoices/unpaid-invoices.md`](../unpaid-invoices/unpaid-invoices.md)) — do not invent unpaid rows here.
 
@@ -75,10 +78,10 @@ For every transactions-tab row with a Debit:
    - Write Notes only when something needs attention (amount mismatch, multi-charge invoice, date far off, receipt instead of invoice, addressee not `{company.name}` — or not `company_addressee_override` when a test session sets it — or uncertain match).
    - **Update `Counterparties` contact fields** for this Counterparty from the invoice (Email, Phone, Registration, Address). Prefer finance / billing / accounts emails. If values **changed**, overwrite and **inform the operator** (old → new). Never invent contact fields.
    - Right away, if the counterparty wasn't already in `Email matching`, or the rule needed changing, add or update its row with the rule that worked, without duplicates.
-5. Skip bank-fee rows (service fees etc) unless an invoice clearly exists. Treat a row as a bank fee when Category or Counterparty matches `bank fee` or `service fee` (case-insensitive).
+5. Skip **no-invoice-needed** rows (Personal / Personal expense, bank fee / service fee — see top of this skill) unless an invoice is already linked. Do not search for or request invoices for those Debits.
 6. Never send, reply to, or change any emails.
 7. Before reporting, re-read `Email matching` and confirm every **email** expense match has its rule saved there (Drive matches do not require an Email matching row).
-8. **Report (expenses):** the `{drive.expenses_folder}` folder link, the matches found (include **Source** counts: Drive / Email / Manual), any Notes written, Counterparties contact updates, and Debit rows still missing an invoice (Date, Counterparty, Debit). When the operator uploads missing files, upload each to `{drive.expenses_folder}` with the same naming, put a filename-labeled hyperlink in Invoice (Clip overflow), fill VAT / Ref when known, set **Source = `Manual`**, and add a note if needed.
+8. **Report (expenses):** the `{drive.expenses_folder}` folder link, the matches found (include **Source** counts: Drive / Email / Manual), any Notes written, Counterparties contact updates, and Debit rows still missing an invoice (Date, Counterparty, Debit) — **excluding** no-invoice-needed rows. When the operator uploads missing files, upload each to `{drive.expenses_folder}` with the same naming, put a filename-labeled hyperlink in Invoice (Clip overflow), fill VAT / Ref when known, set **Source = `Manual`**, and add a note if needed.
 
 ## 3. Match revenue invoices (Credit rows)
 
@@ -178,13 +181,13 @@ Before writing a formula or rows that will occupy **N** data rows under a table�
 
 Evaluate which rows would appear before writing:
 
-- **Missing expense candidates:** Debit > 0 and Invoice blank, **excluding bank-fee rows**.
+- **Missing expense candidates:** Debit > 0 and Invoice blank, **excluding no-invoice-needed rows** (Personal / Personal expense Category; bank fee / service fee Category or Counterparty).
 - **Missing revenue candidates:** Credit > 0 and Invoice blank.
 
 Then:
 
 - **Always keep** the **Missing Expense Invoices** title and headers (create them only if the Summary tab is missing that block entirely).
-- If there is **at least one** missing expense candidate: fill with live `FILTER`/`QUERY` (or equivalent) formulas for Date, Counterparty, Amount (Debit), and Note (for example `No invoice found`). Do not list bank-fee rows as missing invoices.
+- If there is **at least one** missing expense candidate: fill with live `FILTER`/`QUERY` (or equivalent) formulas for Date, Counterparty, Amount (Debit), and Note (for example `No invoice found`). Exclude no-invoice-needed rows from the formula (same Personal / bank-fee rules).
 - If there are **no** missing expense candidates: **clear** any data or formula rows under the headers, but **keep** the title and headers.
 - Same rules for **Missing Revenue Invoices** (Amount = Credit).
 - On a later Summary refresh, refill or clear under the existing headers — do not delete and recreate the block. Keep the two missing-invoice blocks stacked with exactly one blank row between them (see below).
@@ -214,10 +217,10 @@ Do **not** write data into the gap row. Do **not** leave a multi-row empty buffe
 
 After the Summary missing-invoice blocks are filled (or cleared), sync row highlighting on the **transactions tab**:
 
-- Highlight a bank row if and only if it is a **missing expense candidate** or **missing revenue candidate**. Bank-fee rows must **not** be highlighted for missing invoices.
+- Highlight a bank row if and only if it is a **missing expense candidate** or **missing revenue candidate**. No-invoice-needed rows (Personal / Personal expense, bank fees) must **not** be highlighted for missing invoices.
 - **Colour:** light red fill (`#FFCDD2` or Sheets light-red equivalent) on the **full reconciliation data columns** for that row (Date through Source/Notes — not the raw CSV columns).
-- Prefer **conditional formatting** driven by blank Invoice plus Debit/Credit (excluding bank fees). Otherwise apply/clear fill each run.
-- Clear light-red highlighting from rows that now have an Invoice (or that are bank fees).
+- Prefer **conditional formatting** driven by blank Invoice plus Debit/Credit (excluding no-invoice-needed Categories/Counterparties). Otherwise apply/clear fill each run.
+- Clear light-red highlighting from rows that now have an Invoice or that are no-invoice-needed.
 - **Verify:** highlighted bank rows must match Summary Missing Expense / Missing Revenue data rows. When a block has no data rows, no bank rows should remain highlighted for that missing type.
 
 #### Expenses by Category (formula-linked to Bank)
@@ -260,7 +263,7 @@ Include: locations used; for **each** Summary block whether **filled** or left *
 
 If any missing expense or revenue invoice candidates remain after Summary:
 
-1. **List them clearly** in the chat (Date, Counterparty, Debit or Credit), grouped as expenses vs revenue (bank fees excluded from the expense list).
+1. **List them clearly** in the chat (Date, Counterparty, Debit or Credit), grouped as expenses vs revenue (no-invoice-needed Debits — Personal / Personal expense and bank fees — excluded from the expense list).
 2. **Point to the Summary tab** — Missing Expense Invoices / Missing Revenue Invoices, and light-red highlights on Bank Transactions.
 3. **How to supply the files** — drop PDFs into this chat, or upload to Unfiled expense / revenue folders under `{drive.root_path}/{drive.accounts_folder}/{drive.unfiled_folder}/`.
 4. **Then re-run** on the same spreadsheet: match from Unfiled / chat (Source=`Drive` / `Manual`); **update Summary** (keep blocks; clear data when empty); clear highlights on matched rows; hand back again.
