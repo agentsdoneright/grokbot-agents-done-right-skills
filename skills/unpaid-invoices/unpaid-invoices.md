@@ -70,17 +70,15 @@ Session setup is owned by [`skills/bookkeeping-test/bookkeeping-test.md`](../boo
 
 ## 0. Ensure checkbox date-stamp Apps Script (quiet unless broken)
 
-Paid / Reminder Sent must stamp **Date Paid** / **Date Reminder Sent** as **static** dates on click (not `TODAY()` formulas). Agent source of truth:
+Paid / Reminder Sent must stamp **Date Paid** / **Date Reminder Sent** as **static** dates on click (not `TODAY()` formulas). Agent source of truth — **all three** files under [`skills/bank-reconciliation/scripts/`](../bank-reconciliation/scripts/) (`summary-on-edit.gs`, `unpaid-checkbox-dates.gs`, `personal-expense-checkbox.gs`). Maintainers: [`scripts/README.md`](../bank-reconciliation/scripts/README.md).
 
-[`skills/bank-reconciliation/scripts/unpaid-checkbox-dates.gs`](../bank-reconciliation/scripts/unpaid-checkbox-dates.gs)
-
-Drive copies of `{templates.reconciliation_sheet_id}` only mirror the template’s bound project. A file that only has `function myFunction() {}` is **broken** — replace it. Import **section 1b** should already have checked this; verify again here. Maintainers: [`scripts/README.md`](../bank-reconciliation/scripts/README.md).
+Drive copies of `{templates.reconciliation_sheet_id}` only mirror the template’s bound project. A project that only has `function myFunction() {}` is **broken** — replace it. Import **section 1b** should already have checked this; verify again here.
 
 On every unpaid run against the target workbook (after it is a **native Google Sheet**):
 
-1. Read that `.gs` file from the repo.
-2. If the bound project already has working `onEdit` / `setDateDmmm_` / Paid and Reminder Sent behavior: **leave it**. Say **nothing** about scripts in chat.
-3. If missing/outdated (no project, empty, only `myFunction`, or missing those functions): create or **replace** via Apps Script API / `clasp` / editor write so it matches the repo. Do this silently when you can. Expected behavior: Paid → Date Paid + clear Note + Status `paid`; Reminder Sent → Date Reminder Sent; stamps `d-mmm` from **`Config!B1`** when set, else sheet calendar today.
+1. Read those `.gs` files from the repo.
+2. If the bound project already has working `onEdit` (dispatcher) + `handleUnpaidCheckboxEdit_` / `setDateDmmm_` / Paid and Reminder Sent behavior: **leave it**. Say **nothing** about scripts in chat. (Also expect `handlePersonalExpenseEdit_` for Missing Expense Personal Expense checkboxes.)
+3. If missing/outdated (no project, empty, only `myFunction`, or missing those functions): create or **replace** all three files via Apps Script API / `clasp` / editor write so they match the repo. Do this silently when you can. Expected unpaid behavior: Paid → Date Paid + clear Note + Status `paid`; Reminder Sent → Date Reminder Sent; stamps `d-mmm` from **`Config!B1`** when set, else sheet calendar today.
 4. If install/update fails: rely on the **safety backstop** in section 8. In the operator report use **plain language only** (e.g. “If ticking Paid doesn’t fill in the date, tell me and I’ll help”). **Never** tell the operator to open Apps Script, paste a `.gs` file, or look under `skills/…`. Do not invent a `TODAY()` formula as a substitute.
 5. Maintainers (not operator chat): after fixing a month sheet, also update the shared template at `{templates.reconciliation_sheet_url}` so the next first-month copy is not blank.
 

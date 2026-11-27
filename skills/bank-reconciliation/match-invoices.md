@@ -135,8 +135,8 @@ The workbook template is expected to provide a **Summary** tab with table header
 
 Look for these titles and headers (case-insensitive; close wording is fine):
 
-- **Missing Expense Invoices** — columns such as Date, Counterparty (or Description), Amount, and Note (or reason).
-- **Missing Revenue Invoices** — the same kind of columns.
+- **Missing Expense Invoices** — columns: Date, Counterparty, Amount, **Personal Expense** (checkbox), Note. Live formulas fill Date / Counterparty / Amount (and Note if needed) **without** spilling into the Personal Expense column; after writing candidates, ensure **Personal Expense** cells on data rows are checkboxes. Ticking Personal Expense (Apps Script `handlePersonalExpenseEdit_`) sets the matching Bank Debit **Category** to `Personal`, which drops the row from missing candidates on the next formula refresh / Match run.
+- **Missing Revenue Invoices** — columns such as Date, Counterparty, Amount, Note (template may also include No Invoice Needed; leave that column alone unless a later skill covers it).
 - **Expenses by Category** — columns such as Category, Total, and Percentage.
 - **Unpaid Expense Invoices** / **Unpaid Revenue Invoices** — owned by Find Unpaid Invoices for **data** (both blocks); leave empty shells in place when that skill has not run yet.
 
@@ -187,7 +187,7 @@ Evaluate which rows would appear before writing:
 Then:
 
 - **Always keep** the **Missing Expense Invoices** title and headers (create them only if the Summary tab is missing that block entirely).
-- If there is **at least one** missing expense candidate: fill with live `FILTER`/`QUERY` (or equivalent) formulas for Date, Counterparty, Amount (Debit), and Note (for example `No invoice found`). Exclude no-invoice-needed rows from the formula (same Personal / bank-fee rules).
+- If there is **at least one** missing expense candidate: fill with live `FILTER`/`QUERY` (or equivalent) formulas for Date, Counterparty, and Amount (Debit) — and Note when that column is formula-driven (for example `No invoice found`). **Do not** spill into **Personal Expense**; insert/ensure checkbox data validation on that column for each candidate data row. Exclude no-invoice-needed rows from the formula (same Personal / bank-fee rules).
 - If there are **no** missing expense candidates: **clear** any data or formula rows under the headers, but **keep** the title and headers.
 - Same rules for **Missing Revenue Invoices** (Amount = Credit).
 - On a later Summary refresh, refill or clear under the existing headers — do not delete and recreate the block. Keep the two missing-invoice blocks stacked with exactly one blank row between them (see below).

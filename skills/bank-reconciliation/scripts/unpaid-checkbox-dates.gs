@@ -1,6 +1,6 @@
 /**
- * Container-bound Apps Script for reconciliation Summary unpaid tables.
- * Install on the native Google Sheet (xlsx cannot embed this).
+ * Unpaid Expense / Unpaid Revenue checkbox handlers for the reconciliation Summary tab.
+ * Invoked from summary-on-edit.gs → onEdit (do not define onEdit in this file).
  *
  * When Paid is checked/unchecked: set/clear Date Paid; when checked, clear Note;
  *   rewrite Status formula so checked → "paid" (old formulas showed "pending").
@@ -11,7 +11,7 @@
  * Date Paid / Date Reminder Sent are real dates with number format d-mmm (e.g. 10-Nov) —
  * never TODAY() formulas.
  */
-function onEdit(e) {
+function handleUnpaidCheckboxEdit_(e) {
   if (!e || !e.range) return;
   var sheet = e.range.getSheet();
   if (sheet.getName() !== 'Summary') return;
@@ -164,7 +164,7 @@ function isTruthy_(value) {
 
 /**
  * Debugger entry: simulate ticking Paid on the first Unpaid Expense data row.
- * Select this function → Debug (set breakpoints in onEdit / setDateDmmm_).
+ * Select this function → Debug (set breakpoints in handleUnpaidCheckboxEdit_ / setDateDmmm_).
  */
 function debugPaidClick() {
   debugUnpaidCheckbox_('expense', true);
@@ -172,14 +172,14 @@ function debugPaidClick() {
 
 /**
  * Debugger entry: simulate ticking Reminder Sent on the first Unpaid Revenue data row.
- * Select this function → Debug (set breakpoints in onEdit / setDateDmmm_).
+ * Select this function → Debug (set breakpoints in handleUnpaidCheckboxEdit_ / setDateDmmm_).
  */
 function debugReminderSentClick() {
   debugUnpaidCheckbox_('revenue', true);
 }
 
 /**
- * Find the unpaid table checkbox cell and call onEdit with a fake edit event.
+ * Find the unpaid table checkbox cell and call handleUnpaidCheckboxEdit_ with a fake edit event.
  * @param {'expense'|'revenue'} table
  * @param {boolean} checked  simulate check (true) or uncheck (false)
  */
@@ -202,7 +202,7 @@ function debugUnpaidCheckbox_(table, checked) {
 
   var cell = found.cell;
   var oldValue = cell.getValue();
-  cell.setValue(checked); // mirror a real checkbox edit before onEdit runs
+  cell.setValue(checked); // mirror a real checkbox edit before the handler runs
   var e = {
     range: cell,
     value: checked,
@@ -214,7 +214,7 @@ function debugUnpaidCheckbox_(table, checked) {
     'debugUnpaidCheckbox_ ' + table + ' → ' + cell.getA1Notation() +
     ' checked=' + checked + ' stampYmd=' + getConfigTodayYmd_()
   );
-  onEdit(e);
+  handleUnpaidCheckboxEdit_(e);
 }
 
 /**
