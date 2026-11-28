@@ -1,19 +1,20 @@
 ---
 name: Apply spreadsheet updates
-version: 1.1.0
+version: 1.1.1
 description: >-
-  Version 1.1.0. Use when the user says they have updated the categories or
+  Version 1.1.1. Use when the user says they have updated the categories or
   spreadsheet, finished editing the reconciliation spreadsheet, wants to sync
   mappings, apply spreadsheet updates, or update mappings after manual sheet
   changes: read passive Missing Expense / Missing Revenue checkbox marks (No
   Invoice Needed → Bank Notes; Personal Expense → Bank Category Personal
-  Expense) without changing Categories Invoice Required; snapshot Bank
-  Transactions and reference tabs; detect new or renamed categories and
-  counterparties; clarify rename vs new one at a time; sync Categories /
-  Counterparty-* / Email matching; then refresh Summary missing-invoice and
-  Expenses by Category formulas and light-red highlights. Does not import CSV
-  or search email. Requires an existing month sheet (Import + Categorise at
-  least once).
+  Expense plus the same Notes phrase, since personal never needs an invoice)
+  without changing Categories Invoice Required; snapshot Bank Transactions and
+  reference tabs; detect new or renamed categories and counterparties; clarify
+  rename vs new one at a time; sync Categories / Counterparty-* / Email
+  matching; then refresh Summary missing-invoice and Expenses by Category
+  formulas and light-red highlights so Personal / no-invoice rows are not
+  flagged. Does not import CSV or search email. Requires an existing month
+  sheet (Import + Categorise at least once).
 ---
 # Apply spreadsheet updates
 
@@ -55,17 +56,19 @@ For each checked **No Invoice Needed** row (expense or revenue):
 3. Clear light-red missing-invoice highlight on that Bank row when you write the note (full reconciliation columns).
 4. Do **not** change `Categories` or **Invoice Required** for this mark.
 
-### 2c. Personal Expense → Bank Category
+### 2c. Personal Expense → Bank Category (and no invoice needed)
 
-For each checked **Personal Expense** row on **Missing Expense Invoices** only:
+Personal expenses **never require an invoice**. For each checked **Personal Expense** row on **Missing Expense Invoices** only:
 
 1. Find the unique matching Bank **Debit** (Date + Counterparty + Amount). If zero or multiple matches, flag and skip.
 2. Set that Bank row’s **Category** to **`Personal Expense`**.
-3. Do **not** auto-tick or require No Invoice Needed; do **not** change Categories Invoice Required from this checkbox. (If the same row also has No Invoice Needed checked, still apply §2b.)
+3. Append the canonical Notes phrase `No invoice needed (operator)` if not already present (same append rules as §2b) — personal implies no invoice needed.
+4. Clear light-red missing-invoice highlight on that Bank row.
+5. Do **not** change Categories Invoice Required from this checkbox (operator owns that column). New `Personal Expense` category rows still get Invoice Required **FALSE** when added in §6 (seed default only).
 
-If both checkboxes are checked on one expense row, apply both §2b and §2c.
+If both checkboxes are checked on one expense row, apply §2c (category + note) once — do not duplicate the Notes phrase.
 
-Count notes written and categories set to Personal Expense for the final report.
+Count categories set to Personal Expense and notes written for the final report.
 
 ## 3. Snapshot (read into memory — do not write yet)
 
@@ -130,7 +133,7 @@ Skip duplicate keys. Never invent invoices, amounts, or contact fields.
 
 After mappings are consistent, refresh Summary using the **keep blocks / formulas / one-blank-row / Arial 10 white data / light-red highlights** rules in [`match-invoices.md`](match-invoices.md) **section 4** (Summary-only path: Missing Expense, Missing Revenue, Expenses by Category). Honour **no-invoice-needed** exclusions from match-invoices (Categories.Invoice Required false + Personal / Personal Expense / bank-fee fallbacks + Bank Notes containing `No invoice needed (operator)`) and do **not** spill into checkbox columns (No Invoice Needed, Personal Expense). Re-ensure blank checkboxes on remaining candidate data rows. Do **not** invent unpaid rows (Find Unpaid Invoices owns those blocks).
 
-Rows that received §2 notes or Personal Expense category must **not** appear in Missing Expense / Missing Revenue and must **not** stay light-red on Bank Transactions.
+Rows that received §2 notes or Personal Expense category (or any Bank row already categorised Personal*) must **not** appear in Missing Expense / Missing Revenue and must **not** stay light-red on Bank Transactions.
 
 Do **not** re-run full email/Unfiled invoice matching in this skill unless the operator also asked to match invoices.
 

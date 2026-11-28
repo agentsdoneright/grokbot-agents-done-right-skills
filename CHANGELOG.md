@@ -10,6 +10,28 @@ in frontmatter (and the same value at the start of its `description`).
 
 ## [Unreleased]
 
+### Apply spreadsheet updates (1.1.1)
+
+- Renamed **Sync spreadsheet mappings** → **Apply spreadsheet updates**
+  (`apply-spreadsheet-updates.md`).
+- Missing Expense / Missing Revenue checkboxes are passive. On apply: **No
+  Invoice Needed** → Bank Notes `No invoice needed (operator)`; **Personal
+  Expense** → Bank Category `Personal Expense` **and** the same Notes phrase
+  (personal never needs an invoice). Does **not** auto-update Categories
+  Invoice Required.
+- Removed `personal-expense-checkbox.gs` and `no-invoice-needed-checkbox.gs`;
+  bound project is `summary-on-edit.gs` + `unpaid-checkbox-dates.gs` only.
+
+### Match invoices (1.2.1)
+
+- Personal / Personal Expense Bank rows are **always** no-invoice-needed: never
+  list as missing, never light-red highlight, even if Categories.Invoice
+  Required is still true. Also honour Notes phrase and bank-fee fallbacks.
+
+### Import bank CSV (1.2.1) / Find Unpaid Invoices (1.6.2) / Categorise (1.0.2)
+
+- Script install/ensure steps updated for the two-file Apps Script set.
+
 ### Repo update check (1.0.0)
 
 - New skill: fetch public `CHANGELOG.md`, ask before upgrading the whole repo

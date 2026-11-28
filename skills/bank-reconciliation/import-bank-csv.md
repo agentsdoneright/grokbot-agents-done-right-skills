@@ -1,18 +1,19 @@
 ---
 name: Import bank CSV
-version: 1.2.0
+version: 1.2.1
 description: >-
-  Version 1.2.0. Use when the user wants to import or paste the latest bank
+  Version 1.2.1. Use when the user wants to import or paste the latest bank
   statement CSV into their Google Sheets reconciliation workbook: prepare the
   month Drive folders, create each new month sheet by Drive-copying the
   version-matched shared template (`{templates.reconciliation_sheet_version}` /
   `{templates.reconciliation_version_folder_id}`), overlay lookup tabs from the
-  prior month when present, ensure the Summary checkbox Apps Script files match
-  the repo `.gs` set, and paste the CSV into the raw import columns only. Does
-  not fill Date, Counterparty, Category, Credit, Debit, or Invoice columns —
-  run Categorise bank data next (or the one-shot Reconcile Bank Statement
-  wrapper). If `{workspace.local_path}/bookkeeping-test-session.yaml` is active,
-  use that session’s statement month and the CSV already staged in Extracts.
+  prior month when present, ensure the unpaid Summary checkbox Apps Script
+  files match the repo `.gs` set (two files; Missing Expense/Revenue checkboxes
+  are passive), and paste the CSV into the raw import columns only. Does not
+  fill Date, Counterparty, Category, Credit, Debit, or Invoice columns — run
+  Categorise bank data next (or the one-shot Reconcile Bank Statement wrapper).
+  If `{workspace.local_path}/bookkeeping-test-session.yaml` is active, use that
+  session’s statement month and the CSV already staged in Extracts.
 ---
 # Import bank CSV
 

@@ -1,8 +1,8 @@
 ---
 name: Match invoices
-version: 1.2.0
+version: 1.2.1
 description: >-
-  Version 1.2.0. Use when the user wants to match paid invoices to bank statement
+  Version 1.2.1. Use when the user wants to match paid invoices to bank statement
   rows in their Google Sheets reconciliation workbook: Unfiled Drive folders
   first (Source=Drive), then email (Source=Email), then Manual chat uploads
   (Source=Manual) for expense Debits and revenue Credits. Fill the Summary tab
@@ -11,12 +11,12 @@ description: >-
   Summary table block when empty — keep title and headers, clear data only;
   insert sheet rows before spills; keep exactly one blank row between stacked
   Summary tables; format Summary data cells Arial 10 (not bold) with white /
-  no fill background; highlight missing-invoice Bank rows in light red; exclude
-  rows whose Categories.Invoice Required is false (plus Personal / Personal
-  Expense / bank-fee fallbacks) or whose Bank Notes contain the operator
-  no-invoice phrase. Requires Import bank CSV and Categorise bank data first. If
-  `{workspace.local_path}/bookkeeping-test-session.yaml` is active, use fixture
-  inbox/sent EMLs from that session instead of Gmail.
+  no fill background; highlight missing-invoice Bank rows in light red; never
+  flag Personal / Personal Expense rows (no invoice needed); also exclude
+  Categories.Invoice Required false, bank-fee fallbacks, and Bank Notes with
+  the operator no-invoice phrase. Requires Import bank CSV and Categorise bank
+  data first. If `{workspace.local_path}/bookkeeping-test-session.yaml` is
+  active, use fixture inbox/sent EMLs from that session instead of Gmail.
 ---
 # Match invoices to bank transactions
 
@@ -28,11 +28,12 @@ If you must save a PDF or scratch file **locally**, write it under `{workspace.l
 
 **No invoice needed (exclude from missing expense and missing revenue):** a Bank Debit or Credit needs no invoice when **any** of:
 
-1. Its **Category** has **Invoice Required** unchecked / `FALSE` on the `Categories` tab (if the column is missing or the cell is blank, treat as **required** / true). The operator updates Invoice Required **manually** — do not flip it from Summary checkboxes.
-2. Legacy fallbacks: Category is `Personal`, `Personal expense`, or `Personal Expense` (case-insensitive); Category or Counterparty matches `bank fee` or `service fee` (case-insensitive).
-3. Bank **Notes** contains `No invoice needed (operator)` (case-insensitive). That phrase is written by **Apply spreadsheet updates** when the operator marked **No Invoice Needed** on Summary and said they updated the spreadsheet.
+1. **Personal (always):** Bank **Category** is `Personal`, `Personal expense`, or `Personal Expense` (case-insensitive). Personal transactions never require an invoice — do **not** list them as missing, do **not** light-red highlight them, and do **not** ask for a file, **even if** Categories.Invoice Required is still checked for that name.
+2. Its **Category** has **Invoice Required** unchecked / `FALSE` on the `Categories` tab (if the column is missing or the cell is blank, treat as **required** / true). The operator updates Invoice Required **manually** — do not flip it from Summary checkboxes.
+3. Category or Counterparty matches `bank fee` or `service fee` (case-insensitive).
+4. Bank **Notes** contains `No invoice needed (operator)` (case-insensitive). That phrase is written by **Apply spreadsheet updates** when the operator marked **No Invoice Needed** (or **Personal Expense**) on Summary and said they updated the spreadsheet.
 
-Do **not** search email/Drive for those rows, do **not** list them as missing, do **not** light-red highlight them for missing invoices, and do **not** ask the operator for a file. (If an invoice already exists on the row, leave it.) Build a helper list of category names where Invoice Required is false for use in `FILTER`/`QUERY` / candidate evaluation; also exclude rows whose Notes match the phrase above.
+Do **not** search email/Drive for those rows, do **not** list them as missing, do **not** light-red highlight them for missing invoices, and do **not** ask the operator for a file. (If an invoice already exists on the row, leave it.) Build a helper list of category names where Invoice Required is false for use in `FILTER`/`QUERY` / candidate evaluation; **also** exclude Bank rows whose Category matches Personal* and rows whose Notes match the phrase above — do not rely on Invoice Required alone.
 
 **Unpaid Summary data** (**Unpaid Expense Invoices** and **Unpaid Revenue Invoices**) is owned by **Find Unpaid Invoices** ([`skills/unpaid-invoices/unpaid-invoices.md`](../unpaid-invoices/unpaid-invoices.md)) — do not invent unpaid rows here.
 
@@ -143,7 +144,7 @@ The workbook template is expected to provide a **Summary** tab with table header
 
 Look for these titles and headers (case-insensitive; close wording is fine):
 
-- **Missing Expense Invoices** — columns: Date, Counterparty, Amount, Category, **No Invoice Needed** (checkbox), **Personal Expense** (checkbox), Note. Live formulas fill Date / Counterparty / Amount (and Category / Note if formula-driven) **without** spilling into **No Invoice Needed** or **Personal Expense**; after writing candidates, ensure both checkbox columns have checkboxes on data rows. Those checkboxes are **passive** (no Apps Script side effects). When the operator says they have updated the spreadsheet, [`apply-spreadsheet-updates.md`](apply-spreadsheet-updates.md) reads the marks: **No Invoice Needed** → append `No invoice needed (operator)` on the matched Bank Notes; **Personal Expense** → set Bank Category to `Personal Expense`. Do **not** change Categories Invoice Required from these checkboxes.
+- **Missing Expense Invoices** — columns: Date, Counterparty, Amount, Category, **No Invoice Needed** (checkbox), **Personal Expense** (checkbox), Note. Live formulas fill Date / Counterparty / Amount (and Category / Note if formula-driven) **without** spilling into **No Invoice Needed** or **Personal Expense**; after writing candidates, ensure both checkbox columns have checkboxes on data rows. Those checkboxes are **passive** (no Apps Script side effects). When the operator says they have updated the spreadsheet, [`apply-spreadsheet-updates.md`](apply-spreadsheet-updates.md) reads the marks: **No Invoice Needed** → append `No invoice needed (operator)` on the matched Bank Notes; **Personal Expense** → set Bank Category to `Personal Expense` and append the same Notes phrase (personal never needs an invoice). Do **not** change Categories Invoice Required from these checkboxes. After that, Personal rows must leave Missing Expense and must not stay light-red.
 - **Missing Revenue Invoices** — columns: Date, Counterparty, Amount, Category, **No Invoice Needed** (checkbox), Note. Live formulas fill Date / Counterparty / Amount (and Category / Note if needed) **without** spilling into No Invoice Needed; ensure checkboxes on that column for data rows. **No Invoice Needed** is passive; Apply spreadsheet updates writes the Bank Notes phrase (Categories Invoice Required stays manual).
 - **Expenses by Category** — columns such as Category, Total, and Percentage.
 - **Unpaid Expense Invoices** / **Unpaid Revenue Invoices** — owned by Find Unpaid Invoices for **data** (both blocks); leave empty shells in place when that skill has not run yet.
@@ -189,8 +190,8 @@ Before writing a formula or rows that will occupy **N** data rows under a table�
 
 Evaluate which rows would appear before writing:
 
-- **Missing expense candidates:** Debit > 0 and Invoice blank, **excluding no-invoice-needed rows** (Categories.Invoice Required false; Personal / Personal expense / Personal Expense; bank fee / service fee; Bank Notes containing `No invoice needed (operator)`).
-- **Missing revenue candidates:** Credit > 0 and Invoice blank, **excluding no-invoice-needed rows** (same rule).
+- **Missing expense candidates:** Debit > 0 and Invoice blank, **excluding no-invoice-needed rows** (Personal / Personal expense / Personal Expense always; Categories.Invoice Required false; bank fee / service fee; Bank Notes containing `No invoice needed (operator)`). Never treat a Personal* Category Debit as missing.
+- **Missing revenue candidates:** Credit > 0 and Invoice blank, **excluding no-invoice-needed rows** (same rule; Personal* Credits likewise never missing).
 
 Then:
 
@@ -225,7 +226,7 @@ Do **not** write data into the gap row. Do **not** leave a multi-row empty buffe
 
 After the Summary missing-invoice blocks are filled (or cleared), sync row highlighting on the **transactions tab**:
 
-- Highlight a bank row if and only if it is a **missing expense candidate** or **missing revenue candidate**. No-invoice-needed rows (Invoice Required false / Personal / Personal Expense / bank fees / Notes phrase) must **not** be highlighted for missing invoices.
+- Highlight a bank row if and only if it is a **missing expense candidate** or **missing revenue candidate**. Personal / Personal Expense rows must **never** be highlighted. Other no-invoice-needed rows (Invoice Required false / bank fees / Notes phrase) must **not** be highlighted either.
 - **Colour:** light red fill (`#FFCDD2` or Sheets light-red equivalent) on the **full reconciliation data columns** for that row (Date through Source/Notes — not the raw CSV columns).
 - Prefer **conditional formatting** driven by blank Invoice plus Debit/Credit (excluding no-invoice-needed Categories and Notes phrase). Otherwise apply/clear fill each run.
 - Clear light-red highlighting from rows that now have an Invoice or that are no-invoice-needed.

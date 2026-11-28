@@ -1,8 +1,8 @@
 ---
 name: Find Unpaid Invoices
-version: 1.6.1
+version: 1.6.2
 description: >-
-  Version 1.6.1. Use when the user wants to Find Unpaid Invoices — find unpaid
+  Version 1.6.2. Use when the user wants to Find Unpaid Invoices — find unpaid
   expense invoices in their inbox and unpaid revenue invoices in Sent, list
   invoices not yet settled by bank Debit/Credit on the current or previous month
   sheets, refresh Summary Unpaid Expense Invoices and Unpaid Revenue Invoices,
