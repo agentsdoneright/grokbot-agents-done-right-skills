@@ -62,12 +62,13 @@ The operator may be **completely new to agents**. For this whole initiation:
 - Put the **recommended default first** and label it clearly (e.g. “Recommended”). Make accepting defaults the easy path — most operators should finish with two or three clicks plus their company name.
 - Do **not** ask them to type paths, logging modes, or folder names unless they explicitly choose “Change something”.
 - Do **not** start cloning, writing files, creating folders, or checking Google access until they click the permission **Yes** button (step D).
+- During Quick start talk (welcome, permission gate, progress updates), describe only what setup **will** do (Drive / Sheets). Do **not** volunteer Gmail disclaimers such as “I won’t touch Gmail” — Gmail is simply not part of setup.
 
 ### Button workflow (follow in order)
 
 #### A. Welcome (no side effects)
 
-In plain language, say you will help them set up bookkeeping helpers that work with their Google Drive and Sheets. Gmail is requested later only if they run a live skill that searches email (the sample demo does not need Gmail). Setup will:
+In plain language, say you will help them set up bookkeeping helpers that work with their Google Drive and Sheets. Setup will:
 
 1. Save a few preferences (their name, company, where files should live on Google Drive).
 2. Download the shared skills pack into this workspace (if it is not already here).
@@ -106,7 +107,7 @@ Then continue. Do not open a long form.
 
 #### C. Permission gate (required — buttons)
 
-Summarize again in one short paragraph what will happen next (download skills if needed, write the settings file, create the scratch folder, check Google Drive and Sheets access, create Accounts and Logs on Drive). Do **not** imply Gmail will be granted during setup. Then **wait** for a button choice:
+Summarize again in one short paragraph what will happen next (download skills if needed, write the settings file, create the scratch folder, check Google Drive and Sheets access, create Accounts and Logs on Drive). Do **not** mention Gmail here. Then **wait** for a button choice:
 
 - **Yes, set this up** (Recommended)
 - **Not now**
@@ -117,10 +118,10 @@ Do **not** treat the bootstrap paste alone as permission. Asking for name / comp
 
 #### D. Do the setup (only after Yes)
 
-Keep progress updates short and friendly (“Checking Google Drive…”, “Saving your settings…”). Behind the scenes:
+Keep progress updates short and friendly (“Checking Google Drive…”, “Saving your settings…”). Do **not** mention Gmail in progress updates. Behind the scenes:
 
 1. Ensure the workspace is a checkout of `{github.public_skills_repo_url}` (clone if needed).
-2. **Ensure Google connectors**: harmless reads against Drive and Sheets only. Do **not** probe Gmail during Quick start. If Drive or Sheets fail, say which one in plain language, tell them how to grant access, and do not mark verified until both work.
+2. **Ensure Google connectors**: harmless reads against Drive and Sheets only. Do **not** probe Gmail during Quick start (internal — do not announce this to the operator). If Drive or Sheets fail, say which one in plain language, tell them how to grant access, and do not mark verified until both work.
 3. **Derive `google_account`** from the connected account; ask once only if needed.
 4. **Derive `repo.url` / `repo.branch`** from git remote / branch (fallback `main`).
 5. Set `repo.setup: quick_start`.

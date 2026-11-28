@@ -37,7 +37,7 @@ What happens next (the agent should explain this in plain language and use **but
 1. It asks your **company name** (and first name if needed).
 2. It offers **recommended settings** in one click (Drive folder `/Agents Done Right`, a simple activity log, local scratch folder). You can change something only if you want to.
 3. It asks **Yes, set this up** / **Not now** before doing anything lasting.
-4. Only after **Yes**: it downloads the skills pack if needed, saves a small settings file, creates a scratch folder, checks Google Drive / Sheets, and creates Accounts and Logs folders on Drive. Gmail is requested later only if you run a live skill that searches email.
+4. Only after **Yes**: it downloads the skills pack if needed, saves a small settings file, creates a scratch folder, checks Google Drive / Sheets, and creates Accounts and Logs folders on Drive.
 5. When setup is done, it offers an optional **sample bookkeeping demo** (buttons: show me / skip). If you **skip**, the agent lists the two main live prompts (below) and points you at [`skills/README.md`](skills/README.md) for the full skill list.
 
 Later if you want to customize a skill, the agent can run the **Customizable** upgrade. That creates a private GitHub copy and a `custom/` folder for your overrides (stock skills stay shared). New custom skills, rules, and routines are saved automatically unless you turn that off. 

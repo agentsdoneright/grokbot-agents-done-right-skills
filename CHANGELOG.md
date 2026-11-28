@@ -10,6 +10,11 @@ in frontmatter (and the same value at the start of its `description`).
 
 ## [Unreleased]
 
+### Quick start UX
+
+- Setup talk (welcome, permission gate, progress) describes Drive / Sheets
+  only — do not volunteer Gmail disclaimers such as “I won’t touch Gmail”.
+
 ### Match invoices (1.2.2) / Apply spreadsheet updates (1.1.2)
 
 - Missing-invoice Bank Transactions highlights are **agent-applied** light-red
