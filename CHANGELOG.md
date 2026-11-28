@@ -10,6 +10,23 @@ in frontmatter (and the same value at the start of its `description`).
 
 ## [Unreleased]
 
+### Match invoices (1.2.2) / Apply spreadsheet updates (1.1.2)
+
+- Missing-invoice Bank Transactions highlights are **agent-applied** light-red
+  cell fills (`#FFCDD2`) after Summary refresh — **not** conditional
+  formatting. Each Match / Apply run strips blank-Invoice light-red CF rules
+  (and duplicates), clears old fills, then paints only current missing
+  candidates (Personal / no-invoice rows never highlighted). Shared Drive
+  template cleaned of those CF rules so new months do not reintroduce them.
+
+### License
+
+- Replaced Apache License 2.0 with the AccessLogic OU Source License.
+  Operational use remains allowed; educational or promotional reuse
+  (courses, training, workshops, influencer content) requires prior
+  written permission. Authorized educational/promotional use must
+  attribute this project and link https://agentsdoneright.com.
+
 ### Custom overlays (Customizable)
 
 - Workspace `custom/{skills,rules,routines}/` is the source of truth for

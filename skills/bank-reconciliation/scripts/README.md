@@ -9,6 +9,8 @@ Two files in the bound project (separation of concerns). Google allows **one** `
 
 **Missing Expense / Missing Revenue** checkboxes (**No Invoice Needed**, **Personal Expense**) are **passive** — they store operator marks only. [`apply-spreadsheet-updates.md`](../apply-spreadsheet-updates.md) applies Bank Notes / Personal Expense category when the operator says they have updated the spreadsheet. Do **not** re-add Apps Script handlers for those columns.
 
+**Missing-invoice Bank highlights** are **agent-applied cell fills** (Match invoices / Apply spreadsheet updates) — **not** conditional formatting and **not** Apps Script. Do **not** add blank-Invoice light-red CF rules on Bank Transactions in the shared template; Match / Apply also strip any such rules on month sheets.
+
 ## Why a copy can look blank
 
 Drive `copy_file` of the shared Google Sheet template copies the **bound Apps Script project as it exists on the template**. If the template only has an empty stub (`function myFunction() {}`), every new month workbook will get that stub too.

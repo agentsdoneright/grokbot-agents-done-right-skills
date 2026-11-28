@@ -6,6 +6,17 @@ Skills and rules for running Grok Bot with Google Drive / Sheets / Gmail bookkee
 
 Public repo: https://github.com/agentsdoneright/grokbot-agents-done-right-skills
 
+## License
+
+Operational use (running and customizing these skills for your own
+bookkeeping / agent workflows) is allowed under the
+[AccessLogic OU Source License](LICENSE). Educational institutes,
+educators, and influencers may **not** reuse this material for courses,
+training, workshops, or promotions without prior written permission from
+AccessLogic OU. Authorized educational/promotional use must name this
+project, link [https://agentsdoneright.com](https://agentsdoneright.com),
+and state that the material came from this project.
+
 ## Start here
 
 > [!NOTE]
@@ -68,4 +79,4 @@ Compare results to `skills/bookkeeping-test/expected-results.md`.
 
 To remove the Quick start checkout and associated skills/rules from the Grok Bot workspace, paste:
 
-> Delete the workspace `/workspace/grokbot-agents-done-right-skills` and all associated skills rules and routines.
+> Delete the workspace `/workspace/grokbot-agents-done-right-skills` and all associated skills, rules and routines.

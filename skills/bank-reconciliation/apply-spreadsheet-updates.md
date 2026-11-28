@@ -1,8 +1,8 @@
 ---
 name: Apply spreadsheet updates
-version: 1.1.1
+version: 1.1.2
 description: >-
-  Version 1.1.1. Use when the user says they have updated the categories or
+  Version 1.1.2. Use when the user says they have updated the categories or
   spreadsheet, finished editing the reconciliation spreadsheet, wants to sync
   mappings, apply spreadsheet updates, or update mappings after manual sheet
   changes: read passive Missing Expense / Missing Revenue checkbox marks (No
@@ -12,9 +12,10 @@ description: >-
   reference tabs; detect new or renamed categories and counterparties; clarify
   rename vs new one at a time; sync Categories / Counterparty-* / Email
   matching; then refresh Summary missing-invoice and Expenses by Category
-  formulas and light-red highlights so Personal / no-invoice rows are not
-  flagged. Does not import CSV or search email. Requires an existing month
-  sheet (Import + Categorise at least once).
+  formulas and agent-applied light-red cell fills (never conditional formatting;
+  strip conflicting CF) so Personal / no-invoice rows are not flagged. Does not
+  import CSV or search email. Requires an existing month sheet (Import +
+  Categorise at least once).
 ---
 # Apply spreadsheet updates
 
@@ -131,7 +132,14 @@ Skip duplicate keys. Never invent invoices, amounts, or contact fields.
 
 ## 7. Refresh Summary (same run)
 
-After mappings are consistent, refresh Summary using the **keep blocks / formulas / one-blank-row / Arial 10 white data / light-red highlights** rules in [`match-invoices.md`](match-invoices.md) **section 4** (Summary-only path: Missing Expense, Missing Revenue, Expenses by Category). Honour **no-invoice-needed** exclusions from match-invoices (Categories.Invoice Required false + Personal / Personal Expense / bank-fee fallbacks + Bank Notes containing `No invoice needed (operator)`) and do **not** spill into checkbox columns (No Invoice Needed, Personal Expense). Re-ensure blank checkboxes on remaining candidate data rows. Do **not** invent unpaid rows (Find Unpaid Invoices owns those blocks).
+After mappings are consistent, refresh Summary using the **keep blocks / formulas / one-blank-row / Arial 10 white data** rules in [`match-invoices.md`](match-invoices.md) **section 4** (Summary-only path: Missing Expense, Missing Revenue, Expenses by Category). Honour **no-invoice-needed** exclusions from match-invoices (Categories.Invoice Required false + Personal / Personal Expense / bank-fee fallbacks + Bank Notes containing `No invoice needed (operator)`) and do **not** spill into checkbox columns (No Invoice Needed, Personal Expense). Re-ensure blank checkboxes on remaining candidate data rows. Do **not** invent unpaid rows (Find Unpaid Invoices owns those blocks).
+
+**Bank missing-invoice highlights (required — agent fills only):** after Summary missing blocks are filled or cleared, follow match-invoices **Highlight missing-invoice rows on Bank Transactions** exactly:
+
+1. **Strip conflicting CF** on the transactions tab (delete blank-Invoice / missing-invoice light-red rules and duplicates; leave unrelated CF alone). Do **not** create or rely on conditional formatting for this highlight.
+2. **Clear** light-red / `#FFCDD2` fills on reconciliation columns for all Bank data rows.
+3. **Apply** light-red fill only to current missing expense/revenue candidates (same exclusions as match-invoices).
+4. **Verify** highlighted Bank rows match Summary Missing Expense / Missing Revenue data rows.
 
 Rows that received §2 notes or Personal Expense category (or any Bank row already categorised Personal*) must **not** appear in Missing Expense / Missing Revenue and must **not** stay light-red on Bank Transactions.
 

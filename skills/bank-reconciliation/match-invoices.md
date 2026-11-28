@@ -1,8 +1,8 @@
 ---
 name: Match invoices
-version: 1.2.1
+version: 1.2.2
 description: >-
-  Version 1.2.1. Use when the user wants to match paid invoices to bank statement
+  Version 1.2.2. Use when the user wants to match paid invoices to bank statement
   rows in their Google Sheets reconciliation workbook: Unfiled Drive folders
   first (Source=Drive), then email (Source=Email), then Manual chat uploads
   (Source=Manual) for expense Debits and revenue Credits. Fill the Summary tab
@@ -11,12 +11,13 @@ description: >-
   Summary table block when empty — keep title and headers, clear data only;
   insert sheet rows before spills; keep exactly one blank row between stacked
   Summary tables; format Summary data cells Arial 10 (not bold) with white /
-  no fill background; highlight missing-invoice Bank rows in light red; never
-  flag Personal / Personal Expense rows (no invoice needed); also exclude
-  Categories.Invoice Required false, bank-fee fallbacks, and Bank Notes with
-  the operator no-invoice phrase. Requires Import bank CSV and Categorise bank
-  data first. If `{workspace.local_path}/bookkeeping-test-session.yaml` is
-  active, use fixture inbox/sent EMLs from that session instead of Gmail.
+  no fill background; highlight missing-invoice Bank rows in light red with
+  agent-applied cell fills only (never conditional formatting; strip conflicting
+  CF rules); never flag Personal / Personal Expense rows (no invoice needed);
+  also exclude Categories.Invoice Required false, bank-fee fallbacks, and Bank
+  Notes with the operator no-invoice phrase. Requires Import bank CSV and
+  Categorise bank data first. If `{workspace.local_path}/bookkeeping-test-session.yaml`
+  is active, use fixture inbox/sent EMLs from that session instead of Gmail.
 ---
 # Match invoices to bank transactions
 
@@ -224,13 +225,14 @@ Do **not** write data into the gap row. Do **not** leave a multi-row empty buffe
 
 #### Highlight missing-invoice rows on Bank Transactions
 
-After the Summary missing-invoice blocks are filled (or cleared), sync row highlighting on the **transactions tab**:
+After the Summary missing-invoice blocks are filled (or cleared), sync row highlighting on the **transactions tab** with **agent-applied cell fills only**. Do **not** create, prefer, or rely on **conditional formatting** for missing-invoice highlighting — CF re-paints rows (including Personal) after fills are cleared.
 
-- Highlight a bank row if and only if it is a **missing expense candidate** or **missing revenue candidate**. Personal / Personal Expense rows must **never** be highlighted. Other no-invoice-needed rows (Invoice Required false / bank fees / Notes phrase) must **not** be highlighted either.
-- **Colour:** light red fill (`#FFCDD2` or Sheets light-red equivalent) on the **full reconciliation data columns** for that row (Date through Source/Notes — not the raw CSV columns).
-- Prefer **conditional formatting** driven by blank Invoice plus Debit/Credit (excluding no-invoice-needed Categories and Notes phrase). Otherwise apply/clear fill each run.
-- Clear light-red highlighting from rows that now have an Invoice or that are no-invoice-needed.
-- **Verify:** highlighted bank rows must match Summary Missing Expense / Missing Revenue data rows. When a block has no data rows, no bank rows should remain highlighted for that missing type.
+Every Summary refresh (including re-runs after new matches), do this in order:
+
+1. **Strip conflicting CF.** Inspect conditional formatting on the transactions tab. **Delete** every rule that light-red / fills rows when Invoice is blank (or otherwise marks missing invoices), including duplicates. Leave unrelated conditional formatting alone.
+2. **Clear fills.** Clear light-red / `#FFCDD2` (or Sheets light-red equivalent) background fills on the **full reconciliation data columns** for all Bank data rows (Date through Source/Notes — not the raw CSV columns), so previously highlighted or no-invoice-needed rows are not left red.
+3. **Apply fills to current candidates only.** Set light-red fill (`#FFCDD2` or Sheets light-red equivalent) on those same reconciliation columns **only** for rows that are still a **missing expense candidate** or **missing revenue candidate**. Personal / Personal Expense rows must **never** be highlighted. Other no-invoice-needed rows (Invoice Required false / bank fees / Notes phrase) must **not** be highlighted either.
+4. **Verify:** highlighted bank rows must match Summary Missing Expense / Missing Revenue data rows. When a block has no data rows, no bank rows should remain highlighted for that missing type.
 
 #### Expenses by Category (formula-linked to Bank)
 
