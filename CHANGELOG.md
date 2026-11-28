@@ -10,6 +10,17 @@ in frontmatter (and the same value at the start of its `description`).
 
 ## [Unreleased]
 
+### Custom overlays (Customizable)
+
+- Workspace `custom/{skills,rules,routines}/` is the source of truth for
+  operator-created and extended skills, rules, and routines (mirrored paths;
+  custom wins over stock). Stock trees stay untouched.
+- Profile `custom.auto_save_new` (default true): new files under `custom/` must
+  be saved to the private repo. Operator can change the flag in plain language.
+- New rule: `rules/custom-source-of-truth.md`. Private repo copy (1.1.0)
+  creates `custom/` after verify. Sync-to-repo (1.1.0) and repo-update-check
+  (1.1.0) protect/save `custom/`.
+
 ### Apply spreadsheet updates (1.1.1)
 
 - Renamed **Sync spreadsheet mappings** → **Apply spreadsheet updates**

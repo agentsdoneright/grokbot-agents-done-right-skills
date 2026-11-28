@@ -53,3 +53,10 @@ workspace:
   # Also holds repo-update-state.yaml (daily Grok routine / Repo update check fingerprint).
   # That state is local only — not written into this profile file.
   local_path: agents-done-right
+
+custom:
+  # When true (default): after the agent creates a NEW skill, rule, or routine
+  # under custom/, it must run the save flow (private copy) once that create
+  # finishes — custom/ is source of truth. Set false to only offer save later.
+  # Missing key → treat as true. Operator may change via plain-language ask.
+  auto_save_new: true

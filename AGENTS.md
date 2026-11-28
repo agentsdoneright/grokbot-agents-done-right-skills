@@ -10,14 +10,17 @@ This repo holds **optional** bookkeeping skills (bank reconciliation, Drive / Sh
 - [`rules/sync-to-repo.md`](rules/sync-to-repo.md) — when and how to save skill/rule/config changes
 - [`rules/tutorial-workspace.md`](rules/tutorial-workspace.md) — local staging under `{workspace.local_path}/` and Drive Accounts/Logs layout
 - [`rules/generalise-skills.md`](rules/generalise-skills.md) — keep tenant values in profile/product config; version skills and rules
+- [`rules/custom-source-of-truth.md`](rules/custom-source-of-truth.md) — Customizable: source of truth for new/extended skills, rules, and routines is `custom/`; auto-save new custom artifacts when `{custom.auto_save_new}` is true (default)
+
+Also obey any mirrored overrides under [`custom/rules/`](custom/rules/) when present — **custom wins** on conflict with stock `rules/`.
 
 If a new file appears under `rules/` (including rule subfolders), follow it too. **Exception:** action-recording applies only during `skills/` runs (see that rule) — do not log every chat just because this workspace has rules.
 
 ## Standing behavior
 
-- Stay a normal general-purpose assistant unless the operator asks to run Quick start, Customizable setup, or a skill in `skills/`.
+- Stay a normal general-purpose assistant unless the operator asks to run Quick start, Customizable setup, or a skill in `skills/` (or `custom/skills/`).
 - Do **not** assume you are a bookkeeping or company ops assistant on every new chat.
-- Do **not** fetch or overwrite `rules/` or `skills/` from the internet at chat start. Use the local workspace copies only.
+- Do **not** fetch or overwrite `rules/`, `skills/`, or `custom/` from the internet at chat start. Use the local workspace copies only.
 - **Repo updates:** the daily schedule is owned by a **Grok Bot routine** created at Quick start (see step D.10). Do **not** also nag on every chat open. If the operator asks to check for repo / source updates (or the routine fires), read and follow [`skills/repo-update-check/repo-update-check.md`](skills/repo-update-check/repo-update-check.md). Edit / Pause / Test / Delete routines via the Bot’s Routines UI or by asking the Bot — see [xAI Skills and routines](https://docs.x.ai/grok-bot/skills-routines-and-automations#create-a-routine).
 
 Read [`config/product.yaml`](config/product.yaml) for shared URLs (`{docs.*}`, `{github.*}`, `{templates.*}`). **Public skills repo (Quick start):** `{github.public_skills_repo_url}`.
@@ -27,8 +30,8 @@ Read [`config/product.yaml`](config/product.yaml) for shared URLs (`{docs.*}`, `
 Read [`config/profile.yaml`](config/profile.yaml) and substitute `{…}` placeholders **only when**:
 
 1. Running **Quick start initiation** (profile missing or unverified), or
-2. The operator asks to **run or customize a skill** under `skills/`, or
-3. Applying a rule under `rules/` that needs profile values.
+2. The operator asks to **run or customize a skill** under `skills/` or `custom/skills/`, or
+3. Applying a rule under `rules/` or `custom/rules/` that needs profile values.
 
 Do not invent profile values. If the profile is required and missing, run Quick start (with the permission gate) instead of guessing.
 
@@ -41,6 +44,7 @@ When a skill is active, use these from the profile:
 - Logging: `{logging.destination}` (`off`, `disk`, or `disk_and_sheet`) — see [`rules/action-recording/action-recording.md`](rules/action-recording/action-recording.md)
 - Local staging: `{workspace.local_path}`
 - Repo setup: `{repo.setup}` (`quick_start` or `customizable`)
+- Custom overlays: `{custom.auto_save_new}` (`true` by default — missing key means true). Operator may change it in plain language (e.g. “turn off auto-save for new custom skills”); update `config/profile.yaml` only — never commit the profile.
 - Tone for skill work: concise, milestone updates on long jobs, no invented numbers or invoices
 - Statement CSV path: `{drive.root_path}/{drive.accounts_folder}/{drive.year_folder_pattern}/{drive.extracts_folder}/{drive.month_folder_pattern}/` (fill `{YYYY}` / `{YYYYMM}` from the statement month)
 
@@ -120,7 +124,7 @@ Keep progress updates short and friendly (“Checking Google Drive…”, “Sav
 3. **Derive `google_account`** from the connected account; ask once only if needed.
 4. **Derive `repo.url` / `repo.branch`** from git remote / branch (fallback `main`).
 5. Set `repo.setup: quick_start`.
-6. **Write defaults** for remaining fields from [`config/profile.example.yaml`](config/profile.example.yaml) (`drive.*` including `accounts_folder` / `logs_folder`, `logging.destination`, `workspace.local_path: agents-done-right`), applying the Drive folder and logging choice from step B.
+6. **Write defaults** for remaining fields from [`config/profile.example.yaml`](config/profile.example.yaml) (`drive.*` including `accounts_folder` / `logs_folder`, `logging.destination`, `workspace.local_path: agents-done-right`, `custom.auto_save_new: true`), applying the Drive folder and logging choice from step B.
 7. Ensure `{workspace.local_path}/` exists. Ensure `{drive.root_path}/{drive.accounts_folder}` and `{drive.root_path}/{drive.logs_folder}` exist on Drive (create if missing).
 8. Write `config/profile.yaml`.
 9. **Verify Quick start**: public checkout; `origin`/`repo.url` is `{github.public_skills_repo_url}`; `rules/` and `skills/` present; Drive and Sheets succeed for `{google_account}`. Gmail is **not** required for verification. In plain language, say skill customizations are not saved to their own GitHub until they later choose **Customizable** (do not pitch Customizable as a setup-mode menu here).
@@ -159,22 +163,38 @@ The demo ask happens only at the end of a successful initiation, not on every la
 When the operator asks to run a skill (e.g. bank reconciliation):
 
 1. Confirm Quick start (or Customizable) is verified; if not, run Quick start initiation first.
-2. Read `config/profile.yaml`, `config/product.yaml` when the skill needs `{docs.*}` / `{github.*}` / `{templates.*}`, and the matching file under `skills/`.
-3. Keep obeying all of [`rules/`](rules/) (see **Rules (global)** above); load profile values the skill needs.
+2. Read `config/profile.yaml`, `config/product.yaml` when the skill needs `{docs.*}` / `{github.*}` / `{templates.*}`, and the matching stock file under `skills/`. Then, if a mirrored file exists under `custom/skills/` (same relative path, e.g. `custom/skills/bank-reconciliation/match-invoices.md`), read it too and **apply it on top** — custom instructions win on conflict; otherwise follow the stock skill. If only a custom skill exists (brand-new), use that alone.
+3. Keep obeying all of [`rules/`](rules/) (see **Rules (global)** above), plus any mirrored [`custom/rules/`](custom/rules/) overrides (custom wins); load profile values the skill needs.
 4. Use Drive / Sheets connectors for `{company.name}` as `{google_account}` as the skill requires. Use Gmail only when the skill needs **live** email search and no bookkeeping test session is active — before the first Gmail call, probe the connector; if it fails, explain how to grant access in plain language and **stop that email path** (do not invent matches). Keep `{operator.first_name}` posted at milestones during heavy work.
+
+## Custom overlays (`custom/`)
+
+When Customizable is verified, operator customizations live under [`custom/`](custom/):
+
+| Folder | Use |
+| --- | --- |
+| `custom/skills/` | New skills, or extensions of stock `skills/` (mirror the relative path) |
+| `custom/rules/` | New rules, or extensions of stock `rules/` |
+| `custom/routines/` | New or override routine instruction files (agent still creates/updates the live Grok Bot routine from those instructions when asked) |
+
+**Merge:** load stock (if any) then custom; **custom always wins**. Never copy custom content back into stock `skills/`, `rules/`, or `routines/`.
+
+**Edit policy (Customizable):** create and edit **only** under `custom/`. Do **not** modify stock skill, rule, or routine files. Extending a stock skill means writing extension/override instructions at the mirrored path under `custom/skills/`.
+
+**New custom artifacts:** follow [`rules/custom-source-of-truth.md`](rules/custom-source-of-truth.md). If `{custom.auto_save_new}` is true (default), after creating a **new** file under `custom/skills/`, `custom/rules/`, or `custom/routines/`, you **must** save to the private repo via [`rules/sync-to-repo.md`](rules/sync-to-repo.md).
 
 ## Customizable upgrade (only when editing a skill)
 
-**Trigger:** the operator starts making changes to a skill (create/edit under `skills/`, or clear “customize this skill” intent). Not at bootstrap. Not when merely *running* a skill.
+**Trigger:** the operator starts making changes to a skill (create/edit under `custom/skills/`, or clear “customize this skill” intent). Not at bootstrap. Not when merely *running* a skill. Do **not** edit stock files under `skills/` for customizations.
 
-**If `repo.setup` is already `customizable` and verified:** skip the pitch; follow [`rules/sync-to-repo.md`](rules/sync-to-repo.md).
+**If `repo.setup` is already `customizable` and verified:** skip the pitch; ensure `custom/skills`, `custom/rules`, `custom/routines`, and `custom/README.md` exist; ensure `custom.auto_save_new` is present in the profile (default `true` if missing); write only under `custom/`; follow [`rules/sync-to-repo.md`](rules/sync-to-repo.md) and [`rules/custom-source-of-truth.md`](rules/custom-source-of-truth.md).
 
 **If still on Quick start:**
 
-1. **Suggest Customizable** and explain why: changes will be versioned on their own GitHub repo and safely saved; on Quick start alone they are not saved upstream.
+1. **Suggest Customizable** and explain why: changes will be versioned on their own GitHub repo and saved under a `custom/` folder (so the shared skills pack can still update cleanly); on Quick start alone they are not saved upstream.
 2. **Ask once** whether to set that up now.
    - If they decline: continue without Customizable; remind them they can set it up later. Do not nag after a clear “no” (at most one later reminder if useful).
-   - If they accept: run [`skills/private-repo-copy/private-repo-copy.md`](skills/private-repo-copy/private-repo-copy.md). That skill offers **automatic** setup (`gh` with `repo` + `workflow` scopes) or **manual** setup via `{docs.github_account_setup}`. Follow it through verification and profile update (`repo.setup: customizable`). Do not duplicate its steps here.
+   - If they accept: run [`skills/private-repo-copy/private-repo-copy.md`](skills/private-repo-copy/private-repo-copy.md). That skill offers **automatic** setup (`gh` with `repo` + `workflow` scopes) or **manual** setup via `{docs.github_account_setup}`. Follow it through verification, profile update (`repo.setup: customizable`), and creation of `custom/{skills,rules,routines}/`. Do not duplicate its steps here.
 3. **If the process becomes too difficult:** say that is OK; keep `repo.setup: quick_start`; continue; they can retry later.
 
 ## Safety (skill and Drive work)

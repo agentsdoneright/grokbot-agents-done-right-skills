@@ -1,15 +1,15 @@
 ---
 name: Repo update check
-version: 1.0.0
+version: 1.1.0
 description: >-
-  Version 1.0.0. Use when the daily Grok routine for public repo updates fires,
+  Version 1.1.0. Use when the daily Grok routine for public repo updates fires,
   or when the operator asks to check for repo / source updates or upgrade the
   public skills pack checkout. Fetches the public repo CHANGELOG.md, compares a
   fingerprint to `{workspace.local_path}/repo-update-state.yaml`, asks before
   upgrading the whole tracked source tree (skills, rules, AGENTS.md, docs,
-  shared config, scripts — not `config/profile.yaml`), and when skills are
-  customized asks whether to merge those paths. Does not invent changelog
-  entries or upgrades.
+  shared config, scripts — not `config/profile.yaml` or operator `custom/`),
+  and when skills are customized asks whether to merge those paths. Does not
+  invent changelog entries or upgrades.
 ---
 # Repo update check
 
@@ -17,7 +17,7 @@ Read [`config/profile.yaml`](../../config/profile.yaml) for `{workspace.local_pa
 
 **Triggers:** the **daily Grok routine** created at Quick start; or the operator asks to “check for repo updates”, “check for source updates”, “upgrade the skills pack”, or similar.
 
-**What an upgrade updates:** the **whole public source tree** in this checkout — `skills/`, `rules/`, `AGENTS.md`, `README.md`, `CHANGELOG.md`, `docs/`, committed `config/` (e.g. `product.yaml`, `profile.example.yaml`), Apps Script under skills, and other tracked files from the public repo. **Never** overwrite or commit `config/profile.yaml`.
+**What an upgrade updates:** the **whole public source tree** in this checkout — `skills/`, `rules/`, `AGENTS.md`, `README.md`, `CHANGELOG.md`, `docs/`, committed `config/` (e.g. `product.yaml`, `profile.example.yaml`), Apps Script under skills, and other tracked files from the public repo. **Never** overwrite or commit `config/profile.yaml`. **Never** delete or overwrite operator content under `custom/` (skills, rules, routines overlays) — treat `custom/` as operator-owned.
 
 **Approval boundary:** do **not** pull, merge, reset, or overwrite source files until the operator explicitly chooses **Yes, upgrade** (and any merge choices below). Never invent updates.
 
@@ -63,23 +63,23 @@ If **Yes, upgrade:** continue.
 
 ## 4. Detect customized skills
 
-A skill is **customized** when its directory under `skills/` (e.g. `skills/bank-reconciliation/`, `skills/unpaid-invoices/`) differs from the same paths on the **public** repo default branch.
+Prefer **`custom/skills/`**: any non-empty overlay under `custom/skills/` (beyond `.gitkeep`) counts as customized for that skill path. Also treat a skill as **customized** when its directory under stock `skills/` (legacy in-place edits) differs from the same paths on the **public** repo default branch.
 
-How to compare (prefer in order):
+How to compare stock paths (prefer in order):
 
 1. Ensure a git remote pointing at `{github.public_skills_repo_url}` exists (name it `public` or `upstream` if missing); `git fetch` that remote; `git diff public/main...HEAD -- skills/<dir>` (or the remote’s default branch).
 2. Or download / compare public tree for that path via GitHub when git fetch is unavailable.
 
-Ignore `config/profile.yaml`. Do not treat “only behind public with no local edits” as customized — customized means the local skill content is **not identical** to public **and** is not simply an older clean checkout of the same public files (if the whole tree is clean and only behind, there are **no** customized skills; a fast-forward/pull is enough).
+Ignore `config/profile.yaml`. Do not treat “only behind public with no local edits” as customized — customized means local skill content is **not identical** to public **and** is not simply an older clean checkout of the same public files (if the whole tree is clean and only behind, and `custom/skills/` has no overlays, there are **no** customized skills; a fast-forward/pull is enough).
 
-List customized skills by **skill name** (frontmatter `name` or folder name) for the operator.
+List customized skills by **skill name** (frontmatter `name` or folder name) for the operator. When merging, leave `custom/` untouched unless the operator explicitly asks to change an overlay.
 
 ## 5. Apply upgrade
 
 ### No customized skills
 
 - **`repo.setup: quick_start`:** `git pull` (or equivalent) on `{repo.branch}` from the public origin so the **full** tracked source tree updates. Never overwrite `config/profile.yaml`.
-- **`repo.setup: customizable`:** fetch public; merge public default branch into the private checkout for the full source tree. Resolve what you can; if unclear conflicts remain, ask. Never overwrite `config/profile.yaml`. Do not push to the private remote unless the operator later asks to save (see [`rules/sync-to-repo.md`](../../rules/sync-to-repo.md)).
+- **`repo.setup: customizable`:** fetch public; merge public default branch into the private checkout for the full source tree. Resolve what you can; if unclear conflicts remain, ask. Never overwrite `config/profile.yaml` or operator `custom/` content. Do not push to the private remote unless the operator later asks to save (see [`rules/sync-to-repo.md`](../../rules/sync-to-repo.md)).
 
 ### Has customized skills
 
@@ -87,7 +87,7 @@ List them. Buttons:
 
 - **Merge all** — bring public updates into every customized skill path, preserving local edits where possible; on conflict, stop and ask for that skill. Still update the rest of the source tree from public.
 - **Ask per skill** — for each customized skill, ask Merge / Keep mine (skip that path) / Cancel upgrade. Still update non-skipped paths and the rest of the tree.
-- **Skip customized (update everything else)** — update the rest of the source tree from public (`rules/`, docs, shared config, non-customized skills, etc.); leave customized skill directories untouched.
+- **Skip customized (update everything else)** — update the rest of the source tree from public (`rules/`, docs, shared config, non-customized skills, etc.); leave customized stock skill directories and all of `custom/` untouched.
 - **Cancel upgrade** — stop; leave fingerprint unchanged.
 
 After merges, briefly confirm what was updated vs left alone.
